@@ -5,12 +5,23 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
+  const user = await api.getUserBySessionCookie(req, res);
+  if (user === null) {
+    res.status(400).json("User not found");
+    return;
+  }
+
+  let userProfile;
   switch (req.method) {
-    case "POST":
-      const user = models.createUser(req.body as models.User);
-      res.status(200).json(user);
+    case "GET":
+      userProfile = await models.getUserProfile(user.id);
+      res.status(200).json(userProfile);
+      break;
+    case "PUT":
+      userProfile = await models.updateUser(req.body as models.User);
+      res.status(200).json(userProfile);
       break;
     default:
-      api.allowMethods(req, res, ["POST"]);
+      api.allowMethods(req, res, ["GET", "PUT"]);
   }
 }

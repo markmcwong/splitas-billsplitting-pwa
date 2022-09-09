@@ -1,11 +1,33 @@
-import { Prisma, PrismaClient, type User, type Group } from "@prisma/client";
-export { type User, type Group };
+import {
+  Prisma,
+  PrismaClient,
+  type OauthToken,
+  type User,
+  type Group,
+} from "@prisma/client";
+export { type OauthToken, type User, type Group };
 const prisma = new PrismaClient();
 
-function getUserById(id: number) {
+export function getUserBySession(session: string) {
+  return prisma.user.findUnique({
+    where: {
+      session,
+    },
+  });
+}
+
+export function getUserById(id: number) {
   return prisma.user.findUniqueOrThrow({
     where: {
       id,
+    },
+  });
+}
+
+export function getUserByEmail(email: string) {
+  return prisma.user.findUnique({
+    where: {
+      email,
     },
   });
 }
@@ -51,7 +73,7 @@ export function getFriendDetails(userId: number, friendId: number) {
 }
 
 export function getGroupsList(userId: number) {
-  return prisma.user.findUniqueOrThrow({
+  return prisma.user.findUnique({
     where: {
       id: userId,
     },
@@ -62,7 +84,7 @@ export function getGroupsList(userId: number) {
 }
 
 export function getGroupDetails(groupId: number) {
-  return prisma.group.findUniqueOrThrow({
+  return prisma.group.findUnique({
     where: {
       id: groupId,
     },
@@ -86,13 +108,22 @@ export function getActivities(userId: number) {
   });
 }
 
-export function createUser(user: User) {
+export function createToken(token: Prisma.OauthTokenCreateInput) {
+  return prisma.oauthToken.create({
+    data: token,
+  });
+}
+
+export function createUser(user: Prisma.UserCreateInput) {
   return prisma.user.create({
     data: user,
   });
 }
 
-export function createGroup(group: Group, initialUserId: number) {
+export function createGroup(
+  group: Prisma.GroupCreateInput,
+  initialUserId: number
+) {
   const groupWithCreator: Prisma.GroupCreateInput = {
     ...group,
     Users: {
@@ -139,5 +170,13 @@ export function updateGroup(group: Group) {
       id: group.id,
     },
     data: group,
+  });
+}
+export function updateToken(oauthToken: OauthToken) {
+  return prisma.oauthToken.update({
+    where: {
+      id: oauthToken.id,
+    },
+    data: oauthToken,
   });
 }

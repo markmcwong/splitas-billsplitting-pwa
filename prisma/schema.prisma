@@ -12,8 +12,10 @@ datasource db {
 
 model User {
   id               Int          @id @default(autoincrement())
+  session          String?      @unique
   hasAccount       Boolean
   name             String
+  email            String       @unique
   Friends          FriendPair[] @relation("Friend")
   friends          FriendPair[] @relation("friend")
   Groups           Group[]      @relation("UsersGroups")
@@ -22,6 +24,20 @@ model User {
   PaymentsReceived Payment[]    @relation("PaymentsReceived_PaidFrom")
   Expenses         Expense[]
   Splits           Split[]
+  OauthToken       OauthToken   @relation(fields: [tokenId], references: [id])
+  tokenId          Int          @unique
+}
+
+model OauthToken {
+  id           Int     @id @default(autoincrement())
+  accessToken  String
+  idToken      String
+  refreshToken String?
+  scope        String?
+  expiresIn    Int?
+  expiresAt    Int?
+  sessionState String?
+  User         User?
 }
 
 model FriendPair {
