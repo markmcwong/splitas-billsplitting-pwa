@@ -1,4 +1,5 @@
-import { PrismaClient } from "@prisma/client";
+import { Prisma, PrismaClient, type User, type Group } from "@prisma/client";
+export { type User, type Group };
 const prisma = new PrismaClient();
 
 function getUserById(id: number) {
@@ -82,5 +83,61 @@ export function getActivities(userId: number) {
     where: {
       userId,
     },
+  });
+}
+
+export function createUser(user: User) {
+  return prisma.user.create({
+    data: user,
+  });
+}
+
+export function createGroup(group: Group, initialUserId: number) {
+  const groupWithCreator: Prisma.GroupCreateInput = {
+    ...group,
+    Users: {
+      connect: [
+        {
+          id: initialUserId,
+        },
+      ],
+    },
+  };
+
+  return prisma.group.create({
+    data: groupWithCreator,
+  });
+}
+
+export function createFriend(userId: number, friendId: number) {
+  prisma.friendPair.createMany({
+    data: [
+      {
+        user1Id: userId,
+        user2Id: friendId,
+      },
+      {
+        user1Id: friendId,
+        user2Id: userId,
+      },
+    ],
+  });
+}
+
+export function updateUser(user: User) {
+  return prisma.user.update({
+    where: {
+      id: user.id,
+    },
+    data: user,
+  });
+}
+
+export function updateGroup(group: Group) {
+  return prisma.group.update({
+    where: {
+      id: group.id,
+    },
+    data: group,
   });
 }
