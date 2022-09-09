@@ -3,7 +3,7 @@ import { TokenSet } from "openid-client";
 import * as models from "../../utils/models";
 import * as api from "../../utils/api";
 import * as oauth from "../../utils/oauth";
-import { Prisma } from "@prisma/client";
+import { prisma, Prisma } from "@prisma/client";
 
 export type RequestBody = {
   redirectUrl: string;
@@ -48,7 +48,7 @@ export default async function handler(
     return;
   }
 
-  const user = await models.getUserByEmail(email);
+  let user = await models.getUserByEmail(email);
 
   const tokenSharedFields = {
     accessToken,
@@ -60,20 +60,34 @@ export default async function handler(
     sessionState: tokenSet.session_state ?? null,
   };
   if (user === null) {
-    const oauthToken: Prisma.OauthTokenCreateInput = {
+    const oauthTokenInput: Prisma.OauthTokenCreateInput = {
       ...tokenSharedFields,
     };
-    models.createToken(oauthToken);
+
+    const oauthToken = await models.createToken(oauthTokenInput);
+    const userInput: Prisma.UserCreateInput = {
+      email,
+      hasAccount: true,
+      name: email,
+      OauthToken: {
+        connect: {
+          id: oauthToken.id,
+        },
+      },
+    };
+    user = await models.createUser(userInput);
   } else {
     const oauthToken: models.OauthToken = {
       id: user.tokenId,
       ...tokenSharedFields,
     };
-    models.updateToken(oauthToken);
+    await models.updateToken(oauthToken);
   }
 
   // TODO: This is terrible, but I'm a bit lazy right now.
-  api.setSessionCookie(req, res, email);
+  const session = email;
+  api.setSessionCookie(req, res, session);
+  await models.updateUserSession(user.id, session);
 
-  res.status(200).json("success");
+  res.status(200).json("success, your email is " + email);
 }

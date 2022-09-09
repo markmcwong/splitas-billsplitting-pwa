@@ -164,6 +164,18 @@ export function updateUser(user: User) {
   });
 }
 
+export function updateUserSession(userId: number, session: string) {
+  console.log("Update user session", userId, session);
+  return prisma.user.update({
+    where: {
+      id: userId,
+    },
+    data: {
+      session,
+    },
+  });
+}
+
 export function updateGroup(group: Group) {
   return prisma.group.update({
     where: {

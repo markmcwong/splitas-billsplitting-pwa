@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import * as models from "../../../../utils/models";
 import * as api from "../../../../utils/api";
 import { Prisma } from "@prisma/client";
+export type PostBody = Prisma.GroupCreateInput;
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -13,8 +14,8 @@ export default async function handler(
   }
   switch (req.method) {
     case "GET":
-      const groups = await models.getGroupsList(user.id);
-      res.status(200).json(groups);
+      const userWithGroups = await models.getGroupsList(user.id);
+      res.status(200).json(userWithGroups);
       break;
     case "POST":
       const parsedGroup = JSON.parse(req.body) as Prisma.GroupCreateInput;
