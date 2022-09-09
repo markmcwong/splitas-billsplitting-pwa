@@ -21,7 +21,6 @@ export function getFriendsList(userId: number) {
 }
 
 export function getFriendDetails(userId: number, friendId: number) {
-  const user = getUserById(userId);
   const friend = getUserById(friendId);
   const commonGroups = prisma.group.findMany({
     where: {
@@ -45,7 +44,6 @@ export function getFriendDetails(userId: number, friendId: number) {
   });
 
   return {
-    user,
     friend,
     commonGroups,
   };
