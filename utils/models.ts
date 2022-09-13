@@ -9,14 +9,6 @@ import {
 export { type OauthToken, type User, type Group, type Expense };
 const prisma = new PrismaClient();
 
-export function getUserBySession(session: string) {
-  return prisma.user.findUnique({
-    where: {
-      session,
-    },
-  });
-}
-
 export function getFriendPairExpenses(
   payerId: number,
   userOwingMoneyId: number
@@ -211,18 +203,6 @@ export function updateUser(user: User) {
       id: user.id,
     },
     data: user,
-  });
-}
-
-export function updateUserSession(userId: number, session: string) {
-  console.log("Update user session", userId, session);
-  return prisma.user.update({
-    where: {
-      id: userId,
-    },
-    data: {
-      session,
-    },
   });
 }
 
