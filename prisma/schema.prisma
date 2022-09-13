@@ -41,17 +41,21 @@ model OauthToken {
 }
 
 model FriendPair {
-  // These two are supposed to be symmetrical
-  // The correct way of doing this is to have a total order in the db
-  // implemented with a check constraint
-  // Then, a unique constraint on (user1, user2)
-  // But oh well, this will also work at the cost of possible data duplication
-  User1   User @relation("Friend", fields: [user1Id], references: [id])
-  user1Id Int
-  User2   User @relation("friend", fields: [user2Id], references: [id])
-  user2Id Int
+  User1    User            @relation("Friend", fields: [user1Id], references: [id])
+  user1Id  Int
+  User2    User            @relation("friend", fields: [user2Id], references: [id])
+  user2Id  Int
+  Expenses FriendExpense[]
 
   @@id([user1Id, user2Id])
+}
+
+model FriendExpense {
+  id               Int        @id @default(autoincrement())
+  Friends          FriendPair @relation(fields: [payerId, userOwingMoneyId], references: [user1Id, user2Id])
+  payerId          Int
+  userOwingMoneyId Int
+  amount           Int
 }
 
 model Group {
@@ -125,6 +129,7 @@ model Payment {
   paidToId   Int
   PaidFrom   User     @relation("PaymentsReceived_PaidFrom", fields: [paidFromId], references: [id])
   paidFromId Int
+  amount     Int
   timestamp  DateTime
 }
 
@@ -135,6 +140,7 @@ model Expense {
   description String
   Payer       User     @relation(fields: [payerId], references: [id])
   payerId     Int
+  amount      Int
   Splits      Split[]
   timestamp   DateTime
 }
@@ -145,4 +151,5 @@ model Split {
   expenseId Int
   User      User    @relation(fields: [userId], references: [id])
   userId    Int
+  amount    Int
 }
