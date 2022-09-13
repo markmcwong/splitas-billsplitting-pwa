@@ -4,8 +4,8 @@
   "display" : "fullscreen",
   "scope" : "/",
   "start_url" : "/",
-  "name" : "Placeholder",
-  "short_name" : "Placeholder",
+  "name" : "PayMeLah",
+  "short_name" : "PayMeLah",
   "description" : "insert description here",
   "icons": [
     {
