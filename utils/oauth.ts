@@ -1,5 +1,5 @@
 import { BaseClient, Issuer } from "openid-client";
-import * as url from "./url";
+import * as url from "./urls";
 
 const clientId = process.env["PAYMELAH_CLIENT_ID"];
 if (clientId === undefined) {

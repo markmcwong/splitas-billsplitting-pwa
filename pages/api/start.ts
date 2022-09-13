@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import * as models from "../../utils/models";
 import * as api from "../../utils/api";
 import * as oauth from "../../utils/oauth";
-import * as url from "../../utils/url";
+import * as url from "../../utils/urls";
 
 export default async function handler(
   req: NextApiRequest,

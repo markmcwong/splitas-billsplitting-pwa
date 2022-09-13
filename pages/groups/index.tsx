@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from "react";
+import Box from "@mui/material/Box";
+import BottomAppBar from "../../components/BottomAppBar";
+import TopAppBar from "../../components/AppBar";
+import { AppRoutesValues } from "../../utils/urls";
 import { type PostBody } from "../api/user/groups";
 import * as models from "../../utils/models";
-import * as url from "../../utils/url";
+import * as url from "../../utils/urls";
 
 type UserWithGroups = models.User & {
   Groups: models.Group[];
@@ -34,12 +38,14 @@ export default function GroupsPage() {
       method: "POST",
       body: JSON.stringify(postBody),
     });
-
-    setName(""); // a hack to force re-render
+    setTimeout(() => {
+      setName(""); // a hack to force re-render
+    }, 1000);
   }
 
   return (
-    <>
+    <Box bgcolor="primary.main">
+      <TopAppBar />
       <div>Groups</div>
       <ol>
         {userWithGroups?.Groups?.map((group) => (
@@ -55,6 +61,8 @@ export default function GroupsPage() {
           Create
         </button>
       </form>
-    </>
+
+      <BottomAppBar routeValue={AppRoutesValues.Groups} />
+    </Box>
   );
 }

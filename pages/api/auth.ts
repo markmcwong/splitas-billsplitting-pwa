@@ -3,7 +3,7 @@ import { TokenSet } from "openid-client";
 import * as models from "../../utils/models";
 import * as api from "../../utils/api";
 import * as oauth from "../../utils/oauth";
-import { prisma, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 
 export type RequestBody = {
   redirectUrl: string;
