@@ -87,7 +87,6 @@ export default async function handler(
 
   const session = jwt.getToken(user);
   api.setSessionCookie(req, res, session);
-  await models.updateUserSession(user.id, session);
 
   res.status(200).json("success, your email is " + email);
 }
