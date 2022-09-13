@@ -13,9 +13,9 @@ import {
   APP,
   GROUPS,
   FRIENDS,
-  ACTIVITY,
+  ACTIVITIES,
   PROFILE,
-} from "../common/constants/appRoutes";
+} from "../utils/urls";
 
 const BottomAppBar = ({ routeValue = 0 }: { routeValue?: AppRoutesValues }) => {
   const [value, setValue] = useState(routeValue);
@@ -36,7 +36,7 @@ const BottomAppBar = ({ routeValue = 0 }: { routeValue?: AppRoutesValues }) => {
       {
         label: `Activity`,
         icon: <CallToActionIcon />,
-        path: APP + ACTIVITY,
+        path: APP + ACTIVITIES,
       },
       {
         label: `Profile`,

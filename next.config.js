@@ -9,11 +9,11 @@ module.exports = withPWA({
   reactStrictMode: true,
   async redirects() {
     return [
-      {
-        source: "/",
-        destination: "/app",
-        permanent: true,
-      },
+      // {
+      //   source: "/",
+      //   destination: "/",
+      //   permanent: true,
+      // },
     ];
   },
 });
