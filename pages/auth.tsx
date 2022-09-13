@@ -11,7 +11,6 @@ export default function AuthPage() {
       const requestBody: RequestBody = {
         redirectUrl: currentUrl,
       };
-      // TODO: I'm not sure why this runs twice
       console.log("POSTing to auth");
       fetch(`${url.api}/auth`, {
         method: "POST",

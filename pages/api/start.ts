@@ -8,13 +8,10 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const session = api.getSessionCookie(req, res);
-  if (session !== undefined) {
-    const user = await models.getUserBySession(session);
-    if (user !== null) {
-      res.redirect(url.homepage);
-      return;
-    }
+  const payload = api.getTokenPayload(req, res);
+  if (payload !== null) {
+    res.redirect(url.homepage);
+    return;
   }
 
   const state = api.generateStateAndSetCookie(req, res);

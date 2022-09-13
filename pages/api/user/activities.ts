@@ -7,12 +7,12 @@ export default async function handler(
 ) {
   switch (req.method) {
     case "GET":
-      const user = await api.getUserBySessionCookie(req, res);
-      if (user === null) {
-        res.status(400).send("User not found");
+      const payload = api.getTokenPayload(req, res);
+      if (payload === null) {
+        res.status(400).send("Invalid user");
         break;
       }
-      const activities = await models.getActivities(user.id);
+      const activities = await models.getActivities(payload.userId);
       res.status(200).json(activities);
       break;
     default:

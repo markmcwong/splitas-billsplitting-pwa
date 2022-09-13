@@ -3,6 +3,7 @@ import { TokenSet } from "openid-client";
 import * as models from "../../utils/models";
 import * as api from "../../utils/api";
 import * as oauth from "../../utils/oauth";
+import * as jwt from "../../utils/jwt";
 import { Prisma } from "@prisma/client";
 
 export type RequestBody = {
@@ -84,8 +85,7 @@ export default async function handler(
     await models.updateToken(oauthToken);
   }
 
-  // TODO: This is terrible, but I'm a bit lazy right now.
-  const session = email;
+  const session = jwt.getToken(user);
   api.setSessionCookie(req, res, session);
   await models.updateUserSession(user.id, session);
 

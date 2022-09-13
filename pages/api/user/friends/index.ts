@@ -5,20 +5,20 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const user = await api.getUserBySessionCookie(req, res);
-  if (user === null) {
-    res.status(400).json("User not found");
+  const payload = api.getTokenPayload(req, res);
+  if (payload === null) {
+    res.status(400).json("Invalid token");
     return;
   }
 
   switch (req.method) {
     case "GET":
-      const friends = models.getFriendsList(user.id);
+      const friends = await models.getFriendsList(payload.userId);
       res.status(200).json(friends);
       break;
     case "POST":
       const friendId = api.getFriendId(req);
-      const friend = models.createFriend(user.id, friendId);
+      const friend = await models.createFriend(payload.userId, friendId);
       res.status(200).json(friend);
       break;
     default:
