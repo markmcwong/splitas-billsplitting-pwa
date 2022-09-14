@@ -9,9 +9,20 @@ const theme = createTheme({
   palette: {
     mode: 'light',
     primary: {
-      main: orange[300],
+      main: '#6EBA97',
+    },
+    secondary: {
+      main: '#114057',
+    },
+    background: {
+      default: '#082341',
+      paper: '#FFFFFF',
+    },
+    text: {
+      primary: 'rgba(255,255,255,0.87)',
     },
   },
+
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
