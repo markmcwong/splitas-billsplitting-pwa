@@ -24,10 +24,10 @@ const AddFriendItem = () => {
         container
         alignItems="center"
         xs={1}
-        sx={{ my: 1, mx: 2 }}
+        sx={{ my: 1, mr: 3 }}
       >
         <IconButton>
-          <Add />
+          <Add fontSize="large" />
         </IconButton>
       </Grid>
       <Grid display="flex" item xs alignItems="center" sx={{ my: 0 }}>
@@ -36,6 +36,30 @@ const AddFriendItem = () => {
         </Typography>
       </Grid>
     </Grid>
+  );
+};
+
+const RightContent = () => {
+  return (
+    <Box
+      display="flex"
+      flexDirection="row"
+      alignItems="center"
+      sx={{ textAlign: "end" }}
+    >
+      <Typography
+        variant="h6"
+        sx={{ color: "primary.main", display: "inline-block" }}
+      >
+        $10
+      </Typography>
+      <Typography
+        variant="body2"
+        sx={{ color: "primary.main", display: "inline-block" }}
+      >
+        .10
+      </Typography>
+    </Box>
   );
 };
 
@@ -49,7 +73,11 @@ export default function FriendsPage() {
     tokenId: 0,
   };
 
-  const [friends, setFriends] = useState<Array<models.User>>([testUser]);
+  const [friends, setFriends] = useState<Array<models.User>>([
+    testUser,
+    testUser,
+    testUser,
+  ]);
 
   // useEffect(() => {
   //   fetch(`${url.api}/friends`)
@@ -58,24 +86,30 @@ export default function FriendsPage() {
   // }, []);
 
   return (
-    <Box sx={{ minHeight: "100vh" }} bgcolor="background.paper">
-      <TopAppBarNew title="Friends">
-        <TextField
-          sx={{ flex: "0 0 100%" }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search />
-              </InputAdornment>
-            ),
-          }}
-          id="outlined-basic"
-          variant="standard"
-          size="small"
-        />
-      </TopAppBarNew>
+    <Box sx={{ minHeight: "100vh", p: 3 }} bgcolor="background.paper">
+      {/* <TopAppBarNew title="Balance" /> */}
+      <Typography variant="caption" sx={{ color: grey[400] }}>
+        Friends Bill Balance
+      </Typography>
+      <Typography variant="h4" sx={{ color: "primary.main", fontWeight: 500 }}>
+        +$1,243.00
+      </Typography>
+      <TextField
+        sx={{ flex: "0 0 100%", borderRadius: 15, mt: 2 }}
+        fullWidth
+        InputProps={{
+          startAdornment: (
+            <InputAdornment position="start">
+              <Search />
+            </InputAdornment>
+          ),
+        }}
+        id="outlined-basic"
+        variant="outlined"
+        // size="small"
+      />
       {AddFriendItem()}
-      {friends.map((friend) => ContactItem(friend.name, friend.email))}
+      {friends.map((friend) => ContactItem(friend, RightContent()))}
       <BottomAppBar routeValue={AppRoutesValues.Friends} />
     </Box>
   );

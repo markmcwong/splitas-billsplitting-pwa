@@ -6,23 +6,32 @@ import { orange } from "@mui/material/colors";
 // TODO: Properly set up themes, e.g. dark/light mode etc
 
 const theme = createTheme({
+  typography: {
+    fontFamily: [
+      "DM Sans",
+      "-apple-system",
+      "BlinkMacSystemFont",
+      '"Helvetica Neue"',
+      "Arial",
+      "sans-serif",
+    ].join(","),
+  },
   palette: {
-    mode: 'light',
+    mode: "light",
     primary: {
-      main: '#6EBA97',
+      main: "#6EBA97",
     },
     secondary: {
-      main: '#114057',
+      main: "#114057",
     },
     background: {
-      default: '#082341',
-      paper: '#FFFFFF',
+      default: "#082341",
+      paper: "#FFFFFF",
     },
     text: {
-      primary: 'rgba(255,255,255,0.87)',
+      primary: "rgba(255,255,255,0.87)",
     },
   },
-
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
