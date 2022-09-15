@@ -5,16 +5,16 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const user = await api.getUserBySessionCookie(req, res);
-  if (user === null) {
-    res.status(400).json("User not found");
+  const payload = api.getTokenPayload(req, res);
+  if (payload === null) {
+    res.status(400).json("Invalid token");
     return;
   }
 
-  let userProfile;
+  let userProfile: models.User;
   switch (req.method) {
     case "GET":
-      userProfile = await models.getUserProfile(user.id);
+      userProfile = await models.getUserProfile(payload.userId);
       res.status(200).json(userProfile);
       break;
     case "PUT":

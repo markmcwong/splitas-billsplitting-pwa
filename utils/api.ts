@@ -2,6 +2,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { getCookies, getCookie, setCookie, deleteCookie } from "cookies-next";
 import { randomBytes, randomInt, randomUUID } from "crypto";
 import * as models from "./models";
+import * as jwt from "./jwt";
 
 export function getGroupId(req: NextApiRequest): number {
   return Number.parseInt(req.query["groupId"] as string);
@@ -29,15 +30,20 @@ export function getSessionCookie(req: NextApiRequest, res: NextApiResponse) {
   return getCookie(cookieNames.session, { req, res })?.toString();
 }
 
-export function getUserBySessionCookie(
+export function getTokenPayload(
   req: NextApiRequest,
   res: NextApiResponse
-) {
-  const session = getSessionCookie(req, res)?.toString();
-  if (session === undefined) {
+): jwt.TokenPayload | null {
+  const token = getSessionCookie(req, res);
+  if (token == undefined) {
     return null;
   }
-  return models.getUserBySession(session);
+
+  try {
+    return jwt.verifyToken(token);
+  } catch {
+    return null;
+  }
 }
 
 export function setSessionCookie(
