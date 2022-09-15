@@ -4,16 +4,28 @@ import {
   type OauthToken,
   type User,
   type Group,
+  Expense,
 } from "@prisma/client";
-export { type OauthToken, type User, type Group };
+export { type OauthToken, type User, type Group, type Expense };
 const prisma = new PrismaClient();
 
-export function getUserBySession(session: string) {
-  return prisma.user.findUnique({
-    where: {
-      session,
-    },
-  });
+export function getFriendPairExpenses(
+  payerId: number,
+  userOwingMoneyId: number
+) {
+  return prisma.friendPair
+    .findUnique({
+      where: {
+        user1Id_user2Id: {
+          user1Id: payerId,
+          user2Id: userOwingMoneyId,
+        },
+      },
+      include: {
+        Expenses: true,
+      },
+    })
+    .then((value) => value?.Expenses);
 }
 
 export function getUserById(id: number) {
@@ -33,18 +45,26 @@ export function getUserByEmail(email: string) {
 }
 
 export function getFriendsList(userId: number) {
-  return prisma.user.findUniqueOrThrow({
-    where: {
-      id: userId,
-    },
-    include: {
-      Friends: true,
-    },
-  });
+  return prisma.user
+    .findUniqueOrThrow({
+      where: {
+        id: userId,
+      },
+      include: {
+        Friends: {
+          include: {
+            User1: true,
+          },
+        },
+      },
+    })
+    .then((value) => value.Friends.map((friendPair) => friendPair.User1));
 }
 
 export function getFriendDetails(userId: number, friendId: number) {
   const friend = getUserById(friendId);
+  const friendExpenses = getFriendPairExpenses(friendId, userId);
+  const userExpenses = getFriendPairExpenses(userId, friendId);
   const commonGroups = prisma.group.findMany({
     where: {
       AND: [
@@ -68,6 +88,8 @@ export function getFriendDetails(userId: number, friendId: number) {
 
   return {
     friend,
+    userExpenses,
+    friendExpenses,
     commonGroups,
   };
 }
@@ -140,8 +162,14 @@ export function createGroup(
   });
 }
 
+export function createExpense(expense: Prisma.ExpenseCreateInput) {
+  prisma.expense.create({
+    data: expense,
+  });
+}
+
 export function createFriend(userId: number, friendId: number) {
-  prisma.friendPair.createMany({
+  return prisma.friendPair.createMany({
     data: [
       {
         user1Id: userId,
@@ -155,24 +183,26 @@ export function createFriend(userId: number, friendId: number) {
   });
 }
 
+export function createFriendExpense(
+  amount: number,
+  userId: number,
+  friendId: number
+) {
+  return prisma.friendExpense.create({
+    data: {
+      amount,
+      payerId: userId,
+      userOwingMoneyId: friendId,
+    },
+  });
+}
+
 export function updateUser(user: User) {
   return prisma.user.update({
     where: {
       id: user.id,
     },
     data: user,
-  });
-}
-
-export function updateUserSession(userId: number, session: string) {
-  console.log("Update user session", userId, session);
-  return prisma.user.update({
-    where: {
-      id: userId,
-    },
-    data: {
-      session,
-    },
   });
 }
 
