@@ -66,6 +66,7 @@ export default function GroupsPage() {
         setUserWithGroups(g);
       });
   };
+
   const ModalContent = () => {
     const [name, setName] = useState<string>("");
     function submitForm(e: React.MouseEvent<HTMLElement>) {
@@ -96,8 +97,6 @@ export default function GroupsPage() {
           <Typography variant="h6" sx={{ color: "primary.main" }}>
             Create New Group
           </Typography>
-          {/* <form> */}
-          {/* <label htmlFor="name">Name</label> */}
           <TextField
             sx={{
               flex: "0 0 100%",
@@ -111,14 +110,12 @@ export default function GroupsPage() {
           />
           <Button
             variant="outlined"
-            // size="small"
             type="submit"
             sx={{ width: "33%" }}
             onClick={submitForm}
           >
             Create
           </Button>
-          {/* </form> */}
         </Box>
       </Modal>
     );

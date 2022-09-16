@@ -99,11 +99,17 @@ export default function FriendsPage() {
       </Modal>
     );
   };
-  // useEffect(() => {
-  //   fetch(`${url.api}/friends`)
-  //     .then((res) => res.json())
-  //     .then((friends) => setFriends(friends));
-  // }, []);
+  useEffect(() => {
+    fetch(`${url.api}/user/friends`)
+      .then((res) => {
+        res.json();
+        console.log(res);
+      })
+      .then(
+        (friends) => console.log(friends)
+        //setFriends(friends)
+      );
+  }, []);
 
   const style = {
     position: "absolute" as "absolute",
