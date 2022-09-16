@@ -7,7 +7,7 @@ import TransactionItem from "../../../components/TransactionItem";
 
 const FriendDetailsPage = () => {
   const router = useRouter();
-  const { friendId } = router.query;
+  const { friendId, name } = router.query;
 
   return (
     <Box sx={{ minHeight: "100vh", p: 3 }} bgcolor="background.paper">
@@ -18,7 +18,7 @@ const FriendDetailsPage = () => {
       </Box>
       {/* <TopAppBarNew title="Balance" /> */}
       <Typography variant="caption" sx={{ color: grey[400] }}>
-        Transaction between A
+        Transaction between {name}
       </Typography>
       <Typography variant="h4" sx={{ color: "primary.main", fontWeight: 500 }}>
         +$1,243.00

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import Box from "@mui/material/Box";
 import BottomAppBar from "../../components/BottomAppBar";
-import TopAppBar from "../../components/AppBar";
 import { AppRoutesValues } from "../../utils/urls";
 import * as models from "../../utils/models";
 import * as url from "../../utils/urls";
@@ -14,8 +13,9 @@ import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import grey from "@mui/material/colors/grey";
 import IconButton from "@mui/material/IconButton";
+import Modal from "@mui/material/Modal";
 
-const AddFriendItem = () => {
+const AddFriendItem = (callback: Function) => {
   return (
     <Grid container spacing={2}>
       <Grid
@@ -26,7 +26,7 @@ const AddFriendItem = () => {
         xs={1}
         sx={{ my: 1, mr: 3 }}
       >
-        <IconButton>
+        <IconButton onClick={() => callback()}>
           <Add fontSize="large" />
         </IconButton>
       </Grid>
@@ -79,14 +79,46 @@ export default function FriendsPage() {
     testUser,
   ]);
 
+  const [searchString, setSearchString] = useState<string>("");
+  const [open, setOpen] = useState(false);
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  const ModalContent = () => {
+    return (
+      <Modal
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={style}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Text in a modal
+          </Typography>
+        </Box>
+      </Modal>
+    );
+  };
   // useEffect(() => {
   //   fetch(`${url.api}/friends`)
   //     .then((res) => res.json())
   //     .then((friends) => setFriends(friends));
   // }, []);
 
+  const style = {
+    position: "absolute" as "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: "75%",
+    bgcolor: "background.paper",
+    boxShadow: 24,
+    p: 4,
+  };
+
   return (
     <Box sx={{ minHeight: "100vh", p: 3 }} bgcolor="background.paper">
+      <ModalContent />
       {/* <TopAppBarNew title="Balance" /> */}
       <Typography variant="caption" sx={{ color: grey[400] }}>
         Friends Bill Balance
@@ -95,8 +127,15 @@ export default function FriendsPage() {
         +$1,243.00
       </Typography>
       <TextField
-        sx={{ flex: "0 0 100%", borderRadius: 15, mt: 2 }}
+        sx={{
+          flex: "0 0 100%",
+          borderRadius: 15,
+          mt: 2,
+          input: { color: "background.default" },
+        }}
         fullWidth
+        value={searchString}
+        onChange={(e) => setSearchString(e.target.value)}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -106,10 +145,20 @@ export default function FriendsPage() {
         }}
         id="outlined-basic"
         variant="outlined"
+        style={{ color: "black" }}
         // size="small"
       />
-      {AddFriendItem()}
-      {friends.map((friend) => ContactItem(friend, RightContent()))}
+      {AddFriendItem(() => {
+        console.log("Modal Opened");
+        handleOpen();
+      })}
+      {friends
+        .filter(
+          (x) =>
+            x.name.toLowerCase().includes(searchString.toLowerCase()) ||
+            x.email.includes(searchString.toLowerCase())
+        )
+        .map((friend) => ContactItem(friend, RightContent(), "friends"))}
       <BottomAppBar routeValue={AppRoutesValues.Friends} />
     </Box>
   );

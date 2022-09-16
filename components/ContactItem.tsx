@@ -8,11 +8,12 @@ import Link from "next/link";
 const ContactItem = (
   friend: any,
   rightContent?: JSX.Element,
+  hrefPrefix: string = "",
   color: string = "transparent",
   textColor: string = "black"
 ) => {
   return (
-    <Link href={`/friends/${friend.id}`}>
+    <Link href={`/${hrefPrefix}/${friend.id}?name=${friend.name}`}>
       <Grid bgcolor={color} display="flex" flexDirection="row" sx={{ my: 1 }}>
         <Grid display="flex" item container xs={1} sx={{ my: 1, mr: 3 }}>
           <Avatar
