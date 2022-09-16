@@ -19,7 +19,7 @@ export default async function handler(
     case "POST":
       const friendId = api.getFriendId(req);
       const friend = await models.createFriend(payload.userId, friendId);
-      res.status(200).json(friendId);
+      res.status(200).json(friend);
       break;
     default:
       api.allowMethods(req, res, ["GET", "POST"]);
