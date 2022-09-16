@@ -41,13 +41,7 @@ const GroupDetailsPage = () => {
         </IconButton>
       </Box>
       <Grid display="flex" flexDirection="row" container sx={{ mb: 4 }}>
-        <Grid
-          item
-          xs={5}
-          display="flex"
-          flexDirection="column"
-          // alignItems="center"
-        >
+        <Grid item xs={5} display="flex" flexDirection="column">
           <Box alignItems="flex-start">
             <Typography variant="caption" sx={{ color: grey[400] }}>
               Total Bill
@@ -87,7 +81,7 @@ const GroupDetailsPage = () => {
         variant="h5"
         sx={{ my: 2, color: "primary.main", fontWeight: 500 }}
       >
-        Friends
+        Group Members
       </Typography>
       <AvatarList friends={friends} />
       <BottomAppBar routeValue={AppRoutesValues.Groups} />

@@ -29,3 +29,16 @@ a {
   font-size: 36px;
   margin: 1rem 0;
 } */
+
+.modal-centered {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 75%;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 24;
+  padding: 15px;
+}

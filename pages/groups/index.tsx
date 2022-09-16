@@ -16,39 +16,16 @@ import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 import Modal from "@mui/material/Modal";
 import Button from "@mui/material/Button";
+import MoneyLabel from "../../components/MoneyLabel";
 
 type UserWithGroups = models.User & {
   Groups: models.Group[];
 };
 
 const fabStyle = {
-  position: "absolute",
+  position: "fixed",
   bottom: 75,
   right: 16,
-};
-
-const RightContent = () => {
-  return (
-    <Box
-      display="flex"
-      flexDirection="row"
-      alignItems="center"
-      sx={{ textAlign: "end" }}
-    >
-      <Typography
-        variant="h6"
-        sx={{ color: "primary.main", display: "inline-block" }}
-      >
-        $10
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{ color: "primary.main", display: "inline-block" }}
-      >
-        .10
-      </Typography>
-    </Box>
-  );
 };
 
 export default function GroupsPage() {
@@ -59,6 +36,7 @@ export default function GroupsPage() {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+
   const fetchGroup = () => {
     fetch(`${url.api}/user/groups`)
       .then((res) => res.json())
@@ -93,7 +71,7 @@ export default function GroupsPage() {
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
-        <Box sx={style}>
+        <Box className="modal-centered">
           <Typography variant="h6" sx={{ color: "primary.main" }}>
             Create New Group
           </Typography>
@@ -121,60 +99,51 @@ export default function GroupsPage() {
     );
   };
 
-  const style = {
-    position: "absolute" as "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: "75%",
-    bgcolor: "background.paper",
-    display: "flex",
-    flexDirection: "column" as "column",
-    boxShadow: 24,
-    p: 4,
-  };
-
   useEffect(() => {
     fetchGroup();
   }, []);
 
   return (
-    <Box sx={{ minHeight: "100vh", p: 3 }} bgcolor="background.paper">
-      <ModalContent />
-      <BottomAppBar routeValue={AppRoutesValues.Groups} />
-      {/* <TopAppBarNew title="Balance" /> */}
-      <Typography variant="caption" sx={{ color: grey[400] }}>
-        Groups Bill Balance
-      </Typography>
-      <Typography variant="h4" sx={{ color: "primary.main", fontWeight: 500 }}>
-        +$1,243.00
-      </Typography>
-      <TextField
-        sx={{
-          flex: "0 0 100%",
-          borderRadius: 15,
-          mt: 2,
-          input: { color: "background.default" },
-        }}
-        fullWidth
-        value={searchString}
-        onChange={(e) => setSearchString(e.target.value)}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <Search />
-            </InputAdornment>
-          ),
-        }}
-        id="outlined-basic"
-        variant="outlined"
-        style={{ color: "black" }}
-        // size="small"
-      />
-      {userWithGroups?.Groups?.map((group) =>
-        ContactItem(group, RightContent(), "groups")
-      )}
-      <BottomAppBar routeValue={AppRoutesValues.Groups} />
+    <>
+      <Box sx={{ minHeight: "100vh", p: 3 }} bgcolor="background.paper">
+        <ModalContent />
+        <BottomAppBar routeValue={AppRoutesValues.Groups} />
+        <Typography variant="caption" sx={{ color: grey[400] }}>
+          Groups Bill Balance
+        </Typography>
+        <Typography
+          variant="h4"
+          sx={{ color: "primary.main", fontWeight: 500 }}
+        >
+          +$1,243.00
+        </Typography>
+        <TextField
+          sx={{
+            flex: "0 0 100%",
+            borderRadius: 15,
+            mt: 2,
+            input: { color: "background.default" },
+          }}
+          fullWidth
+          value={searchString}
+          onChange={(e) => setSearchString(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
+          }}
+          id="outlined-basic"
+          variant="outlined"
+          style={{ color: "black" }}
+          // size="small"
+        />
+        {userWithGroups?.Groups?.map((group) =>
+          ContactItem(group, MoneyLabel(420, 69), "groups")
+        )}
+        <BottomAppBar routeValue={AppRoutesValues.Groups} />
+      </Box>
       <Fab
         color="primary"
         sx={fabStyle}
@@ -183,6 +152,6 @@ export default function GroupsPage() {
       >
         <AddIcon fontSize="medium" sx={{ color: "white" }} />
       </Fab>
-    </Box>
+    </>
   );
 }

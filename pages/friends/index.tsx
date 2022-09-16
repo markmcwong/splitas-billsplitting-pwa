@@ -14,8 +14,10 @@ import Grid from "@mui/material/Grid";
 import grey from "@mui/material/colors/grey";
 import IconButton from "@mui/material/IconButton";
 import Modal from "@mui/material/Modal";
+import ModalContent from "../../components/Modal";
+import MoneyLabel from "../../components/MoneyLabel";
 
-const AddFriendItem = (callback: Function) => {
+const AddFriendItem = (props: { callback: () => void }) => {
   return (
     <Grid container spacing={2}>
       <Grid
@@ -26,7 +28,7 @@ const AddFriendItem = (callback: Function) => {
         xs={1}
         sx={{ my: 1, mr: 3 }}
       >
-        <IconButton onClick={() => callback()}>
+        <IconButton onClick={() => props.callback()}>
           <Add fontSize="large" />
         </IconButton>
       </Grid>
@@ -39,42 +41,18 @@ const AddFriendItem = (callback: Function) => {
   );
 };
 
-const RightContent = () => {
-  return (
-    <Box
-      display="flex"
-      flexDirection="row"
-      alignItems="center"
-      sx={{ textAlign: "end" }}
-    >
-      <Typography
-        variant="h6"
-        sx={{ color: "primary.main", display: "inline-block" }}
-      >
-        $10
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{ color: "primary.main", display: "inline-block" }}
-      >
-        .10
-      </Typography>
-    </Box>
-  );
+// mock User data
+const testUser: models.User = {
+  id: 1,
+  hasAccount: true,
+  name: "Test User",
+  email: "email.com",
+  session: null,
+  tokenId: 0,
 };
 
 export default function FriendsPage() {
-  const testUser: models.User = {
-    id: 1,
-    hasAccount: true,
-    name: "Test User",
-    email: "email.com",
-    session: null,
-    tokenId: 0,
-  };
-
   const [friends, setFriends] = useState<Array<models.User>>([
-    testUser,
     testUser,
     testUser,
   ]);
@@ -83,49 +61,23 @@ export default function FriendsPage() {
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
-  const ModalContent = () => {
-    return (
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Text in a modal
-          </Typography>
-        </Box>
-      </Modal>
-    );
-  };
+
   useEffect(() => {
     fetch(`${url.api}/user/friends`)
-      .then((res) => {
-        res.json();
-        console.log(res);
-      })
-      .then(
-        (friends) => console.log(friends)
-        //setFriends(friends)
-      );
+      .then((res) => res.json())
+      .then((friends) => {
+        console.log(friends);
+        setFriends(friends);
+      });
   }, []);
-
-  const style = {
-    position: "absolute" as "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: "75%",
-    bgcolor: "background.paper",
-    boxShadow: 24,
-    p: 4,
-  };
 
   return (
     <Box sx={{ minHeight: "100vh", p: 3 }} bgcolor="background.paper">
-      <ModalContent />
-      {/* <TopAppBarNew title="Balance" /> */}
+      <ModalContent
+        open={open}
+        handleClose={handleClose}
+        title="Add new friends"
+      />
       <Typography variant="caption" sx={{ color: grey[400] }}>
         Friends Bill Balance
       </Typography>
@@ -152,19 +104,22 @@ export default function FriendsPage() {
         id="outlined-basic"
         variant="outlined"
         style={{ color: "black" }}
-        // size="small"
       />
-      {AddFriendItem(() => {
-        console.log("Modal Opened");
-        handleOpen();
-      })}
+
+      <AddFriendItem
+        callback={() => {
+          console.log("Modal Opened");
+          handleOpen();
+        }}
+      />
+
       {friends
         .filter(
           (x) =>
             x.name.toLowerCase().includes(searchString.toLowerCase()) ||
             x.email.includes(searchString.toLowerCase())
         )
-        .map((friend) => ContactItem(friend, RightContent(), "friends"))}
+        .map((friend) => ContactItem(friend, MoneyLabel(10, 50), "friends"))}
       <BottomAppBar routeValue={AppRoutesValues.Friends} />
     </Box>
   );
