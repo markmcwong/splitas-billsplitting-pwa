@@ -5,30 +5,8 @@ import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import ListItemButton from "@mui/material/ListItemButton";
 import { Box, Typography } from "@mui/material";
+import MoneyLabel from "./MoneyLabel";
 
-const RightContent = () => {
-  return (
-    <Box
-      display="flex"
-      flexDirection="row"
-      alignItems="center"
-      sx={{ textAlign: "end" }}
-    >
-      <Typography
-        variant="h6"
-        sx={{ color: "primary.main", display: "inline-block" }}
-      >
-        $10
-      </Typography>
-      <Typography
-        variant="body2"
-        sx={{ color: "primary.main", display: "inline-block" }}
-      >
-        .10
-      </Typography>
-    </Box>
-  );
-};
 const TransactionItem = (
   friend: any,
   rightContent?: JSX.Element,
@@ -64,7 +42,7 @@ const TransactionItem = (
         }}
       />
       {/* <Typography color="background.default">test</Typography> */}
-      {RightContent()}
+      {MoneyLabel(1, 23)}
     </ListItem>
   );
 };
