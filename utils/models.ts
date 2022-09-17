@@ -53,12 +53,12 @@ export function getFriendsList(userId: number) {
       include: {
         Friends: {
           include: {
-            User1: true,
+            User2: true,
           },
         },
       },
     })
-    .then((value) => value.Friends.map((friendPair) => friendPair.User1));
+    .then((value) => value.Friends.map((friendPair) => friendPair.User2));
 }
 
 export function getFriendDetails(userId: number, friendId: number) {
