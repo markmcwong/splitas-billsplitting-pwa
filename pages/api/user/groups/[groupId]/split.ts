@@ -13,20 +13,16 @@ export default async function handler(
   }
   const groupId = api.getGroupId(req);
   switch (req.method) {
-    case "PUT":
-      const input = JSON.parse(req.body) as Prisma.ExpenseCreateInput;
-      const response = await models.createNewExpense(
-        input,
-        groupId,
-        payload.userId
-      );
-      res.status(200).json(response);
-      break;
+    // case "PUT":
+    //   const parsedAmount = JSON.parse(req.body) as Prisma.ExpenseCreateInput;
+    //   models.createExpense(parsedAmount);
+    //   res.status(200).json("success");
+    //   break;
     case "GET":
       const splits = await models.getSplitsFromGroup(groupId, payload.userId);
       res.status(200).json(splits);
       break;
     default:
-      api.allowMethods(req, res, ["PUT", "GET"]);
+      api.allowMethods(req, res, ["GET"]);
   }
 }

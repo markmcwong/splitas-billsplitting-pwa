@@ -54,7 +54,8 @@ model FriendExpense {
   Friends          FriendPair @relation(fields: [payerId, userOwingMoneyId], references: [user1Id, user2Id])
   payerId          Int
   userOwingMoneyId Int
-  amount           Int
+  amount           Float
+  timestamp        DateTime   @default(now()) @db.Timestamptz(6)
 }
 
 model Group {
@@ -128,7 +129,7 @@ model Payment {
   paidToId   Int
   PaidFrom   User     @relation("PaymentsReceived_PaidFrom", fields: [paidFromId], references: [id])
   paidFromId Int
-  amount     Int
+  amount     Float
   timestamp  DateTime
 }
 
@@ -139,7 +140,7 @@ model Expense {
   description String
   Payer       User     @relation(fields: [payerId], references: [id])
   payerId     Int
-  amount      Int
+  amount      Float
   Splits      Split[]
   timestamp   DateTime
 }
@@ -150,5 +151,5 @@ model Split {
   expenseId Int
   User      User    @relation(fields: [userId], references: [id])
   userId    Int
-  amount    Int
+  amount    Float
 }
