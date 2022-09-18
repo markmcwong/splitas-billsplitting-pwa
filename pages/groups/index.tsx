@@ -22,12 +22,6 @@ type UserWithGroups = models.User & {
   Groups: models.Group[];
 };
 
-const fabStyle = {
-  position: "fixed",
-  bottom: 75,
-  right: 16,
-};
-
 export default function GroupsPage() {
   const [userWithGroups, setUserWithGroups] = useState<UserWithGroups | null>(
     null
@@ -140,13 +134,13 @@ export default function GroupsPage() {
           // size="small"
         />
         {userWithGroups?.Groups?.map((group) =>
-          ContactItem(group, MoneyLabel(420, 69), "groups")
+          ContactItem(group, MoneyLabel(420.69), "groups")
         )}
         <BottomAppBar routeValue={AppRoutesValues.Groups} />
       </Box>
       <Fab
         color="primary"
-        sx={fabStyle}
+        className="fab--action-offset"
         aria-label="add"
         onClick={() => handleOpen()}
       >

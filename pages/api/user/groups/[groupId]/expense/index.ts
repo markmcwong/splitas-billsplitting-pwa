@@ -1,6 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import * as models from "../../../../../utils/models";
-import * as api from "../../../../../utils/api";
+import * as models from "../../../../../../utils/models";
+import * as api from "../../../../../../utils/api";
 import { Prisma } from "@prisma/client";
 export default async function handler(
   req: NextApiRequest,
@@ -23,8 +23,8 @@ export default async function handler(
       res.status(200).json(response);
       break;
     case "GET":
-      const splits = await models.getSplitsFromGroup(groupId, payload.userId);
-      res.status(200).json(splits);
+      // const splits = await models.getSplitsByGroup(groupId, payload.userId);
+      res.status(200).json("not available");
       break;
     default:
       api.allowMethods(req, res, ["PUT", "GET"]);

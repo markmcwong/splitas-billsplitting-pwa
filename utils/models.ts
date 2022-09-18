@@ -44,7 +44,7 @@ export function getUserByEmail(email: string) {
   });
 }
 
-export function getSplitsFromGroup(groupId: number, userId: number) {
+export function getSplitsByGroup(groupId: number, userId: number) {
   return prisma.split
     .findMany({
       where: {
@@ -55,6 +55,21 @@ export function getSplitsFromGroup(groupId: number, userId: number) {
       },
     })
     .then((value) => value);
+}
+
+export function getSplitsByExpense(expenseId: number, groupId: number) {
+  return prisma.split.findMany({
+    where: {
+      expenseId: expenseId,
+      Expense: {
+        groupId: groupId,
+      },
+    },
+    include: {
+      User: true,
+    },
+  });
+  // .then((value) => value);
 }
 
 export function getPaymentsFromGroup(groupId: number, userId: number) {

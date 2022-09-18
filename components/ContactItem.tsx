@@ -19,7 +19,7 @@ const ContactItem = (
           <Avatar
             sx={{ maxHeight: 45, maxWidth: 45 }}
             alt="name"
-            src="https://via.placeholder.com/150.png"
+            src="https://i.pravatar.cc/300"
           />
         </Grid>
         <Grid
