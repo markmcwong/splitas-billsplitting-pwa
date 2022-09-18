@@ -42,3 +42,15 @@ a {
   box-shadow: 24;
   padding: 15px;
 }
+
+.fab--action {
+  position: fixed;
+  bottom: 25px;
+  right: 16px;
+}
+
+.fab--action-offset {
+  position: fixed;
+  bottom: 75px;
+  right: 16px;
+}
