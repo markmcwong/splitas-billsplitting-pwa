@@ -25,6 +25,7 @@ const ModalContent = ({
   return (
     <Modal
       open={open}
+      // keepMounted
       onClose={handleClose}
       aria-labelledby="modal-modal-title"
       aria-describedby="modal-modal-description"
@@ -36,7 +37,7 @@ const ModalContent = ({
               {title}
             </Typography>
             {subtitle && (
-              <Typography variant="body1" color={grey[400]}>
+              <Typography variant="body1" color={grey[400]} sx={{ pb: 1 }}>
                 {subtitle}
               </Typography>
             )}

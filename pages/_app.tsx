@@ -29,7 +29,7 @@ const theme = createTheme({
       paper: "#FFFFFF",
     },
     text: {
-      primary: "rgba(255,255,255,0.87)",
+      primary: "#000000dd",
     },
   },
 });

@@ -44,6 +44,43 @@ export function getUserByEmail(email: string) {
   });
 }
 
+export function getSplitsByGroup(groupId: number, userId: number) {
+  return prisma.split
+    .findMany({
+      where: {
+        Expense: {
+          groupId: groupId,
+        },
+        userId: userId,
+      },
+    })
+    .then((value) => value);
+}
+
+export function getSplitsByExpense(expenseId: number, groupId: number) {
+  return prisma.split.findMany({
+    where: {
+      expenseId: expenseId,
+      Expense: {
+        groupId: groupId,
+      },
+    },
+    include: {
+      User: true,
+    },
+  });
+  // .then((value) => value);
+}
+
+export function getPaymentsFromGroup(groupId: number, userId: number) {
+  return prisma.payment.findMany({
+    where: {
+      groupId: groupId,
+      paidFromId: userId,
+    },
+  });
+}
+
 export function getFriendsList(userId: number) {
   return prisma.user
     .findUniqueOrThrow({
@@ -186,6 +223,12 @@ export function createUser(user: Prisma.UserCreateInput) {
   });
 }
 
+export function createSplit(user: Prisma.SplitCreateInput) {
+  return prisma.split.create({
+    data: user,
+  });
+}
+
 export async function createGroup(
   group: Prisma.GroupCreateInput,
   initialUserId: number
@@ -215,6 +258,31 @@ export async function createGroup(
   });
 
   return createdGroup;
+}
+
+export function createNewExpense(
+  group: Prisma.ExpenseCreateInput,
+  groupId: number,
+  payerId: number
+) {
+  const expense: Prisma.ExpenseCreateInput = {
+    ...group,
+    Group: {
+      connect: {
+        id: groupId,
+      },
+    },
+    Payer: {
+      connect: {
+        id: payerId,
+      },
+    },
+    timestamp: new Date(),
+  };
+
+  return prisma.expense.create({
+    data: expense,
+  });
 }
 
 // creatorUserId should be equal to expense.Payer.id, but I decided to be explicit here.

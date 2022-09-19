@@ -9,7 +9,7 @@ type Props = {
   friends: models.User[];
 };
 
-const AvatarList = ({ friends }) => {
+const AvatarList = ({ friends }: Props) => {
   return (
     <Box
       // container
@@ -46,11 +46,11 @@ const AvatarList = ({ friends }) => {
           >
             <Avatar
               alt={friend.name}
-              src="https://via.placeholder.com/150.png"
+              src="https://i.pravatar.cc/150"
               sx={{ width: 60, height: 60 }}
             />
             <Typography sx={{ color: "black" }}>
-              {friend.name.split(" ")[0]}
+              {friend.name.split(" ")[0].substring(0, 8)}
             </Typography>
           </Box>
         );
