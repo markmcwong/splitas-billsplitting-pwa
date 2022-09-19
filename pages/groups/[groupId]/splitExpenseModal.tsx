@@ -46,10 +46,9 @@ const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
     <ModalContent open={open} handleClose={handleClose} title={"View splits"}>
       <List>
         {splits.map((split) => (
-          <ListItem sx={{ ml: 0, pl: 0 }}>
+          <ListItem sx={{ ml: 0, pl: 0, display: "flex" }}>
             <ListItemIcon
               sx={{
-                mr: 2,
                 display: "flex",
                 flex: "0 0 66%",
                 borderRadius: 2,
@@ -57,7 +56,9 @@ const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
             >
               <Typography>{split.User.name.substring(0, 8)}</Typography>
             </ListItemIcon>
-            <Typography color="text.primary">{split.amount}</Typography>
+            <Typography color="text.primary" width="100%" textAlign="end">
+              {split.amount}
+            </Typography>
           </ListItem>
         ))}
       </List>
