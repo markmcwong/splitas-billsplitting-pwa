@@ -1,3 +1,4 @@
+import { UserInclude } from "./../node_modules/.prisma/client/index.d";
 import {
   Prisma,
   PrismaClient,
@@ -98,6 +99,71 @@ export function getFriendsList(userId: number) {
     .then((value) => value.Friends.map((friendPair) => friendPair.User2));
 }
 
+export function getAllFriendWithExpensesDetails(userId: number) {
+  /*
+        "amount": figure,
+        "user": {
+            "id": 3,
+            "name": "test",
+            "email": "test@test.com",
+            ...
+        }
+  */
+
+  return getFriendsList(userId).then((friends) => {
+    return prisma.friendExpense
+      .groupBy({
+        by: ["payerId", "userOwingMoneyId"],
+        where: {
+          OR: [
+            {
+              payerId: userId,
+            },
+            {
+              userOwingMoneyId: userId,
+            },
+          ],
+        },
+        _sum: {
+          amount: true,
+        },
+      })
+      .then((value) => {
+        const friendExpenses = value.map((friendExpense) => {
+          return {
+            _sum: {
+              amount:
+                friendExpense.payerId == userId
+                  ? -friendExpense._sum!.amount
+                  : friendExpense._sum!.amount,
+            },
+            friend: friends.find(
+              (friend) =>
+                friend.id ===
+                (friendExpense.payerId == userId
+                  ? friendExpense.userOwingMoneyId
+                  : friendExpense.payerId)
+            ),
+          };
+        });
+        let result = [];
+        friendExpenses.reduce((res, value) => {
+          if (!res[value.friend.id]) {
+            res[value.friend.id] = {
+              // id: value.friend.id,
+              amount: 0,
+              user: value.friend,
+            };
+            result.push(res[value!.friend.id]);
+          }
+          res[value!.friend.id].amount += value._sum.amount;
+          return res;
+        }, {});
+        return result;
+      });
+  });
+}
+
 export function getFriendDetails(userId: number, friendId: number) {
   const friend = getUserById(friendId);
   const friendExpenses = getFriendPairExpenses(friendId, userId);
@@ -180,10 +246,31 @@ export function getGroupDetails(groupId: number) {
     },
     include: {
       Expenses: true,
-      Payment: true,
+      Payment: {
+        include: {
+          PaidFrom: true,
+        },
+      },
       Users: true,
     },
   });
+}
+
+export async function getGroupSummaries(userId: number) {
+  // return prisma.$queryRaw`
+  // SELECT "Group"."id" FROM "public"."Group"`;
+  // return prisma.$queryRaw`
+  // SELECT Group."id", Group."name", SUM(Payment."amount"), SUM(Split."amount") FROM "public"."Group", "public"."_UsersGroups", "public"."Payment", "public"."Expense", "public"."Split"
+  // WHERE Group."id" = UsersGroups."A" AND UsersGroups."B" = ${userId} AND Payment."groupId" = Group."id"
+  // AND Expense."groupId" = Group."id" AND Split."expenseId" = Expense."id" AND Split."userId" = ${userId}
+  // GROUP BY Group."id"`;
+  return prisma.$queryRaw`
+  SELECT "Group"."id", "Group"."name", coalesce(SUM("Payment"."amount"), 0) as Payment, coalesce(SUM("Split"."amount"), 0) as Split FROM "public"."Group" JOIN "public"."_UsersGroups"
+  ON "Group"."id" = "public"."_UsersGroups"."A" AND "public"."_UsersGroups"."B" = ${userId} 
+  LEFT JOIN "public"."Payment" ON "Payment"."groupId" = "Group"."id" AND "Payment"."paidFromId" = ${userId}
+  LEFT JOIN "public"."Expense" ON "Expense"."groupId" = "Group"."id"
+  LEFT JOIN "public"."Split" ON "Split"."expenseId" = "Expense"."id" AND "Split"."userId" = ${userId}
+  GROUP BY "Group"."id"`;
 }
 
 export function getUserProfile(userId: number) {

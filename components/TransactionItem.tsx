@@ -21,6 +21,7 @@ const TransactionItem = ({
   rightContent = MoneyLabel(21.54),
   color = "transparent",
   textColor = "black",
+  label = "Transaction",
   date = new Date("2022 05-05 11:30PM"),
   onClick = () => {},
 }: TransactionItemProps) => {
@@ -42,7 +43,7 @@ const TransactionItem = ({
         </Typography>
       </ListItemIcon>
       <ListItemText
-        primary={`Transaction`}
+        primary={label}
         secondary={date.toLocaleString("en-US", {
           hour12: true,
           hour: "numeric",
