@@ -29,6 +29,9 @@ export default async function handler(
       );
       res.status(200).json(updatedGroup);
       break;
+    case "DELETE":
+      await models.deleteGroup(groupId, payload.userId);
+      res.status(200).send("Deleted.");
     default:
       api.allowMethods(req, res, ["GET", "PUT"]);
   }

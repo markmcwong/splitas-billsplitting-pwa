@@ -268,6 +268,7 @@ export async function updateUser(user: User) {
   return updatedUser;
 }
 
+// Precondition: The user is a member of the group.
 export async function updateGroup(group: Group, updaterUserId: number) {
   const updatedGroup = await prisma.group.update({
     where: {
@@ -280,18 +281,85 @@ export async function updateGroup(group: Group, updaterUserId: number) {
     data: {
       userId: updaterUserId,
       type: "updateGroup",
-      description: "Updated a group!",
+      description: `Updated the group ${group.name}!`,
       groupId: updatedGroup.id,
     },
   });
 
   return updatedGroup;
 }
+
+// Precondition: leaver is in group
+export async function leaveGroup(groupId: number, leaverUserId: number) {
+  const updatedGroup = await prisma.group.update({
+    where: {
+      id: groupId,
+    },
+    data: {
+      Users: {
+        disconnect: {
+          id: leaverUserId,
+        },
+      },
+    },
+  });
+
+  await prisma.activity.create({
+    data: {
+      userId: leaverUserId,
+      type: "leaveGroup",
+      description: `Left the group ${updatedGroup.name}`,
+      groupId,
+    },
+  });
+}
+
 export function updateToken(oauthToken: OauthToken) {
   return prisma.oauthToken.update({
     where: {
       id: oauthToken.id,
     },
     data: oauthToken,
+  });
+}
+
+export async function deleteFriend(userId: number, friendId: number) {
+  const { count } = await prisma.friendPair.deleteMany({
+    where: {
+      OR: [
+        { user1Id: userId, user2Id: friendId },
+        { user1Id: friendId, user2Id: userId },
+      ],
+    },
+  });
+
+  const friend = await getUserById(friendId);
+
+  if (count > 0) {
+    await prisma.activity.create({
+      data: {
+        userId,
+        type: "deleteFriend",
+        friendId,
+        description: `Said goodbye to ${friend.name}`,
+      },
+    });
+  }
+}
+
+// Precondition: The deleter is a member of the group.
+export async function deleteGroup(groupId: number, deleterUserId: number) {
+  const deletedGroup = await prisma.group.delete({
+    where: {
+      id: groupId,
+    },
+  });
+
+  await prisma.activity.create({
+    data: {
+      type: "deleteGroup",
+      userId: deleterUserId,
+      description: `Deleted the group ${deletedGroup.name}`,
+    },
   });
 }

@@ -110,13 +110,13 @@ model Group {
 enum ActivityType {
   createGroup
   updateGroup
-  leaveGroup // TODO
-  deleteGroup // TODO
+  leaveGroup
+  deleteGroup
   createPayment
   createExpense
   createFriend
   updateFriend
-  deleteFriend // TODO
+  deleteFriend
   updateUser
 }
 
