@@ -8,8 +8,16 @@ export function getGroupId(req: NextApiRequest): number {
   return Number.parseInt(req.query["groupId"] as string);
 }
 
+export function hasFriendId(req: NextApiRequest): boolean {
+  return req.query["friendId"] != undefined;
+}
+
 export function getFriendId(req: NextApiRequest): number {
   return Number.parseInt(req.query["friendId"] as string);
+}
+
+export function getFriendEmail(req: NextApiRequest): string {
+  return req.query["friendEmail"] as string;
 }
 
 export function allowMethods(

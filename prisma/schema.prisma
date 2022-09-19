@@ -23,8 +23,8 @@ model User {
   PaymentsReceived Payment[]    @relation("PaymentsReceived_PaidFrom")
   Expenses         Expense[]
   Splits           Split[]
-  OauthToken       OauthToken   @relation(fields: [tokenId], references: [id])
-  tokenId          Int          @unique
+  OauthToken       OauthToken?  @relation(fields: [tokenId], references: [id])
+  tokenId          Int?         @unique
 }
 
 model OauthToken {

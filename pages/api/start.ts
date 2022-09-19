@@ -16,5 +16,6 @@ export default async function handler(
 
   const state = api.generateStateAndSetCookie(req, res);
   const endpoint = await oauth.getAuthEndpointWithParams(state);
+  console.log(endpoint);
   res.redirect(endpoint);
 }

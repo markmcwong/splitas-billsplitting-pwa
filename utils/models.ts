@@ -122,6 +122,19 @@ export function getUserProfile(userId: number) {
   return getUserById(userId);
 }
 
+export function getTokenByUser(userId: number) {
+  return prisma.user
+    .findUniqueOrThrow({
+      where: {
+        id: userId,
+      },
+      include: {
+        OauthToken: true,
+      },
+    })
+    .then((user) => user?.OauthToken);
+}
+
 export function getActivities(userId: number) {
   return prisma.activity.findMany({
     where: {

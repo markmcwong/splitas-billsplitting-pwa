@@ -17,7 +17,21 @@ export default async function handler(
       res.status(200).json(friends);
       break;
     case "POST":
-      const friendId = api.getFriendId(req);
+      let friendId: number;
+      if (!api.hasFriendId(req)) {
+        const email = api.getFriendEmail(req);
+        let user = await models.getUserByEmail(email);
+        if (user === null) {
+          user = await models.createUser({
+            name: email,
+            email,
+            hasAccount: false,
+          });
+        }
+        friendId = user.id;
+      } else {
+        friendId = api.getFriendId(req);
+      }
       const friend = await models.createFriend(payload.userId, friendId);
       res.status(200).json(friend);
       break;
