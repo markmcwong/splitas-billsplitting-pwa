@@ -18,6 +18,7 @@ import ModalContent from "../../components/Modal";
 import MoneyLabel from "../../components/MoneyLabel";
 
 const AddFriendItem = (props: { callback: () => void }) => {
+  const [searchString, setSearchString] = useState<string>("");
   return (
     <Grid container spacing={2}>
       <Grid
@@ -47,14 +48,13 @@ const testUser: models.User = {
   hasAccount: true,
   name: "Test User",
   email: "email.com",
-  session: null,
   tokenId: 0,
 };
 
 export default function FriendsPage() {
   const [friends, setFriends] = useState<Array<models.User>>([
-    testUser,
-    testUser,
+    // testUser,
+    // testUser,
   ]);
 
   const [searchString, setSearchString] = useState<string>("");
@@ -66,8 +66,8 @@ export default function FriendsPage() {
     fetch(`${url.api}/user/friends`)
       .then((res) => res.json())
       .then((friends) => {
-        console.log(friends);
         setFriends(friends);
+        console.log(friends);
       });
   }, []);
 
@@ -77,7 +77,29 @@ export default function FriendsPage() {
         open={open}
         handleClose={handleClose}
         title="Add new friends"
-      />
+      >
+        <TextField
+          sx={{
+            flex: "0 0 100%",
+            borderRadius: 15,
+            mt: 2,
+            input: { color: "background.default" },
+          }}
+          fullWidth
+          value={searchString}
+          onChange={(e) => setSearchString(e.target.value)}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <Search />
+              </InputAdornment>
+            ),
+          }}
+          id="outlined-basic"
+          variant="outlined"
+          style={{ color: "black" }}
+        />
+      </ModalContent>
       <Typography variant="caption" sx={{ color: grey[400] }}>
         Friends Bill Balance
       </Typography>
@@ -119,7 +141,7 @@ export default function FriendsPage() {
             x.name.toLowerCase().includes(searchString.toLowerCase()) ||
             x.email.includes(searchString.toLowerCase())
         )
-        .map((friend) => ContactItem(friend, MoneyLabel(10, 50), "friends"))}
+        .map((friend) => ContactItem(friend, MoneyLabel(10, true), "friends"))}
       <BottomAppBar routeValue={AppRoutesValues.Friends} />
     </Box>
   );

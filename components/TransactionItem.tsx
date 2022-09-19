@@ -7,14 +7,25 @@ import ListItemButton from "@mui/material/ListItemButton";
 import { Box, Typography } from "@mui/material";
 import MoneyLabel from "./MoneyLabel";
 
-const TransactionItem = (
-  friend: any,
-  rightContent?: JSX.Element,
-  color: string = "transparent",
-  textColor: string = "black"
-) => {
+type TransactionItemProps = {
+  // friend: any;
+  rightContent?: JSX.Element;
+  color?: string;
+  textColor?: string;
+  date?: Date;
+  onClick?: () => void;
+};
+
+const TransactionItem = ({
+  // friend,
+  rightContent = MoneyLabel(21.54),
+  color = "transparent",
+  textColor = "black",
+  date = new Date("2022 05-05 11:30PM"),
+  onClick = () => {},
+}: TransactionItemProps) => {
   return (
-    <ListItem sx={{ ml: 0, pl: 0 }}>
+    <ListItem sx={{ ml: 0, pl: 0 }} onClick={onClick}>
       <ListItemIcon
         sx={{
           flexDirection: "column",
@@ -25,12 +36,18 @@ const TransactionItem = (
           border: "0.4px solid black",
         }}
       >
-        <Typography>24</Typography>
-        <Typography>Feb</Typography>
+        <Typography>{date.getDate()}</Typography>
+        <Typography>
+          {date.toLocaleDateString("en-US", { month: "short" })}
+        </Typography>
       </ListItemIcon>
       <ListItemText
-        primary={`Line item`}
-        secondary={"11:30 PM"}
+        primary={`Transaction`}
+        secondary={date.toLocaleString("en-US", {
+          hour12: true,
+          hour: "numeric",
+          minute: "numeric",
+        })}
         color="background.default"
         primaryTypographyProps={{
           color: "background.default",
@@ -42,7 +59,7 @@ const TransactionItem = (
         }}
       />
       {/* <Typography color="background.default">test</Typography> */}
-      {MoneyLabel(1, 23)}
+      {rightContent}
     </ListItem>
   );
 };

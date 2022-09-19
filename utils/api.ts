@@ -12,6 +12,10 @@ export function getFriendId(req: NextApiRequest): number {
   return Number.parseInt(req.query["friendId"] as string);
 }
 
+export function getExpenseId(req: NextApiRequest): number {
+  return Number.parseInt(req.query["expenseId"] as string);
+}
+
 export function allowMethods(
   req: NextApiRequest,
   res: NextApiResponse,
