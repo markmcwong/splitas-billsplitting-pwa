@@ -94,15 +94,46 @@ export function getFriendDetails(userId: number, friendId: number) {
   };
 }
 
-export function getGroupsList(userId: number) {
-  return prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-    include: {
-      Groups: true,
-    },
-  });
+interface GroupListElement {}
+
+export async function getGroupsList(userId: number) {
+  // aim: for each group, get all splits belonging to user
+
+  // aim: for each group, get all payments made by user
+  // const paymentsGroupedByGroup = await prisma.payment.groupBy({
+  //   where: {
+  //     paidFromId: userId,
+  //   },
+  //   by: ["groupId"],
+  //   _sum: {
+  //     amount: true,
+  //   },
+  // });
+
+  // const groups = await prisma.group.findMany({
+  //   where: {
+  //     Users: {
+  //       some: {
+  //         id: userId,
+  //       },
+  //     },
+  //   },
+  //   include: {
+  //     Payment: true,
+  //   },
+  // });
+
+  // Note _UsersGroups.A references Group
+  // _UsersGroups.B references User
+  // A better way to do this is to explicitly create the join table.
+
+  const paymentsAndSplitsGroupedByGroup = (await prisma.$queryRaw`
+  SELECT Group.id, Group.name, SUM(Payment.amount), SUM(Split.amount) FROM Group, _UsersGroups, Payment, Expense, Split 
+  WHERE Group.id = _UsersGroups.A AND _UsersGroups.B = ${userId} AND Payment.groupId = Group.id
+  AND Expense.groupId = Group.id AND Split.expenseId = Expense.id AND Split.userId = ${userId}
+  GROUP BY Group.id`) as any;
+  console.log(paymentsAndSplitsGroupedByGroup);
+  return paymentsAndSplitsGroupedByGroup;
 }
 
 export function getGroupDetails(groupId: number) {
