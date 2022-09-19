@@ -15,7 +15,7 @@ export default async function handler(
   switch (req.method) {
     case "PUT":
       const parsedAmount = JSON.parse(req.body) as Prisma.ExpenseCreateInput;
-      models.createExpense(parsedAmount);
+      models.createExpense(parsedAmount, payload.userId);
       res.status(200).json("success");
       break;
     default:

@@ -18,10 +18,11 @@ model User {
   Friends          FriendPair[] @relation("Friend")
   friends          FriendPair[] @relation("friend")
   Groups           Group[]      @relation("UsersGroups")
-  Activities       Activity[]
+  Activities       Activity[]   @relation("User_Activities")
   PaymentsMade     Payment[]    @relation("PaymentsMade_PaidTo")
   PaymentsReceived Payment[]    @relation("PaymentsReceived_PaidFrom")
   Expenses         Expense[]
+  FriendActivities Activity[]   @relation("Friend_FriendActivities")
   Splits           Split[]
   OauthToken       OauthToken?  @relation(fields: [tokenId], references: [id])
   tokenId          Int?         @unique
@@ -58,11 +59,12 @@ model FriendExpense {
 }
 
 model Group {
-  id       Int       @id @default(autoincrement())
+  id       Int        @id @default(autoincrement())
   name     String
-  Users    User[]    @relation("UsersGroups")
+  Users    User[]     @relation("UsersGroups")
   Payment  Payment[]
   Expenses Expense[]
+  Activity Activity[]
 }
 
 // enum ActivityType {
@@ -106,42 +108,61 @@ model Group {
 // }
 
 enum ActivityType {
-  group
-  payment
-  expense
+  createGroup
+  updateGroup
+  leaveGroup // TODO
+  deleteGroup // TODO
+  createPayment
+  createExpense
+  createFriend
+  updateFriend
+  deleteFriend // TODO
+  updateUser
 }
 
 model Activity {
   id          Int          @id @default(autoincrement())
-  User        User         @relation(fields: [userId], references: [id])
+  User        User         @relation("User_Activities", fields: [userId], references: [id])
   userId      Int
   type        ActivityType
+  // Single Table Inheritance, not the best, but it'll do.
+  Group       Group?       @relation(fields: [groupId], references: [id])
+  groupId     Int?
+  Payment     Payment?     @relation(fields: [paymentId], references: [id])
+  paymentId   Int?
+  Expense     Expense?     @relation(fields: [expenseId], references: [id])
+  expenseId   Int?
+  Friend      User?        @relation("Friend_FriendActivities", fields: [friendId], references: [id])
+  friendId    Int?
+  // This is more of a frontend thing, so we can remove this, but we can also keep it if we want to keep track of the exact activity specifics.
   description String
-  timestamp   DateTime
+  timestamp   DateTime     @default(now()) @db.Timestamptz(6)
 }
 
 model Payment {
-  id         Int      @id @default(autoincrement())
-  Group      Group    @relation(fields: [groupId], references: [id])
+  id         Int        @id @default(autoincrement())
+  Group      Group      @relation(fields: [groupId], references: [id])
   groupId    Int
-  PaidTo     User     @relation("PaymentsMade_PaidTo", fields: [paidToId], references: [id])
+  PaidTo     User       @relation("PaymentsMade_PaidTo", fields: [paidToId], references: [id])
   paidToId   Int
-  PaidFrom   User     @relation("PaymentsReceived_PaidFrom", fields: [paidFromId], references: [id])
+  PaidFrom   User       @relation("PaymentsReceived_PaidFrom", fields: [paidFromId], references: [id])
   paidFromId Int
   amount     Int
   timestamp  DateTime
+  Activity   Activity[]
 }
 
 model Expense {
-  id          Int      @id @default(autoincrement())
-  Group       Group    @relation(fields: [groupId], references: [id])
+  id          Int        @id @default(autoincrement())
+  Group       Group      @relation(fields: [groupId], references: [id])
   groupId     Int
   description String
-  Payer       User     @relation(fields: [payerId], references: [id])
+  Payer       User       @relation(fields: [payerId], references: [id])
   payerId     Int
   amount      Int
   Splits      Split[]
   timestamp   DateTime
+  Activity    Activity[]
 }
 
 model Split {

@@ -155,7 +155,7 @@ export function createUser(user: Prisma.UserCreateInput) {
   });
 }
 
-export function createGroup(
+export async function createGroup(
   group: Prisma.GroupCreateInput,
   initialUserId: number
 ) {
@@ -170,31 +170,69 @@ export function createGroup(
     },
   };
 
-  return prisma.group.create({
+  const createdGroup = await prisma.group.create({
     data: groupWithCreator,
   });
+
+  await prisma.activity.create({
+    data: {
+      userId: initialUserId,
+      type: "createGroup",
+      groupId: createdGroup.id,
+      description: "Created a group!",
+    },
+  });
+
+  return createdGroup;
 }
 
-export function createExpense(expense: Prisma.ExpenseCreateInput) {
-  prisma.expense.create({
+// creatorUserId should be equal to expense.Payer.id, but I decided to be explicit here.
+export async function createExpense(
+  expense: Prisma.ExpenseCreateInput,
+  creatorUserId: number
+) {
+  const createdExpense = await prisma.expense.create({
     data: expense,
   });
+
+  await prisma.activity.create({
+    data: {
+      type: "createExpense",
+      userId: creatorUserId,
+      description: "Created an expense!",
+      expenseId: createdExpense.id,
+    },
+  });
+
+  return createdExpense;
 }
 
-export function createFriend(userId: number, friendId: number) {
-  return prisma.friendPair.createMany({
-    data: [
-      {
-        user1Id: userId,
-        user2Id: friendId,
+export async function createFriend(userId: number, friendId: number) {
+  const count = (
+    await prisma.friendPair.createMany({
+      data: [
+        {
+          user1Id: userId,
+          user2Id: friendId,
+        },
+        {
+          user1Id: friendId,
+          user2Id: userId,
+        },
+      ],
+      skipDuplicates: true,
+    })
+  ).count;
+  if (count > 0) {
+    await prisma.activity.create({
+      data: {
+        userId,
+        type: "createFriend",
+        friendId,
+        description: "Made a friend!",
       },
-      {
-        user1Id: friendId,
-        user2Id: userId,
-      },
-    ],
-    skipDuplicates: true,
-  });
+    });
+  }
 }
 
 export function createFriendExpense(
@@ -211,22 +249,43 @@ export function createFriendExpense(
   });
 }
 
-export function updateUser(user: User) {
-  return prisma.user.update({
+export async function updateUser(user: User) {
+  const updatedUser = await prisma.user.update({
     where: {
       id: user.id,
     },
     data: user,
   });
+
+  await prisma.activity.create({
+    data: {
+      userId: user.id,
+      type: "updateUser",
+      description: "Updated your profile!",
+    },
+  });
+
+  return updatedUser;
 }
 
-export function updateGroup(group: Group) {
-  return prisma.group.update({
+export async function updateGroup(group: Group, updaterUserId: number) {
+  const updatedGroup = await prisma.group.update({
     where: {
       id: group.id,
     },
     data: group,
   });
+
+  await prisma.activity.create({
+    data: {
+      userId: updaterUserId,
+      type: "updateGroup",
+      description: "Updated a group!",
+      groupId: updatedGroup.id,
+    },
+  });
+
+  return updatedGroup;
 }
 export function updateToken(oauthToken: OauthToken) {
   return prisma.oauthToken.update({
