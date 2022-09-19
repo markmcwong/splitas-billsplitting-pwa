@@ -29,7 +29,7 @@ export function getFriendPairExpenses(
 }
 
 export function getUserById(id: number) {
-  return prisma.user.findUniqueOrThrow({
+  return prisma.user.findFirstOrThrow({
     where: {
       id,
     },
@@ -37,7 +37,7 @@ export function getUserById(id: number) {
 }
 
 export function getUserByEmail(email: string) {
-  return prisma.user.findUnique({
+  return prisma.user.findFirst({
     where: {
       email,
     },
@@ -193,6 +193,7 @@ export function createFriend(userId: number, friendId: number) {
         user2Id: userId,
       },
     ],
+    skipDuplicates: true,
   });
 }
 

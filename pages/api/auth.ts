@@ -64,7 +64,7 @@ export default async function handler(
     scope: tokenSet.scope ?? null,
     sessionState: tokenSet.session_state ?? null,
   };
-  if (user === null) {
+  if (user === null || !user.hasAccount) {
     const oauthTokenInput: Prisma.OauthTokenCreateInput = {
       ...tokenSharedFields,
     };
@@ -83,7 +83,7 @@ export default async function handler(
     user = await models.createUser(userInput);
   } else {
     const oauthToken: models.OauthToken = {
-      id: user.tokenId,
+      id: user.tokenId!,
       ...tokenSharedFields,
     };
     await models.updateToken(oauthToken);

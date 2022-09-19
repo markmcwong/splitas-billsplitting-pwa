@@ -12,6 +12,10 @@ export function hasFriendId(req: NextApiRequest): boolean {
   return req.query["friendId"] != undefined;
 }
 
+export function hasFriendEmail(req: NextApiRequest): boolean {
+  return req.query["friendEmail"] !== undefined;
+}
+
 export function getFriendId(req: NextApiRequest): number {
   return Number.parseInt(req.query["friendId"] as string);
 }
