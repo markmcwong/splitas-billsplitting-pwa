@@ -23,9 +23,15 @@ export default async function handler(
       break;
     case "PUT":
       const parsedGroup = JSON.parse(req.body) as models.Group;
-      const updatedGroup = await models.updateGroup(parsedGroup);
+      const updatedGroup = await models.updateGroup(
+        parsedGroup,
+        payload.userId
+      );
       res.status(200).json(updatedGroup);
       break;
+    case "DELETE":
+      await models.deleteGroup(groupId, payload.userId);
+      res.status(200).send("Deleted.");
     default:
       api.allowMethods(req, res, ["GET", "PUT"]);
   }

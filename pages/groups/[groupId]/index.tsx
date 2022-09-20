@@ -33,7 +33,7 @@ import ViewSplitsModal from "./splitExpenseModal";
 
 type GroupDetails = models.Group & {
   Expenses: models.Expense[];
-  Payment: Payment[];
+  Payment: (Payment & { PaidFrom: models.User })[];
   Users: models.User[];
 };
 
@@ -59,7 +59,7 @@ const GroupDetailsPage = () => {
       .then((res) => res.json())
       .then((splits) => {
         setSplits(splits);
-        // console.log("splits: ", splits);
+        console.log("splits: ", splits);
       });
   };
 
@@ -68,7 +68,7 @@ const GroupDetailsPage = () => {
       .then((res) => res.json())
       .then((groupDetails) => {
         setGroupDetails(groupDetails);
-        // console.log(groupDetails);
+        console.log(groupDetails);
       });
   };
 
@@ -180,12 +180,30 @@ const GroupDetailsPage = () => {
             {groupDetails.Expenses.map((_transaction) => {
               return (
                 <TransactionItem
+                  label={_transaction.description}
                   date={new Date(_transaction.timestamp)}
                   rightContent={MoneyLabel(_transaction.amount)}
                   onClick={() => {
                     setCurrentExpenseId(_transaction.id);
                     handleOpenv2();
                   }}
+                />
+              );
+            })}
+          </List>
+          <Typography
+            variant="h6"
+            sx={{ color: "primary.main", fontWeight: 500, mt: 3 }}
+          >
+            Payments
+          </Typography>
+          <List>
+            {groupDetails.Payment.map((_transaction) => {
+              return (
+                <TransactionItem
+                  date={new Date(_transaction.timestamp)}
+                  rightContent={MoneyLabel(_transaction.amount)}
+                  label={_transaction.PaidFrom.name}
                 />
               );
             })}

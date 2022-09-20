@@ -29,14 +29,18 @@ export default async function handler(
     return;
   }
 
-  const tokenSet: TokenSet = await oauth.processRedirectFromAuthEndpoint(
+  const tokenSet = await oauth.processRedirectFromAuthEndpoint(
     redirectUrl,
     state
   );
 
-  const { access_token: accessToken, id_token: idToken } = tokenSet;
-
-  if (accessToken === undefined || idToken === undefined) {
+  const {
+    access_token: accessToken,
+    id_token: idToken,
+    refresh_token: refreshToken,
+  } = tokenSet;
+  console.log(tokenSet);
+  if (!accessToken || !idToken || !refreshToken) {
     res.status(400).send("Unable to continue with authentication.");
     return;
   }
@@ -54,13 +58,13 @@ export default async function handler(
   const tokenSharedFields = {
     accessToken,
     idToken,
-    refreshToken: tokenSet.refresh_token ?? null,
+    refreshToken,
     expiresAt: tokenSet.expires_at ?? null,
     expiresIn: tokenSet.expires_in ?? null,
     scope: tokenSet.scope ?? null,
     sessionState: tokenSet.session_state ?? null,
   };
-  if (user === null) {
+  if (user === null || !user.hasAccount) {
     const oauthTokenInput: Prisma.OauthTokenCreateInput = {
       ...tokenSharedFields,
     };
@@ -79,7 +83,7 @@ export default async function handler(
     user = await models.createUser(userInput);
   } else {
     const oauthToken: models.OauthToken = {
-      id: user.tokenId,
+      id: user.tokenId!,
       ...tokenSharedFields,
     };
     await models.updateToken(oauthToken);

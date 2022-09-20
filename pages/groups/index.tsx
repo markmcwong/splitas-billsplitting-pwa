@@ -18,24 +18,35 @@ import Modal from "@mui/material/Modal";
 import Button from "@mui/material/Button";
 import MoneyLabel from "../../components/MoneyLabel";
 
-type UserWithGroups = models.User & {
-  Groups: models.Group[];
+type GroupSummary = {
+  id: number;
+  name: string;
+  payment: number;
+  split: number;
 };
 
 export default function GroupsPage() {
-  const [userWithGroups, setUserWithGroups] = useState<UserWithGroups | null>(
+  const [userWithGroups, setUserWithGroups] = useState<GroupSummary[] | null>(
     null
   );
   const [searchString, setSearchString] = useState<string>("");
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
+  const [balance, setBalance] = useState<number>(0);
 
   const fetchGroup = () => {
-    fetch(`${url.api}/user/groups`)
+    fetch(`${url.api}/user/groups/summary`)
       .then((res) => res.json())
       .then((g) => {
         setUserWithGroups(g);
+        setBalance(
+          g.reduce(
+            (acc: number, curr: { payment: number; split: number }) =>
+              acc + curr.payment - curr.split,
+            0
+          )
+        );
       });
   };
 
@@ -107,9 +118,12 @@ export default function GroupsPage() {
         </Typography>
         <Typography
           variant="h4"
-          sx={{ color: "primary.main", fontWeight: 500 }}
+          sx={{
+            color: balance < 0 ? "error.main" : "primary.main",
+            fontWeight: 500,
+          }}
         >
-          +$1,243.00
+          ${Math.abs(balance).toFixed(2)}
         </Typography>
         <TextField
           sx={{
@@ -133,9 +147,14 @@ export default function GroupsPage() {
           style={{ color: "black" }}
           // size="small"
         />
-        {userWithGroups?.Groups?.map((group) =>
-          ContactItem(group, MoneyLabel(420.69), "groups")
-        )}
+        {userWithGroups &&
+          userWithGroups?.map((group) =>
+            ContactItem(
+              group,
+              MoneyLabel(group.payment - group.split),
+              "groups"
+            )
+          )}
         <BottomAppBar routeValue={AppRoutesValues.Groups} />
       </Box>
       <Fab

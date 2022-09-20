@@ -16,6 +16,7 @@ import IconButton from "@mui/material/IconButton";
 import Modal from "@mui/material/Modal";
 import ModalContent from "../../components/Modal";
 import MoneyLabel from "../../components/MoneyLabel";
+import "../../utils/class_extension.ts";
 
 const AddFriendItem = (props: { callback: () => void }) => {
   const [searchString, setSearchString] = useState<string>("");
@@ -51,23 +52,35 @@ const testUser: models.User = {
   tokenId: 0,
 };
 
+type friendWithExpense = {
+  amount: number;
+  user: models.User;
+};
+
 export default function FriendsPage() {
-  const [friends, setFriends] = useState<Array<models.User>>([
+  const [friends, setFriends] = useState<Array<friendWithExpense>>([
     // testUser,
     // testUser,
   ]);
 
+  const [balance, setBalance] = useState<number>(0);
   const [searchString, setSearchString] = useState<string>("");
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
   useEffect(() => {
-    fetch(`${url.api}/user/friends`)
+    fetch(`${url.api}/user/friends/summary`)
       .then((res) => res.json())
       .then((friends) => {
         setFriends(friends);
         console.log(friends);
+        setBalance(
+          friends.reduce(
+            (acc: number, cur: { amount: number }) => acc + cur.amount,
+            0
+          )
+        );
       });
   }, []);
 
@@ -101,10 +114,16 @@ export default function FriendsPage() {
         />
       </ModalContent>
       <Typography variant="caption" sx={{ color: grey[400] }}>
-        Friends Bill Balance
+        {`Currently you ${balance < 0 ? "owed" : "lent"}`}
       </Typography>
-      <Typography variant="h4" sx={{ color: "primary.main", fontWeight: 500 }}>
-        +$1,243.00
+      <Typography
+        variant="h4"
+        sx={{
+          color: balance < 0 ? "error.main" : "primary.main",
+          fontWeight: 500,
+        }}
+      >
+        ${Math.abs(balance).toFixed(2)}
       </Typography>
       <TextField
         sx={{
@@ -138,10 +157,12 @@ export default function FriendsPage() {
       {friends
         .filter(
           (x) =>
-            x.name.toLowerCase().includes(searchString.toLowerCase()) ||
-            x.email.includes(searchString.toLowerCase())
+            x.user.name.toLowerCase().includes(searchString.toLowerCase()) ||
+            x.user.email.includes(searchString.toLowerCase())
         )
-        .map((friend) => ContactItem(friend, MoneyLabel(10, true), "friends"))}
+        .map((friend) =>
+          ContactItem(friend.user, MoneyLabel(friend.amount, true), "friends")
+        )}
       <BottomAppBar routeValue={AppRoutesValues.Friends} />
     </Box>
   );

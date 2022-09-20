@@ -13,6 +13,7 @@ type TransactionItemProps = {
   color?: string;
   textColor?: string;
   date?: Date;
+  label?: string;
   onClick?: () => void;
 };
 
@@ -21,11 +22,12 @@ const TransactionItem = ({
   rightContent = MoneyLabel(21.54),
   color = "transparent",
   textColor = "black",
+  label = "Transaction",
   date = new Date("2022 05-05 11:30PM"),
   onClick = () => {},
 }: TransactionItemProps) => {
   return (
-    <ListItem sx={{ ml: 0, pl: 0 }} onClick={onClick}>
+    <ListItem sx={{ ml: 0, pl: 0 }} onClick={onClick} on>
       <ListItemIcon
         sx={{
           flexDirection: "column",
@@ -42,7 +44,7 @@ const TransactionItem = ({
         </Typography>
       </ListItemIcon>
       <ListItemText
-        primary={`Transaction`}
+        primary={label}
         secondary={date.toLocaleString("en-US", {
           hour12: true,
           hour: "numeric",

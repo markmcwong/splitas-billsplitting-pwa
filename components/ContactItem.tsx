@@ -30,9 +30,12 @@ const ContactItem = (
           justifyContent="center"
         >
           <Typography variant="body2" sx={{ color: textColor }}>
-            {friend.email}
+            {friend.email != null && friend.email}
           </Typography>
-          <Typography variant="caption" sx={{ color: grey[500] }}>
+          <Typography
+            variant={friend.email != null ? "caption" : "h6"}
+            sx={{ color: friend.email != null ? grey[500] : textColor }}
+          >
             {friend.name}
           </Typography>
         </Grid>

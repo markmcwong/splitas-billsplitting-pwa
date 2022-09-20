@@ -1,3 +1,4 @@
+import { UserInclude } from "./../node_modules/.prisma/client/index.d";
 import {
   Prisma,
   PrismaClient,
@@ -5,6 +6,7 @@ import {
   type User,
   type Group,
   Expense,
+  Split,
 } from "@prisma/client";
 export { type OauthToken, type User, type Group, type Expense };
 const prisma = new PrismaClient();
@@ -29,7 +31,7 @@ export function getFriendPairExpenses(
 }
 
 export function getUserById(id: number) {
-  return prisma.user.findUniqueOrThrow({
+  return prisma.user.findFirstOrThrow({
     where: {
       id,
     },
@@ -37,7 +39,7 @@ export function getUserById(id: number) {
 }
 
 export function getUserByEmail(email: string) {
-  return prisma.user.findUnique({
+  return prisma.user.findFirst({
     where: {
       email,
     },
@@ -67,6 +69,11 @@ export function getSplitsByExpense(expenseId: number, groupId: number) {
     },
     include: {
       User: true,
+      Expense: {
+        include: {
+          Payer: true,
+        },
+      },
     },
   });
   // .then((value) => value);
@@ -96,6 +103,71 @@ export function getFriendsList(userId: number) {
       },
     })
     .then((value) => value.Friends.map((friendPair) => friendPair.User2));
+}
+
+export function getAllFriendWithExpensesDetails(userId: number) {
+  /*
+        "amount": figure,
+        "user": {
+            "id": 3,
+            "name": "test",
+            "email": "test@test.com",
+            ...
+        }
+  */
+
+  return getFriendsList(userId).then((friends) => {
+    return prisma.friendExpense
+      .groupBy({
+        by: ["payerId", "userOwingMoneyId"],
+        where: {
+          OR: [
+            {
+              payerId: userId,
+            },
+            {
+              userOwingMoneyId: userId,
+            },
+          ],
+        },
+        _sum: {
+          amount: true,
+        },
+      })
+      .then((value) => {
+        const friendExpenses = value.map((friendExpense) => {
+          return {
+            _sum: {
+              amount:
+                friendExpense.payerId == userId
+                  ? -friendExpense._sum!.amount
+                  : friendExpense._sum!.amount,
+            },
+            friend: friends.find(
+              (friend) =>
+                friend.id ===
+                (friendExpense.payerId == userId
+                  ? friendExpense.userOwingMoneyId
+                  : friendExpense.payerId)
+            ),
+          };
+        });
+        let result = [];
+        friendExpenses.reduce((res, value) => {
+          if (!res[value.friend.id]) {
+            res[value.friend.id] = {
+              // id: value.friend.id,
+              amount: 0,
+              user: value.friend,
+            };
+            result.push(res[value!.friend.id]);
+          }
+          res[value!.friend.id].amount += value._sum.amount;
+          return res;
+        }, {});
+        return result;
+      });
+  });
 }
 
 export function getFriendDetails(userId: number, friendId: number) {
@@ -131,15 +203,46 @@ export function getFriendDetails(userId: number, friendId: number) {
   };
 }
 
-export function getGroupsList(userId: number) {
-  return prisma.user.findUnique({
-    where: {
-      id: userId,
-    },
-    include: {
-      Groups: true,
-    },
-  });
+interface GroupListElement {}
+
+export async function getGroupsList(userId: number) {
+  // aim: for each group, get all splits belonging to user
+
+  // aim: for each group, get all payments made by user
+  // const paymentsGroupedByGroup = await prisma.payment.groupBy({
+  //   where: {
+  //     paidFromId: userId,
+  //   },
+  //   by: ["groupId"],
+  //   _sum: {
+  //     amount: true,
+  //   },
+  // });
+
+  // const groups = await prisma.group.findMany({
+  //   where: {
+  //     Users: {
+  //       some: {
+  //         id: userId,
+  //       },
+  //     },
+  //   },
+  //   include: {
+  //     Payment: true,
+  //   },
+  // });
+
+  // Note _UsersGroups.A references Group
+  // _UsersGroups.B references User
+  // A better way to do this is to explicitly create the join table.
+
+  const paymentsAndSplitsGroupedByGroup = (await prisma.$queryRaw`
+  SELECT Group.id, Group.name, SUM(Payment.amount), SUM(Split.amount) FROM Group, _UsersGroups, Payment, Expense, Split 
+  WHERE Group.id = _UsersGroups.A AND _UsersGroups.B = ${userId} AND Payment.groupId = Group.id
+  AND Expense.groupId = Group.id AND Split.expenseId = Expense.id AND Split.userId = ${userId}
+  GROUP BY Group.id`) as any;
+  console.log(paymentsAndSplitsGroupedByGroup);
+  return paymentsAndSplitsGroupedByGroup;
 }
 
 export function getGroupDetails(groupId: number) {
@@ -149,14 +252,57 @@ export function getGroupDetails(groupId: number) {
     },
     include: {
       Expenses: true,
-      Payment: true,
+      Payment: {
+        include: {
+          PaidFrom: true,
+        },
+      },
       Users: true,
     },
   });
 }
 
+export async function getGroupSummaries(userId: number) {
+  // return prisma.$queryRaw`
+  // SELECT "Group"."id" FROM "public"."Group"`;
+  // return prisma.$queryRaw`
+  // SELECT Group."id", Group."name", SUM(Payment."amount"), SUM(Split."amount") FROM "public"."Group", "public"."_UsersGroups", "public"."Payment", "public"."Expense", "public"."Split"
+  // WHERE Group."id" = UsersGroups."A" AND UsersGroups."B" = ${userId} AND Payment."groupId" = Group."id"
+  // AND Expense."groupId" = Group."id" AND Split."expenseId" = Expense."id" AND Split."userId" = ${userId}
+  // GROUP BY Group."id"`;
+  return prisma.$queryRaw`
+  SELECT * FROM (SELECT "Group"."id", "Group"."name", coalesce(SUM("test"."amount"), 0) as Payment
+  -- , coalesce(SUM("Split"."amount"), 0) as Split 
+  FROM "public"."Group" JOIN "public"."_UsersGroups"
+  ON "Group"."id" = "public"."_UsersGroups"."A" AND "public"."_UsersGroups"."B" = ${userId} 
+  -- INNER JOIN (SELECT * FROM "public"."Expense") "expense" ON "expense"."groupId" = "Group"."id"
+  -- JOIN "public"."Split" ON "Split"."expenseId" = "expense"."id" AND "Split"."userId" = ${userId}
+  INNER JOIN (SELECT * FROM "public"."Payment" WHERE "public"."Payment"."paidFromId" = ${userId}) "test" ON "test"."groupId" = "Group"."id" 
+  GROUP BY "Group"."id") "A" JOIN
+  (SELECT "Group"."id", "Group"."name", coalesce(SUM("Split"."amount"), 0) as Split 
+  FROM "public"."Group" JOIN "public"."_UsersGroups"
+  ON "Group"."id" = "public"."_UsersGroups"."A" AND "public"."_UsersGroups"."B" = ${userId} 
+  INNER JOIN (SELECT * FROM "public"."Expense") "expense" ON "expense"."groupId" = "Group"."id"
+  JOIN "public"."Split" ON "Split"."expenseId" = "expense"."id" AND "Split"."userId" = ${userId}
+  -- INNER JOIN (SELECT * FROM "public"."Payment" WHERE "public"."Payment"."paidFromId" = ${userId}) "test" ON "test"."groupId" = "Group"."id" 
+  GROUP BY "Group"."id") "B" ON "A"."id" = "B"."id"`;
+}
+
 export function getUserProfile(userId: number) {
   return getUserById(userId);
+}
+
+export function getTokenByUser(userId: number) {
+  return prisma.user
+    .findUniqueOrThrow({
+      where: {
+        id: userId,
+      },
+      include: {
+        OauthToken: true,
+      },
+    })
+    .then((user) => user?.OauthToken);
 }
 
 export function getActivities(userId: number) {
@@ -179,13 +325,36 @@ export function createUser(user: Prisma.UserCreateInput) {
   });
 }
 
-export function createSplit(user: Prisma.SplitCreateInput) {
-  return prisma.split.create({
-    data: user,
+// export function createSplit(user: Prisma.SplitCreateInput) {
+//   return prisma.split.create({
+//     data: user,
+//   });
+// }
+
+export async function createSplits(splits: Split[]) {
+  const promises = splits.map((split) => {
+    const splitInput: Prisma.SplitCreateInput = {
+      amount: split.amount,
+      Expense: {
+        connect: {
+          id: split.expenseId,
+        },
+      },
+      User: {
+        connect: {
+          id: split.userId,
+        },
+      },
+    };
+    return prisma.split.create({
+      data: splitInput,
+    });
   });
+  const res = await Promise.all(promises);
+  return res;
 }
 
-export function createGroup(
+export async function createGroup(
   group: Prisma.GroupCreateInput,
   initialUserId: number
 ) {
@@ -200,9 +369,20 @@ export function createGroup(
     },
   };
 
-  return prisma.group.create({
+  const createdGroup = await prisma.group.create({
     data: groupWithCreator,
   });
+
+  await prisma.activity.create({
+    data: {
+      userId: initialUserId,
+      type: "createGroup",
+      groupId: createdGroup.id,
+      description: "Created a group!",
+    },
+  });
+
+  return createdGroup;
 }
 
 export function createNewExpense(
@@ -230,25 +410,53 @@ export function createNewExpense(
   });
 }
 
-// export function createExpense(expense: Prisma.ExpenseCreateInput) {
-//   prisma.expense.create({
-//     data: expense,
-//   });
-// }
-
-export function createFriend(userId: number, friendId: number) {
-  return prisma.friendPair.createMany({
-    data: [
-      {
-        user1Id: userId,
-        user2Id: friendId,
-      },
-      {
-        user1Id: friendId,
-        user2Id: userId,
-      },
-    ],
+// creatorUserId should be equal to expense.Payer.id, but I decided to be explicit here.
+export async function createExpense(
+  expense: Prisma.ExpenseCreateInput,
+  creatorUserId: number
+) {
+  const createdExpense = await prisma.expense.create({
+    data: expense,
   });
+
+  await prisma.activity.create({
+    data: {
+      type: "createExpense",
+      userId: creatorUserId,
+      description: "Created an expense!",
+      expenseId: createdExpense.id,
+    },
+  });
+
+  return createdExpense;
+}
+
+export async function createFriend(userId: number, friendId: number) {
+  const count = (
+    await prisma.friendPair.createMany({
+      data: [
+        {
+          user1Id: userId,
+          user2Id: friendId,
+        },
+        {
+          user1Id: friendId,
+          user2Id: userId,
+        },
+      ],
+      skipDuplicates: true,
+    })
+  ).count;
+  if (count > 0) {
+    await prisma.activity.create({
+      data: {
+        userId,
+        type: "createFriend",
+        friendId,
+        description: "Made a friend!",
+      },
+    });
+  }
 }
 
 export function createFriendExpense(
@@ -265,28 +473,132 @@ export function createFriendExpense(
   });
 }
 
-export function updateUser(user: User) {
-  return prisma.user.update({
+export async function updateUser(user: User) {
+  const updatedUser = await prisma.user.update({
     where: {
       id: user.id,
     },
     data: user,
   });
+
+  await prisma.activity.create({
+    data: {
+      userId: user.id,
+      type: "updateUser",
+      description: "Updated your profile!",
+    },
+  });
+
+  return updatedUser;
 }
 
-export function updateGroup(group: Group) {
-  return prisma.group.update({
+// Precondition: The user is a member of the group.
+export async function updateGroup(group: Group, updaterUserId: number) {
+  const updatedGroup = await prisma.group.update({
     where: {
       id: group.id,
     },
     data: group,
   });
+
+  await prisma.activity.create({
+    data: {
+      userId: updaterUserId,
+      type: "updateGroup",
+      description: `Updated the group ${group.name}!`,
+      groupId: updatedGroup.id,
+    },
+  });
+
+  return updatedGroup;
 }
+
+// Precondition: leaver is in group
+export async function leaveGroup(groupId: number, leaverUserId: number) {
+  const updatedGroup = await prisma.group.update({
+    where: {
+      id: groupId,
+    },
+    data: {
+      Users: {
+        disconnect: {
+          id: leaverUserId,
+        },
+      },
+    },
+  });
+
+  await prisma.activity.create({
+    data: {
+      userId: leaverUserId,
+      type: "leaveGroup",
+      description: `Left the group ${updatedGroup.name}`,
+      groupId,
+    },
+  });
+}
+
+export async function updateSplit(splits: Split[]) {
+  const promises = splits.map((split) =>
+    prisma.split.update({
+      where: {
+        id: split.id,
+      },
+      data: {
+        amount: split.amount,
+      },
+    })
+  );
+  const res = await Promise.all(promises);
+  return res;
+}
+
 export function updateToken(oauthToken: OauthToken) {
   return prisma.oauthToken.update({
     where: {
       id: oauthToken.id,
     },
     data: oauthToken,
+  });
+}
+
+export async function deleteFriend(userId: number, friendId: number) {
+  const { count } = await prisma.friendPair.deleteMany({
+    where: {
+      OR: [
+        { user1Id: userId, user2Id: friendId },
+        { user1Id: friendId, user2Id: userId },
+      ],
+    },
+  });
+
+  const friend = await getUserById(friendId);
+
+  if (count > 0) {
+    await prisma.activity.create({
+      data: {
+        userId,
+        type: "deleteFriend",
+        friendId,
+        description: `Said goodbye to ${friend.name}`,
+      },
+    });
+  }
+}
+
+// Precondition: The deleter is a member of the group.
+export async function deleteGroup(groupId: number, deleterUserId: number) {
+  const deletedGroup = await prisma.group.delete({
+    where: {
+      id: groupId,
+    },
+  });
+
+  await prisma.activity.create({
+    data: {
+      type: "deleteGroup",
+      userId: deleterUserId,
+      description: `Deleted the group ${deletedGroup.name}`,
+    },
   });
 }
