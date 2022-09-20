@@ -2,8 +2,6 @@ import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { orange } from "@mui/material/colors";
-import { SessionProvider } from "next-auth/react";
-import Layout from '../components/Layout';
 
 // TODO: Properly set up themes, e.g. dark/light mode etc
 
@@ -36,15 +34,11 @@ const theme = createTheme({
   },
 });
 
-function MyApp({ Component, pageProps, session}) {
+function MyApp({ Component, pageProps }: AppProps) {
   return (
-    <SessionProvider session={session}>
-      <Layout>
-        <ThemeProvider theme={theme}>
-          <Component {...pageProps} />
-        </ThemeProvider>
-      </Layout>
-    </SessionProvider>    
+    <ThemeProvider theme={theme}>
+      <Component {...pageProps} />
+    </ThemeProvider>
   );
 }
 
