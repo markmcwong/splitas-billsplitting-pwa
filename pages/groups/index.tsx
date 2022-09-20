@@ -148,13 +148,17 @@ export default function GroupsPage() {
           // size="small"
         />
         {userWithGroups &&
-          userWithGroups?.map((group) =>
-            ContactItem(
-              group,
-              MoneyLabel(group.payment - group.split),
-              "groups"
+          userWithGroups
+            .filter((x) =>
+              x.name.toLowerCase().includes(searchString.toLowerCase())
             )
-          )}
+            .map((group) =>
+              ContactItem(
+                group,
+                MoneyLabel(group.payment - group.split),
+                "groups"
+              )
+            )}
         <BottomAppBar routeValue={AppRoutesValues.Groups} />
       </Box>
       <Fab

@@ -21,6 +21,7 @@ import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 import CustomModal from "./createExpenseModal";
 import ViewSplitsModal from "./splitExpenseModal";
+import FriendModal from "../../../components/AddFriendModal";
 
 // const testUser: models.User = {
 //   id: 1,
@@ -45,15 +46,19 @@ const GroupDetailsPage = () => {
   const [total, setTotal] = useState<number>(0);
   const [open, setOpen] = useState(false);
   const [openv2, setOpenv2] = useState(false);
+  const [openv3, setOpenv3] = useState(false);
 
   const [currentExpenseId, setCurrentExpenseId] = useState<
     number | undefined
   >();
 
   const handleOpen = () => setOpen(true);
+  const handleOpenv3 = () => setOpenv3(true);
   const handleClose = () => setOpen(false);
   const handleOpenv2 = () => setOpenv2(true);
   const handleClosev2 = () => setOpenv2(false);
+  const handleClosev3 = () => setOpenv3(false);
+
   const getSplitsRequired = () => {
     fetch(`${url.api}/user/groups/${groupId}/split`)
       .then((res) => res.json())
@@ -72,10 +77,23 @@ const GroupDetailsPage = () => {
       });
   };
 
+  const kickFromGroup = (userId: number) => {
+    const postBody = {
+      type: "kick",
+      userId,
+    };
+    fetch(`${url.api}/user/groups/${groupId}`, {
+      method: "POST",
+      body: JSON.stringify(postBody),
+    });
+    getGroupDetails();
+    getSplitsRequired();
+  };
+
   useEffect(() => {
     getGroupDetails();
     getSplitsRequired();
-  }, [open]);
+  }, [open, openv3, openv2]);
 
   useEffect(() => {
     if (splits && groupDetails) {
@@ -98,6 +116,13 @@ const GroupDetailsPage = () => {
           groupId={groupId as string}
         />
       )}
+      <FriendModal
+        open={openv3}
+        handleClose={handleClosev3}
+        callback={getGroupDetails}
+        // currentUsers={groupDetails.Users}
+        isUsedForGroup={true}
+      />
       {currentExpenseId && (
         <ViewSplitsModal
           open={openv2}
@@ -169,7 +194,17 @@ const GroupDetailsPage = () => {
         <CircularProgress />
       ) : (
         <>
-          <AvatarList friends={groupDetails.Users} />
+          <AvatarList
+            callback={() => {
+              handleOpenv3();
+              console.log("clicked");
+            }}
+            friends={groupDetails.Users}
+            kickOut={(user) => {
+              kickFromGroup(user.id);
+              getGroupDetails();
+            }}
+          />
           <Typography
             variant="h6"
             sx={{ color: "primary.main", fontWeight: 500, mt: 3 }}

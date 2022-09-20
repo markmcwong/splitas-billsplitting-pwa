@@ -7,7 +7,7 @@ import * as url from "../../utils/urls";
 import TextField from "@mui/material/TextField";
 import ContactItem from "../../components/ContactItem";
 import InputAdornment from "@mui/material/InputAdornment";
-import { Add, Search } from "@mui/icons-material";
+import { Add, Check, Input, List, Search } from "@mui/icons-material";
 import TopAppBarNew from "../../components/TopBarNew";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
@@ -17,9 +17,10 @@ import Modal from "@mui/material/Modal";
 import ModalContent from "../../components/Modal";
 import MoneyLabel from "../../components/MoneyLabel";
 import "../../utils/class_extension.ts";
+import { ListItem, ListItemIcon } from "@mui/material";
+import FriendModal from "../../components/AddFriendModal";
 
 const AddFriendItem = (props: { callback: () => void }) => {
-  const [searchString, setSearchString] = useState<string>("");
   return (
     <Grid container spacing={2}>
       <Grid
@@ -69,12 +70,11 @@ export default function FriendsPage() {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  useEffect(() => {
+  const friendSummary = () => {
     fetch(`${url.api}/user/friends/summary`)
       .then((res) => res.json())
       .then((friends) => {
         setFriends(friends);
-        console.log(friends);
         setBalance(
           friends.reduce(
             (acc: number, cur: { amount: number }) => acc + cur.amount,
@@ -82,37 +82,21 @@ export default function FriendsPage() {
           )
         );
       });
+  };
+
+  useEffect(() => {
+    friendSummary();
   }, []);
 
   return (
     <Box sx={{ minHeight: "100vh", p: 3 }} bgcolor="background.paper">
-      <ModalContent
+      <FriendModal
         open={open}
         handleClose={handleClose}
-        title="Add new friends"
-      >
-        <TextField
-          sx={{
-            flex: "0 0 100%",
-            borderRadius: 15,
-            mt: 2,
-            input: { color: "background.default" },
-          }}
-          fullWidth
-          value={searchString}
-          onChange={(e) => setSearchString(e.target.value)}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <Search />
-              </InputAdornment>
-            ),
-          }}
-          id="outlined-basic"
-          variant="outlined"
-          style={{ color: "black" }}
-        />
-      </ModalContent>
+        callback={friendSummary}
+        isUsedForGroup={false}
+      />
+
       <Typography variant="caption" sx={{ color: grey[400] }}>
         {`Currently you ${balance < 0 ? "owed" : "lent"}`}
       </Typography>

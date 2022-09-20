@@ -29,10 +29,19 @@ export default async function handler(
       );
       res.status(200).json(updatedGroup);
       break;
+    case "POST":
+      const body = JSON.parse(req.body);
+      if (body.type === "invite") {
+        models.inviteUserToGroup(groupId, body.userId);
+      } else if (body.type === "kick") {
+        models.removeUserFromGroup(groupId, body.userId);
+      }
+      res.status(200).json("success");
+      break;
     case "DELETE":
       await models.deleteGroup(groupId, payload.userId);
       res.status(200).send("Deleted.");
     default:
-      api.allowMethods(req, res, ["GET", "PUT"]);
+      api.allowMethods(req, res, ["GET", "PUT", "POST", "DELETE"]);
   }
 }
