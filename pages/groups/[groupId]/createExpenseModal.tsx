@@ -48,12 +48,13 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
     })
       .then((res) => res.json())
       .then((data) => {
-        const len = Object.keys(userAmounts).length;
-        const putBody: {
+        const len = Object.keys(users).length;
+        const putBodys: {
           amount: number;
           userId: number;
           expenseId: number;
         }[] = Object.keys(userAmounts).map((key) => {
+          console.log(users);
           return {
             userId: parseInt(key),
             amount:
@@ -64,13 +65,13 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
           };
         });
 
-        console.log(putBody);
         fetch(`${url.api}/user/groups/${groupId}/split`, {
           method: "PUT",
-          body: JSON.stringify(putBody),
+          body: JSON.stringify(putBodys),
+        }).then((res) => {
+          handleClose();
+          resetFields();
         });
-        handleClose();
-        resetFields();
       });
   };
 

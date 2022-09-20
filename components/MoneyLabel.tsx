@@ -3,7 +3,7 @@ import grey from "@mui/material/colors/grey";
 import Typography from "@mui/material/Typography";
 
 const MoneyLabel = (dollar: number, labelEnabled: boolean = false) => {
-  const cents = parseInt((dollar % 1).toFixed(2).substring(2));
+  const cents = parseInt((dollar % 1).toFixed(2).split(".")[1]);
   return (
     <Box display="flex" flexDirection="column" alignItems="center">
       <Box
@@ -19,12 +19,15 @@ const MoneyLabel = (dollar: number, labelEnabled: boolean = false) => {
             display: "inline-block",
           }}
         >
-          ${Math.abs(dollar).toFixed(0)}
+          ${Math.abs(dollar).toFixed(2).toString().split(".")[0]}
         </Typography>
         {cents != 0 && (
           <Typography
             variant="body2"
-            sx={{ color: "primary.main", display: "inline-block" }}
+            sx={{
+              color: dollar < 0 ? "error.main" : "primary.main",
+              display: "inline-block",
+            }}
           >
             .{cents}
           </Typography>

@@ -208,8 +208,8 @@ export function getAllFriendWithExpensesDetails(userId: number) {
             _sum: {
               amount:
                 friendExpense.payerId == userId
-                  ? friendExpense._sum!.amount
-                  : -friendExpense._sum!.amount,
+                  ? -friendExpense._sum!.amount
+                  : friendExpense._sum!.amount,
             },
             friend: friends.find(
               (friend) =>
@@ -230,9 +230,12 @@ export function getAllFriendWithExpensesDetails(userId: number) {
           ),
           {}
         );
-        friendExpenses.reduce((res, value) => {
-          result[value!.friend.id].amount += value._sum.amount;
-        });
+        console.log(result);
+        if (friendExpenses.length >= 1) {
+          friendExpenses.reduce((res, value) => {
+            result[value!.friend.id].amount += value._sum.amount;
+          });
+        }
         return Object.keys(result).map((x) => {
           return { amount: result[x].amount, user: result[x].user };
         });
@@ -347,13 +350,13 @@ export async function getGroupSummaries(userId: number) {
   ON "Group"."id" = "public"."_UsersGroups"."A" AND "public"."_UsersGroups"."B" = ${userId} 
   -- INNER JOIN (SELECT * FROM "public"."Expense") "expense" ON "expense"."groupId" = "Group"."id"
   -- JOIN "public"."Split" ON "Split"."expenseId" = "expense"."id" AND "Split"."userId" = ${userId}
-  INNER JOIN (SELECT * FROM "public"."Payment" WHERE "public"."Payment"."paidFromId" = ${userId}) "test" ON "test"."groupId" = "Group"."id" 
+  LEFT JOIN (SELECT * FROM "public"."Payment" WHERE "public"."Payment"."paidFromId" = ${userId}) "test" ON "test"."groupId" = "Group"."id" 
   GROUP BY "Group"."id") "A" JOIN
   (SELECT "Group"."id", "Group"."name", coalesce(SUM("Split"."amount"), 0) as Split 
   FROM "public"."Group" JOIN "public"."_UsersGroups"
   ON "Group"."id" = "public"."_UsersGroups"."A" AND "public"."_UsersGroups"."B" = ${userId} 
-  INNER JOIN (SELECT * FROM "public"."Expense") "expense" ON "expense"."groupId" = "Group"."id"
-  JOIN "public"."Split" ON "Split"."expenseId" = "expense"."id" AND "Split"."userId" = ${userId}
+  LEFT JOIN (SELECT * FROM "public"."Expense") "expense" ON "expense"."groupId" = "Group"."id"
+  LEFT JOIN "public"."Split" ON "Split"."expenseId" = "expense"."id" AND "Split"."userId" = ${userId}
   -- INNER JOIN (SELECT * FROM "public"."Payment" WHERE "public"."Payment"."paidFromId" = ${userId}) "test" ON "test"."groupId" = "Group"."id" 
   GROUP BY "Group"."id") "B" ON "A"."id" = "B"."id"`;
 }
