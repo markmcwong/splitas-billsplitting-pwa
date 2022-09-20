@@ -7,6 +7,8 @@ import { AppRoutesValues } from "../../utils/urls";
 const AppPage: NextPage = () => {
   return (
     <Box bgcolor="primary.main">
+      <TopAppBar />
+      <BottomAppBar routeValue={AppRoutesValues.Activity} />
     </Box>
   );
 };
