@@ -46,6 +46,75 @@ export function getUserByEmail(email: string) {
   });
 }
 
+export function getUserByEmailFuzzySearch(input: string, userId: number) {
+  return prisma.user.findMany({
+    where: {
+      AND: [
+        {
+          OR: [
+            {
+              email: {
+                contains: input,
+              },
+            },
+            {
+              name: {
+                contains: input,
+              },
+            },
+          ],
+        },
+        {
+          NOT: {
+            Friends: {
+              some: {
+                user2Id: userId,
+              },
+            },
+          },
+        },
+      ],
+    },
+  });
+}
+
+export function findUsersAddForGroup(
+  input: string,
+  userId: number,
+  groupId: number
+) {
+  return prisma.user.findMany({
+    where: {
+      AND: [
+        {
+          OR: [
+            {
+              email: {
+                contains: input,
+              },
+            },
+            {
+              name: {
+                contains: input,
+              },
+            },
+          ],
+        },
+        {
+          NOT: {
+            // id: userId,
+            Groups: {
+              some: {
+                id: groupId,
+              },
+            },
+          },
+        },
+      ],
+    },
+  });
+}
+
 export function getSplitsByGroup(groupId: number, userId: number) {
   return prisma.split
     .findMany({
@@ -76,7 +145,6 @@ export function getSplitsByExpense(expenseId: number, groupId: number) {
       },
     },
   });
-  // .then((value) => value);
 }
 
 export function getPaymentsFromGroup(groupId: number, userId: number) {
@@ -140,8 +208,8 @@ export function getAllFriendWithExpensesDetails(userId: number) {
             _sum: {
               amount:
                 friendExpense.payerId == userId
-                  ? -friendExpense._sum!.amount
-                  : friendExpense._sum!.amount,
+                  ? friendExpense._sum!.amount
+                  : -friendExpense._sum!.amount,
             },
             friend: friends.find(
               (friend) =>
@@ -152,20 +220,22 @@ export function getAllFriendWithExpensesDetails(userId: number) {
             ),
           };
         });
-        let result = [];
-        friendExpenses.reduce((res, value) => {
-          if (!res[value.friend.id]) {
-            res[value.friend.id] = {
-              // id: value.friend.id,
+        let result = friends.reduce(
+          (acc, curr) => (
+            (acc[curr.id] = {
               amount: 0,
-              user: value.friend,
-            };
-            result.push(res[value!.friend.id]);
-          }
-          res[value!.friend.id].amount += value._sum.amount;
-          return res;
-        }, {});
-        return result;
+              user: curr,
+            }),
+            acc
+          ),
+          {}
+        );
+        friendExpenses.reduce((res, value) => {
+          result[value!.friend.id].amount += value._sum.amount;
+        });
+        return Object.keys(result).map((x) => {
+          return { amount: result[x].amount, user: result[x].user };
+        });
       });
   });
 }
@@ -492,6 +562,39 @@ export async function updateUser(user: User) {
   return updatedUser;
 }
 
+export async function inviteUserToGroup(groupId: number, newUserId: number) {
+  const updatedGroup = await prisma.group.update({
+    where: {
+      id: groupId,
+    },
+    data: {
+      Users: {
+        connect: {
+          id: newUserId,
+        },
+      },
+    },
+  });
+
+  return updatedGroup;
+}
+
+export async function removeUserFromGroup(groupId: number, userId: number) {
+  const updatedGroup = await prisma.group.update({
+    where: {
+      id: groupId,
+    },
+    data: {
+      Users: {
+        disconnect: {
+          id: userId,
+        },
+      },
+    },
+  });
+
+  return updatedGroup;
+}
 // Precondition: The user is a member of the group.
 export async function updateGroup(group: Group, updaterUserId: number) {
   const updatedGroup = await prisma.group.update({
