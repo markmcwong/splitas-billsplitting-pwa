@@ -33,7 +33,7 @@ import ViewSplitsModal from "./splitExpenseModal";
 
 type GroupDetails = models.Group & {
   Expenses: models.Expense[];
-  Payment: Payment[];
+  Payment: (Payment & { PaidFrom: models.User })[];
   Users: models.User[];
 };
 
@@ -180,6 +180,7 @@ const GroupDetailsPage = () => {
             {groupDetails.Expenses.map((_transaction) => {
               return (
                 <TransactionItem
+                  label={_transaction.description}
                   date={new Date(_transaction.timestamp)}
                   rightContent={MoneyLabel(_transaction.amount)}
                   onClick={() => {
@@ -203,10 +204,6 @@ const GroupDetailsPage = () => {
                   date={new Date(_transaction.timestamp)}
                   rightContent={MoneyLabel(_transaction.amount)}
                   label={_transaction.PaidFrom.name}
-                  // onClick={() => {
-                  //   setCurrentExpenseId(_transaction.id);
-                  //   handleOpenv2();
-                  // }}
                 />
               );
             })}

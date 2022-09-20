@@ -29,11 +29,15 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
   const [amount, setAmount] = useState<number>(0);
   const [description, setDescription] = useState<string>("");
   const [splitType, setSplitType] = useState<string>("split");
-  const [userAmounts, setUserAmounts] = useState<object>(
+  const [userAmounts, setUserAmounts] = useState<Object>(
     users.reduce((map, obj) => ((map[obj.id] = 0), map), {})
   );
 
-  const createExpense = (amount: number, description: string) => {
+  const createExpense = (
+    amount: number,
+    description: string
+    // splitInput: { amount: number; userId: number }[]
+  ) => {
     const postBody = {
       amount,
       description,
@@ -41,9 +45,33 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
     fetch(`${url.api}/user/groups/${groupId}/expense`, {
       method: "PUT",
       body: JSON.stringify(postBody),
-    });
-    handleClose();
-    resetFields();
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const len = Object.keys(userAmounts).length;
+        const putBody: {
+          amount: number;
+          userId: number;
+          expenseId: number;
+        }[] = Object.keys(userAmounts).map((key) => {
+          return {
+            userId: parseInt(key),
+            amount:
+              (userAmounts[key] as number) == 0
+                ? amount / len
+                : parseFloat(userAmounts[key]),
+            expenseId: data.id,
+          };
+        });
+
+        console.log(putBody);
+        fetch(`${url.api}/user/groups/${groupId}/split`, {
+          method: "PUT",
+          body: JSON.stringify(putBody),
+        });
+        handleClose();
+        resetFields();
+      });
   };
 
   const resetFields = () => {

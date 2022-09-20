@@ -13,6 +13,7 @@ type TransactionItemProps = {
   color?: string;
   textColor?: string;
   date?: Date;
+  label?: string;
   onClick?: () => void;
 };
 
@@ -26,7 +27,7 @@ const TransactionItem = ({
   onClick = () => {},
 }: TransactionItemProps) => {
   return (
-    <ListItem sx={{ ml: 0, pl: 0 }} onClick={onClick}>
+    <ListItem sx={{ ml: 0, pl: 0 }} onClick={onClick} on>
       <ListItemIcon
         sx={{
           flexDirection: "column",
