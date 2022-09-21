@@ -128,7 +128,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       console.log("Stored install prompt");
     });
   }, []);
-
+  
   return (
     <>
       <Script
