@@ -128,14 +128,13 @@ const FriendDetailsPage = () => {
       </Typography>
       <List>
         {transactions &&
-          transactions.map((_transaction) => {
-            return (
+          transactions.map((_transaction) => (
               <TransactionItem
                 date={new Date(_transaction.timestamp)}
                 rightContent={MoneyLabel(_transaction.amount, true)}
+                key={_transaction.id}
               />
-            );
-          })}
+          ))}
       </List>
       <Fab
         color="primary"
