@@ -48,7 +48,7 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
     })
       .then((res) => res.json())
       .then((data) => {
-        const len = Object.keys(userAmounts).length;
+        const len = Object.keys(userAmounts).length; 
         const putBody: {
           amount: number;
           userId: number;
@@ -173,7 +173,7 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
         {splitType == "exact" &&
           users &&
           users.map((user) => (
-            <ListItem sx={{ ml: 0, pl: 0 }}>
+            <ListItem sx={{ ml: 0, pl: 0 }} key={user.id}>
               <ListItemIcon
                 sx={{
                   mr: 2,

@@ -112,7 +112,7 @@ const FriendModal = ({
           style={{ color: "black" }}
         />
         {friendSearchResult!.map((user, i) => (
-          <ListItem sx={{ ml: 0, pl: 0, display: "flex" }}>
+          <ListItem key={i} sx={{ ml: 0, pl: 0, display: "flex" }}>
             <ListItemIcon
               sx={{
                 display: "flex",
