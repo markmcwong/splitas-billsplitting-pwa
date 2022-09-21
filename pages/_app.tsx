@@ -1,17 +1,16 @@
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
-import { orange } from "@mui/material/colors";
+import Script from "next/script";
 import {
   createContext,
   useState,
-  useContext,
   useEffect,
   Dispatch,
   SetStateAction,
 } from "react";
 
-// TODO: Properly set up themes, e.g. dark/light mode etc
+const TRACKING_ID = "UA-242063911-1"; // Google Analytics Tracking ID
 
 const theme = createTheme({
   typography: {
@@ -131,11 +130,26 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, []);
 
   return (
-    <ThemeProvider theme={theme}>
-      <PwaContext.Provider value={{ pwaData, setPwaData, handleAppInstall }}>
-        <Component {...pageProps} />
-      </PwaContext.Provider>
-    </ThemeProvider>
+    <>
+      <Script
+        src={`https://www.googletagmanager.com/gtag/js?id=${TRACKING_ID}`}
+        strategy="afterInteractive"
+      />
+      <Script id="google-analytics" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){window.dataLayer.push(arguments);}
+          gtag('js', new Date());
+
+          gtag('config', '${TRACKING_ID}');
+        `}
+      </Script>
+      <ThemeProvider theme={theme}>
+        <PwaContext.Provider value={{ pwaData, setPwaData, handleAppInstall }}>
+          <Component {...pageProps} />
+        </PwaContext.Provider>
+      </ThemeProvider>
+    </>
   );
 }
 
