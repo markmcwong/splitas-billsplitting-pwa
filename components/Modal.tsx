@@ -13,6 +13,7 @@ type Props = {
   title: string;
   subtitle?: string;
   children?: JSX.Element;
+  rightContent?: JSX.Element | null;
 };
 
 const ModalContent = ({
@@ -21,6 +22,7 @@ const ModalContent = ({
   title,
   subtitle,
   children,
+  rightContent,
 }: Props) => {
   return (
     <Modal
@@ -31,7 +33,7 @@ const ModalContent = ({
       aria-describedby="modal-modal-description"
     >
       <Box className="modal-centered">
-        <Grid sx={{ flex: 1 }} flexDirection="row" display="flex">
+        <Grid sx={{ flex: 1, mb: 1 }} flexDirection="row" display="flex">
           <Grid item xs>
             <Typography variant="h6" component="h2" color="background.default">
               {title}
@@ -42,7 +44,8 @@ const ModalContent = ({
               </Typography>
             )}
           </Grid>
-          <Grid item xs={2}>
+          <Grid item xs={5}>
+            {rightContent}
             <IconButton onClick={handleClose}>
               <Close />
             </IconButton>

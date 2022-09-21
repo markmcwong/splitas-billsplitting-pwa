@@ -13,14 +13,15 @@ import {
   Divider,
   List,
   IconButton,
+  ModalClasses,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import ModalContent from "../../../components/Modal";
-import * as models from "../../../utils/models";
 import "../../../utils/class_extension.ts";
 import * as url from "../../../utils/urls";
+import * as models from "../../../utils/models";
 import grey from "@mui/material/colors/grey";
-import Box from "@mui/system/Box";
+import { check_cookie_by_name } from "../../../utils/class_extension";
 
 type Props = {
   open: boolean;
@@ -29,11 +30,22 @@ type Props = {
   groupId: string;
 };
 
+type SplitType = {
+  User: models.User;
+  Expense: models.Expense;
+  id: number;
+  expenseId: number;
+  userId: number;
+  amount: number;
+};
+
 const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
-  const [splits, setSplits] = useState<any[]>([]);
+  const [splits, setSplits] = useState<SplitType[]>([]);
   const [originalSplit, setOriginalSplit] = useState<any>(null);
   const [originalSum, setOriginalSum] = useState<number>(0);
   const [isEditing, setIsEditing] = useState<boolean[]>([]);
+  const currentUserId = check_cookie_by_name("userId");
+
   const getSplitsByExpense = () => {
     if (expenseId !== null && groupId !== null) {
       fetch(`${url.api}/user/groups/${groupId}/expense/${expenseId}`)
@@ -45,6 +57,33 @@ const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
           setIsEditing(splits.map(() => false));
         });
     }
+  };
+
+  const createPayment = () => {
+    const postBody = splits
+      .filter((x) => x.User.id === parseInt(currentUserId!))
+      .map((split) => {
+        return { paidToId: split.id, amount: split.amount };
+      })[0];
+    fetch(`${url.api}/user/groups/${groupId}/expense/${expenseId}`, {
+      method: "POST",
+      body: JSON.stringify(postBody),
+    })
+      .then((res) => res.json())
+      .then(() => handleClose());
+  };
+
+  const PayButton = () => {
+    return (
+      <Button
+        variant="contained"
+        onClick={() => {
+          createPayment();
+        }}
+      >
+        <Typography color="white">Pay now</Typography>
+      </Button>
+    );
   };
 
   const updateSplits = () => {
@@ -72,6 +111,11 @@ const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
       open={open}
       handleClose={handleClose}
       title={"Expense Details"}
+      rightContent={
+        splits.some((split) => split.User.id === parseInt(currentUserId!))
+          ? PayButton()
+          : null
+      }
     >
       {splits.length > 0 && (
         <>
@@ -191,16 +235,21 @@ const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
           </ListItem>
         ))}
       </List>
-      {originalSplit !== splits &&
-        splits.reduce((a, b) => a + b.amount, 0) !== originalSum && (
+      {splits.length > 0 &&
+        originalSplit !== splits &&
+        splits.reduce((a, b) => a + b.amount, 0) > splits[0].Expense.amount && (
           <Typography color="error.main" sx={{ mb: 2 }}>
-            Amounts do not sum up to ${originalSum}
+            Total amount is greater than original expense: $
+            {splits[0].Expense.amount}
           </Typography>
         )}
-      {originalSplit !== splits && (
+      {splits.length > 0 && originalSplit !== splits && (
         <Button
           variant="outlined"
-          disabled={isEditing.some((x) => x)}
+          disabled={
+            isEditing.some((x) => x) ||
+            splits.reduce((a, b) => a + b.amount, 0) > splits[0].Expense.amount
+          }
           onClick={() => updateSplits()}
         >
           Submit

@@ -230,20 +230,24 @@ const GroupDetailsPage = () => {
             Expenses
           </Typography>
           <List>
-            {groupDetails.Expenses.map((_transaction) => {
-              return (
-                <TransactionItem
-                  key={_transaction.id}
-                  label={_transaction.description}
-                  date={new Date(_transaction.timestamp)}
-                  rightContent={MoneyLabel(_transaction.amount)}
-                  onClick={() => {
-                    setCurrentExpenseId(_transaction.id);
-                    handleOpenv2();
-                  }}
-                />
-              );
-            })}
+            {splits &&
+              groupDetails &&
+              groupDetails.Expenses.map((expense) => {
+                return (
+                  <TransactionItem
+                    key={expense.id}
+                    label={expense.description}
+                    date={new Date(expense.timestamp)}
+                    rightContent={MoneyLabel(
+                      splits.find((x) => x.expenseId == expense.id)?.amount || 0
+                    )}
+                    onClick={() => {
+                      setCurrentExpenseId(expense.id);
+                      handleOpenv2();
+                    }}
+                  />
+                );
+              })}
           </List>
           <Typography
             variant="h6"

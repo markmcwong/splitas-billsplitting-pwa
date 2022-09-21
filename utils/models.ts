@@ -206,8 +206,8 @@ export function getAllFriendWithExpensesDetails(userId: number) {
             _sum: {
               amount:
                 friendExpense.payerId == userId
-                  ? -friendExpense._sum!.amount
-                  : friendExpense._sum!.amount,
+                  ? friendExpense._sum!.amount
+                  : -friendExpense._sum!.amount,
             },
             friend: friends.find(
               (friend) =>
@@ -228,8 +228,9 @@ export function getAllFriendWithExpensesDetails(userId: number) {
           ),
           {}
         );
-        if (friendExpenses.length >= 1) {
-          friendExpenses.reduce((res, value) => {
+        // console.log(friendExpenses, friendExpenses.length > 0);
+        if (friendExpenses.length > 0) {
+          friendExpenses.forEach((value) => {
             result[value!.friend.id].amount += value._sum.amount;
           });
         }
@@ -386,6 +387,35 @@ export function getActivities(userId: number) {
 export function createToken(token: Prisma.OauthTokenCreateInput) {
   return prisma.oauthToken.create({
     data: token,
+  });
+}
+
+export function createPayments(
+  payAmount: number,
+  payerId: number,
+  payToId: number,
+  groupId: number
+) {
+  return prisma.payment.create({
+    data: {
+      amount: payAmount,
+      timestamp: new Date(),
+      Group: {
+        connect: {
+          id: groupId,
+        },
+      },
+      PaidFrom: {
+        connect: {
+          id: payerId,
+        },
+      },
+      PaidTo: {
+        connect: {
+          id: payToId,
+        },
+      },
+    },
   });
 }
 
