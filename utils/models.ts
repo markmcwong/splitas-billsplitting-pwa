@@ -116,16 +116,14 @@ export function findUsersAddForGroup(
 }
 
 export function getSplitsByGroup(groupId: number, userId: number) {
-  return prisma.split
-    .findMany({
-      where: {
-        Expense: {
-          groupId: groupId,
-        },
-        userId: userId,
+  return prisma.split.findMany({
+    where: {
+      Expense: {
+        groupId: groupId,
       },
-    })
-    .then((value) => value);
+      userId: userId,
+    },
+  });
 }
 
 export function getSplitsByExpense(expenseId: number, groupId: number) {
@@ -230,7 +228,6 @@ export function getAllFriendWithExpensesDetails(userId: number) {
           ),
           {}
         );
-        console.log(result);
         if (friendExpenses.length >= 1) {
           friendExpenses.reduce((res, value) => {
             result[value!.friend.id].amount += value._sum.amount;
@@ -404,25 +401,27 @@ export function createUser(user: Prisma.UserCreateInput) {
 //   });
 // }
 
-export async function createSplits(splits: Split[]) {
-  const promises = splits.map((split) => {
-    const splitInput: Prisma.SplitCreateInput = {
-      amount: split.amount,
-      Expense: {
-        connect: {
-          id: split.expenseId,
+export async function createSplits(splits: Split[], currentUserId: number) {
+  const promises = splits
+    .filter((x) => x.id != currentUserId)
+    .map((split) => {
+      const splitInput: Prisma.SplitCreateInput = {
+        amount: split.amount,
+        Expense: {
+          connect: {
+            id: split.expenseId,
+          },
         },
-      },
-      User: {
-        connect: {
-          id: split.userId,
+        User: {
+          connect: {
+            id: split.userId,
+          },
         },
-      },
-    };
-    return prisma.split.create({
-      data: splitInput,
+      };
+      return prisma.split.create({
+        data: splitInput,
+      });
     });
-  });
   const res = await Promise.all(promises);
   return res;
 }

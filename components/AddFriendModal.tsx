@@ -122,8 +122,6 @@ const FriendModal = ({
             userId: i > -1 ? currentUsers![i].id : null,
           };
         });
-        console.log(test);
-        console.log(currentUsers);
 
         setFriendSearchResult(
           data.map((x: { emailAddress: string; name: string }) => {
@@ -160,10 +158,15 @@ const FriendModal = ({
   return (
     <ModalContent open={open} handleClose={handleClose} title="Add new friends">
       <>
-        <Stack direction="row" sx={{ mt: 2 }} spacing={2} alignItems="center">
+        <Stack
+          direction="row"
+          sx={{ mt: 2, maxWidth: "100%" }}
+          spacing={2}
+          alignItems="center"
+        >
           <TextField
             sx={{
-              flex: "0 0 60%",
+              flex: 1,
               borderRadius: 15,
               input: { color: "background.default" },
             }}
@@ -186,7 +189,7 @@ const FriendModal = ({
             direction="row"
             alignItems="center"
             justifyContent="center"
-            sx={{ px: 1, width: "100%" }}
+            sx={{ px: 1 }}
           >
             <Typography color="primary.main" variant="body2">
               Email
