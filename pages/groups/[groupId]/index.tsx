@@ -22,6 +22,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CustomModal from "./createExpenseModal";
 import ViewSplitsModal from "./splitExpenseModal";
 import FriendModal from "../../../components/AddFriendModal";
+import { Logout } from "@mui/icons-material";
 
 // const testUser: models.User = {
 //   id: 1,
@@ -42,7 +43,7 @@ const GroupDetailsPage = () => {
   const router = useRouter();
   const { groupId } = router.query;
   const [groupDetails, setGroupDetails] = useState<GroupDetails | null>(null);
-  const [splits, setSplits] = useState<any[] | null>(null);
+  const [splits, setSplits] = useState<any[] | null>([]);
   const [total, setTotal] = useState<number>(0);
   const [open, setOpen] = useState(false);
   const [openv2, setOpenv2] = useState(false);
@@ -77,7 +78,7 @@ const GroupDetailsPage = () => {
       });
   };
 
-  const kickFromGroup = (userId: number) => {
+  const kickFromGroup = (userId?: number) => {
     const postBody = {
       type: "kick",
       userId,
@@ -107,7 +108,10 @@ const GroupDetailsPage = () => {
   }, [splits, groupDetails]);
 
   return (
-    <Box sx={{ minHeight: "100vh", pl: 3, py: 3 }} bgcolor="background.paper">
+    <Box
+      sx={{ minHeight: "100vh", pl: 3, py: 3, minWidth: "100%" }}
+      bgcolor="background.paper"
+    >
       {groupDetails && (
         <CustomModal
           open={open}
@@ -131,9 +135,24 @@ const GroupDetailsPage = () => {
           groupId={groupId as string}
         />
       )}
-      <Box sx={{ ml: -1.5, width: "100%", justifyContent: "flex-start" }}>
+      <Box
+        sx={{
+          ml: -1.5,
+          width: "100%",
+          justifyContent: "space-between",
+        }}
+        display="flex"
+      >
         <IconButton onClick={() => router.back()}>
           <ArrowBack fontSize="large" />
+        </IconButton>
+
+        <IconButton
+          onClick={() => {
+            kickFromGroup();
+          }}
+        >
+          <Logout fontSize="large" />
         </IconButton>
       </Box>
       <Grid display="flex" flexDirection="row" container sx={{ mb: 4 }}>
@@ -197,7 +216,6 @@ const GroupDetailsPage = () => {
           <AvatarList
             callback={() => {
               handleOpenv3();
-              console.log("clicked");
             }}
             friends={groupDetails.Users}
             kickOut={(user) => {

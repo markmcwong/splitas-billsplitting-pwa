@@ -91,6 +91,7 @@ export default async function handler(
 
   const session = jwt.getToken(user);
   api.setSessionCookie(req, res, session);
+  api.setUserIdCookie(req, res, user.id);
 
   res.status(200).json("success, your email is " + email);
 }
