@@ -74,6 +74,7 @@ export default function FriendsPage() {
     fetch(`${url.api}/user/friends/summary`)
       .then((res) => res.json())
       .then((friends) => {
+        console.log(friends);
         setFriends(friends);
         setBalance(
           friends.reduce(
