@@ -22,6 +22,7 @@ import AddIcon from "@mui/icons-material/Add";
 import CustomModal from "./createExpenseModal";
 import ViewSplitsModal from "./splitExpenseModal";
 import FriendModal from "../../../components/AddFriendModal";
+import { Logout } from "@mui/icons-material";
 
 // const testUser: models.User = {
 //   id: 1,
@@ -131,9 +132,20 @@ const GroupDetailsPage = () => {
           groupId={groupId as string}
         />
       )}
-      <Box sx={{ ml: -1.5, width: "100%", justifyContent: "flex-start" }}>
+      <Box
+        sx={{
+          ml: -1.5,
+          width: "100%",
+          justifyContent: "space-between",
+        }}
+        display="flex"
+      >
         <IconButton onClick={() => router.back()}>
           <ArrowBack fontSize="large" />
+        </IconButton>
+        {/* kickFromGroup(user.id); */}
+        <IconButton onClick={() => {}}>
+          <Logout fontSize="large" />
         </IconButton>
       </Box>
       <Grid display="flex" flexDirection="row" container sx={{ mb: 4 }}>
@@ -215,6 +227,7 @@ const GroupDetailsPage = () => {
             {groupDetails.Expenses.map((_transaction) => {
               return (
                 <TransactionItem
+                  key={_transaction.id}
                   label={_transaction.description}
                   date={new Date(_transaction.timestamp)}
                   rightContent={MoneyLabel(_transaction.amount)}
@@ -236,6 +249,7 @@ const GroupDetailsPage = () => {
             {groupDetails.Payment.map((_transaction) => {
               return (
                 <TransactionItem
+                  key={_transaction.id}
                   date={new Date(_transaction.timestamp)}
                   rightContent={MoneyLabel(_transaction.amount)}
                   label={_transaction.PaidFrom.name}

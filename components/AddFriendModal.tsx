@@ -23,7 +23,7 @@ type Props = {
   open: boolean;
   callback: () => void;
   isUsedForGroup: boolean;
-  currentUsers?: string[];
+  currentUsers?: models.User[];
 };
 
 const FriendModal = ({
@@ -113,17 +113,36 @@ const FriendModal = ({
     fetch(`${url.api}/user/contacts`, {})
       .then((res) => res.json())
       .then((data) => {
-        setFriendSearchResult(
-          data.map((x) => ({
+        const test = data.map((x: { emailAddress: string; name: string }) => {
+          const i = currentUsers!.findIndex((e) => e.email == x.emailAddress);
+          return {
             ...x,
             email: x.emailAddress,
-            isFriendAlready: currentUsers?.includes(x.emailAddress) ?? false,
-            userId: null,
-          }))
+            isFriendAlready: i > -1,
+            userId: i > -1 ? currentUsers![i].id : null,
+          };
+        });
+        console.log(test);
+        console.log(currentUsers);
+
+        setFriendSearchResult(
+          data.map((x: { emailAddress: string; name: string }) => {
+            const i = currentUsers!.findIndex((e) => e.email == x.emailAddress);
+            if (i > -1) console.log(x);
+            return {
+              ...x,
+              email: x.emailAddress,
+              isFriendAlready: i > -1,
+              id: i > -1 ? currentUsers![i].id : null,
+            };
+          })
         );
-        console.log(data);
       });
   };
+
+  useEffect(() => {
+    console.log(friendSearchResult);
+  }, [friendSearchResult]);
 
   const addToGroup = (userId: number, isInviting: boolean) => {
     const postBody = {
@@ -163,7 +182,28 @@ const FriendModal = ({
             size="small"
             style={{ color: "black" }}
           />
-          <Button
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="center"
+            sx={{ px: 1, width: "100%" }}
+          >
+            <Typography color="primary.main" variant="body2">
+              Email
+            </Typography>
+            <Switch
+              value={searchByEmail}
+              onChange={() => {
+                setFriendSearchResult([]);
+                setSearchByEmail(!searchByEmail);
+              }}
+              sx={{ ml: 0 }}
+            />
+            <Typography color="primary.main" variant="body2">
+              Contacts
+            </Typography>
+          </Stack>
+          {/* <Button
             sx={{ flex: "0 0 35%" }}
             variant="contained"
             onClick={() => {
@@ -172,9 +212,9 @@ const FriendModal = ({
             }}
           >
             <Typography color="white" variant="body2">
-              {searchByEmail ? "By Contacts" : "By Email"}
+              {"By Email"}
             </Typography>
-          </Button>
+          </Button> */}
         </Stack>
         <Box overflow="scroll">
           {friendSearchResult!

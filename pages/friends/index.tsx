@@ -95,7 +95,7 @@ export default function FriendsPage() {
         handleClose={handleClose}
         callback={friendSummary}
         isUsedForGroup={false}
-        currentUsers={friends.map((x) => x.user.email)}
+        currentUsers={friends.map((x) => x.user)}
       />
 
       <Typography variant="caption" sx={{ color: grey[400] }}>

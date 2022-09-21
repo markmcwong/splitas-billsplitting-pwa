@@ -2,6 +2,14 @@ import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import { ThemeProvider, createTheme } from "@mui/material/styles";
 import { orange } from "@mui/material/colors";
+import {
+  createContext,
+  useState,
+  useContext,
+  useEffect,
+  Dispatch,
+  SetStateAction,
+} from "react";
 
 // TODO: Properly set up themes, e.g. dark/light mode etc
 
@@ -34,10 +42,99 @@ const theme = createTheme({
   },
 });
 
+type PwaData = {
+  deferredInstallPrompt?: BeforeInstallPromptEvent;
+};
+
+// let pwaData: PwaData = {
+//   deferredInstallPrompt: undefined,
+// };
+
+// function setPwaData(newPwaData: PwaData) {
+//   pwaData = newPwaData;
+// }
+
+function handleAppInstall(
+  pwaData: PwaData,
+  setPwaData: Dispatch<SetStateAction<PwaData>>
+) {
+  const deferredPrompt = pwaData.deferredInstallPrompt;
+  if (!deferredPrompt) {
+    console.error("Install prompt is not saved");
+    return;
+  }
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then((choiceResult) => {
+    if (choiceResult.outcome === "accepted") {
+      console.log("User accepted the prompt");
+    }
+
+    setPwaData({
+      ...pwaData,
+      deferredInstallPrompt: undefined,
+    });
+  });
+}
+
+type PwaContextType = {
+  pwaData: PwaData;
+  setPwaData: Dispatch<SetStateAction<PwaData>>;
+  handleAppInstall: typeof handleAppInstall;
+};
+
+export const PwaContext = createContext<PwaContextType | null>(null);
+
+// https://stackoverflow.com/questions/51503754/typescript-type-beforeinstallpromptevent
+/**
+ * The BeforeInstallPromptEvent is fired at the Window.onbeforeinstallprompt handler
+ * before a user is prompted to "install" a web site to a home screen on mobile.
+ *
+ */
+interface BeforeInstallPromptEvent extends Event {
+  /**
+   * Returns an array of DOMString items containing the platforms on which the event was dispatched.
+   * This is provided for user agents that want to present a choice of versions to the user such as,
+   * for example, "web" or "play" which would allow the user to chose between a web version or
+   * an Android version.
+   */
+  readonly platforms: Array<string>;
+
+  /**
+   * Returns a Promise that resolves to a DOMString containing either "accepted" or "dismissed".
+   */
+  readonly userChoice: Promise<{
+    outcome: "accepted" | "dismissed";
+    platform: string;
+  }>;
+
+  /**
+   * Allows a developer to show the install prompt at a time of their own choosing.
+   * This method returns a Promise.
+   */
+  prompt(): Promise<void>;
+}
+
 function MyApp({ Component, pageProps }: AppProps) {
+  const [pwaData, setPwaData] = useState<PwaData>({
+    deferredInstallPrompt: undefined,
+  });
+
+  useEffect(() => {
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      setPwaData({
+        ...pwaData,
+        deferredInstallPrompt: e as BeforeInstallPromptEvent,
+      });
+      console.log("Stored install prompt");
+    });
+  }, []);
+
   return (
     <ThemeProvider theme={theme}>
-      <Component {...pageProps} />
+      <PwaContext.Provider value={{ pwaData, setPwaData, handleAppInstall }}>
+        <Component {...pageProps} />
+      </PwaContext.Provider>
     </ThemeProvider>
   );
 }

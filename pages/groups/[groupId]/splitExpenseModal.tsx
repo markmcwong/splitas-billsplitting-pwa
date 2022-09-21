@@ -130,7 +130,7 @@ const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
       <Divider />
       <List>
         {splits.map((split, i) => (
-          <ListItem sx={{ ml: 0, pl: 0, display: "flex" }}>
+          <ListItem key={i} sx={{ ml: 0, pl: 0, display: "flex" }}>
             <ListItemIcon
               sx={{
                 display: "flex",
