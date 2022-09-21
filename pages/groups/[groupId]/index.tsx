@@ -23,6 +23,9 @@ import CustomModal from "./createExpenseModal";
 import ViewSplitsModal from "./splitExpenseModal";
 import FriendModal from "../../../components/AddFriendModal";
 import { Logout } from "@mui/icons-material";
+import { check_cookie_by_name } from "../../../utils/class_extension";
+import { Stack } from "@mui/material";
+import expense from "../../api/user/friends/[friendId]/expense";
 
 // const testUser: models.User = {
 //   id: 1,
@@ -39,6 +42,20 @@ type GroupDetails = models.Group & {
   Users: models.User[];
 };
 
+const StackedPriceLabel = (splits, expense, currentUserId) => {
+  return (
+    <Stack direction="row" alignItems="center">
+      {MoneyLabel(
+        splits.find(
+          (x) => x.expenseId == expense.id && x.Expense.payerId != currentUserId
+        )?.amount || 0
+      )}
+      <Typography color={grey[500]}>/</Typography>
+      {MoneyLabel(expense.amount)}
+    </Stack>
+  );
+};
+
 const GroupDetailsPage = () => {
   const router = useRouter();
   const { groupId } = router.query;
@@ -48,6 +65,7 @@ const GroupDetailsPage = () => {
   const [open, setOpen] = useState(false);
   const [openv2, setOpenv2] = useState(false);
   const [openv3, setOpenv3] = useState(false);
+  const currentUserId = check_cookie_by_name("userId");
 
   const [currentExpenseId, setCurrentExpenseId] = useState<
     number | undefined
@@ -102,7 +120,9 @@ const GroupDetailsPage = () => {
         groupDetails!.Payment.filter((x) => x.paidFromId == 1)
           .map((y) => y.amount)
           .reduce((a, b) => a + b, 0) -
-          splits!.map((x) => x.amount).reduce((a, b) => a + b, 0)
+          splits!
+            .map((x) => (x.Expense.payerId == currentUserId ? 0 : x.amount))
+            .reduce((a, b) => a + b, 0)
       );
     }
   }, [splits, groupDetails]);
@@ -238,8 +258,10 @@ const GroupDetailsPage = () => {
                     key={expense.id}
                     label={expense.description}
                     date={new Date(expense.timestamp)}
-                    rightContent={MoneyLabel(
-                      splits.find((x) => x.expenseId == expense.id)?.amount || 0
+                    rightContent={StackedPriceLabel(
+                      splits,
+                      expense,
+                      currentUserId
                     )}
                     onClick={() => {
                       setCurrentExpenseId(expense.id);

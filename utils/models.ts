@@ -123,6 +123,9 @@ export function getSplitsByGroup(groupId: number, userId: number) {
       },
       userId: userId,
     },
+    include: {
+      Expense: true,
+    },
   });
 }
 
@@ -353,7 +356,7 @@ export async function getGroupSummaries(userId: number) {
   (SELECT "Group"."id", "Group"."name", coalesce(SUM("Split"."amount"), 0) as Split 
   FROM "public"."Group" JOIN "public"."_UsersGroups"
   ON "Group"."id" = "public"."_UsersGroups"."A" AND "public"."_UsersGroups"."B" = ${userId} 
-  LEFT JOIN (SELECT * FROM "public"."Expense") "expense" ON "expense"."groupId" = "Group"."id"
+  LEFT JOIN (SELECT * FROM "public"."Expense" WHERE "public"."Expense"."payerId" != ${userId}) "expense" ON "expense"."groupId" = "Group"."id"
   LEFT JOIN "public"."Split" ON "Split"."expenseId" = "expense"."id" AND "Split"."userId" = ${userId}
   -- INNER JOIN (SELECT * FROM "public"."Payment" WHERE "public"."Payment"."paidFromId" = ${userId}) "test" ON "test"."groupId" = "Group"."id" 
   GROUP BY "Group"."id") "B" ON "A"."id" = "B"."id"`;
