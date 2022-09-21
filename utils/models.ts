@@ -389,6 +389,35 @@ export function createToken(token: Prisma.OauthTokenCreateInput) {
   });
 }
 
+export function createPayments(
+  payAmount: number,
+  payerId: number,
+  payToId: number,
+  groupId: number
+) {
+  return prisma.payment.create({
+    data: {
+      amount: payAmount,
+      timestamp: new Date(),
+      Group: {
+        connect: {
+          id: groupId,
+        },
+      },
+      PaidFrom: {
+        connect: {
+          id: payerId,
+        },
+      },
+      PaidTo: {
+        connect: {
+          id: payToId,
+        },
+      },
+    },
+  });
+}
+
 export function createUser(user: Prisma.UserCreateInput) {
   return prisma.user.create({
     data: user,

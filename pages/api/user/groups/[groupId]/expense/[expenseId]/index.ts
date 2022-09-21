@@ -16,14 +16,19 @@ export default async function handler(
 
   switch (req.method) {
     case "GET":
-      const splits = await models.getSplitsByExpense(
-        expenseId,
-        payload.userId,
-        groupId
-      );
+      const splits = await models.getSplitsByExpense(expenseId, payload.userId);
       res.status(200).json(splits);
       break;
+    case "POST":
+      const input = JSON.parse(req.body);
+      const ans = await models.createPayments(
+        input.amount,
+        payload.userId,
+        input.paidToId,
+        groupId
+      );
+      res.status(200).json(ans);
     default:
-      api.allowMethods(req, res, ["GET"]);
+      api.allowMethods(req, res, ["GET", "POST"]);
   }
 }

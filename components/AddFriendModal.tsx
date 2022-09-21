@@ -113,19 +113,11 @@ const FriendModal = ({
     fetch(`${url.api}/user/contacts`, {})
       .then((res) => res.json())
       .then((data) => {
-        const test = data.map((x: { emailAddress: string; name: string }) => {
-          const i = currentUsers!.findIndex((e) => e.email == x.emailAddress);
-          return {
-            ...x,
-            email: x.emailAddress,
-            isFriendAlready: i > -1,
-            userId: i > -1 ? currentUsers![i].id : null,
-          };
-        });
-
         setFriendSearchResult(
           data.map((x: { emailAddress: string; name: string }) => {
-            const i = currentUsers!.findIndex((e) => e.email == x.emailAddress);
+            const i = currentUsers
+              ? currentUsers!.findIndex((e) => e.email == x.emailAddress)
+              : -1;
             if (i > -1) console.log(x);
             return {
               ...x,
