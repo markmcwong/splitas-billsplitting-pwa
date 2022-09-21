@@ -215,6 +215,7 @@ const GroupDetailsPage = () => {
             {groupDetails.Expenses.map((_transaction) => {
               return (
                 <TransactionItem
+                  key={_transaction.id}
                   label={_transaction.description}
                   date={new Date(_transaction.timestamp)}
                   rightContent={MoneyLabel(_transaction.amount)}
@@ -236,6 +237,7 @@ const GroupDetailsPage = () => {
             {groupDetails.Payment.map((_transaction) => {
               return (
                 <TransactionItem
+                  key={_transaction.id}
                   date={new Date(_transaction.timestamp)}
                   rightContent={MoneyLabel(_transaction.amount)}
                   label={_transaction.PaidFrom.name}

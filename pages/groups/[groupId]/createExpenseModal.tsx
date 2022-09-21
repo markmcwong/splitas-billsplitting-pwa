@@ -174,7 +174,7 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
         {splitType == "exact" &&
           users &&
           users.map((user) => (
-            <ListItem sx={{ ml: 0, pl: 0 }}>
+            <ListItem sx={{ ml: 0, pl: 0 }} key={user.id}>
               <ListItemIcon
                 sx={{
                   mr: 2,
