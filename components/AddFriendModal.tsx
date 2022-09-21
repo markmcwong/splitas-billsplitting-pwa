@@ -96,7 +96,6 @@ const FriendModal = ({
     })
       .then((res) => res.json())
       .then((data) => {
-        console.log(data.userId);
         const res = friendSearchResult.map((x) => {
           return {
             ...x,
