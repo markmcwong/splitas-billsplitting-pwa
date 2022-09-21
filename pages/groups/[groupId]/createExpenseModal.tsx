@@ -58,7 +58,7 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
           userId: number;
           expenseId: number;
         }[] = Object.keys(userAmounts)
-          .filter((x: string) => x !== currentUserId!)
+          // .filter((x: string) => x !== currentUserId!)
           .map((key) => {
             return {
               userId: parseInt(key),
@@ -176,24 +176,26 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
               Total amount is greater than original expense: ${amount}
             </Typography>
           )}
-        <Typography
-          variant="caption"
-          color={grey[500]}
-          sx={{ lineHeight: 1, mt: 2 }}
-        >
-          You are paying: $
-          {splitType == "equal"
+        {splitType == "equal" && (
+          <Typography
+            variant="caption"
+            color={grey[500]}
+            sx={{ lineHeight: 1, mt: 2 }}
+          >
+            You are paying: ${amount / Object.keys(userAmounts).length}
+            {/* {splitType == "equal"
             ? amount / Object.keys(userAmounts).length
             : amount -
               Object.values(userAmounts).reduce(
                 (partialSum, a) => partialSum + a,
                 0
-              )}
-        </Typography>
+              )} */}
+          </Typography>
+        )}
         {splitType == "exact" &&
           users &&
           users
-            .filter((x) => x.id !== parseInt(currentUserId!))
+            // .filter((x) => x.id !== parseInt(currentUserId!))
             .map((user) => (
               <ListItem sx={{ ml: 0, pl: 0 }} key={user.id}>
                 <ListItemIcon
