@@ -30,7 +30,7 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
   const [description, setDescription] = useState<string>("");
   const [splitType, setSplitType] = useState<string>("split");
   const [userAmounts, setUserAmounts] = useState<Object>(
-    users.reduce((map, obj) => ((map[obj.id] = 0), map), {})
+    users?.reduce((map, obj) => ((map[obj.id] = 0), map), {}) || {}
   );
 
   const createExpense = (
