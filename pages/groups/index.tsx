@@ -110,7 +110,10 @@ export default function GroupsPage() {
 
   return (
     <>
-      <Box sx={{ minHeight: "100vh", p: 3 }} bgcolor="background.paper">
+      <Box
+        sx={{ minHeight: "100vh", p: 3, minWidth: "100%" }}
+        bgcolor="background.paper"
+      >
         <ModalContent />
         <BottomAppBar routeValue={AppRoutesValues.Groups} />
         <Typography variant="caption" sx={{ color: grey[400] }}>
@@ -148,13 +151,17 @@ export default function GroupsPage() {
           // size="small"
         />
         {userWithGroups &&
-          userWithGroups?.map((group) =>
-            ContactItem(
-              group,
-              MoneyLabel(group.payment - group.split),
-              "groups"
+          userWithGroups
+            .filter((x) =>
+              x.name.toLowerCase().includes(searchString.toLowerCase())
             )
-          )}
+            .map((group) =>
+              ContactItem(
+                group,
+                MoneyLabel(group.payment - group.split),
+                "groups"
+              )
+            )}
         <BottomAppBar routeValue={AppRoutesValues.Groups} />
       </Box>
       <Fab

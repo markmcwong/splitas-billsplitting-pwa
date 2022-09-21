@@ -46,17 +46,84 @@ export function getUserByEmail(email: string) {
   });
 }
 
-export function getSplitsByGroup(groupId: number, userId: number) {
-  return prisma.split
-    .findMany({
-      where: {
-        Expense: {
-          groupId: groupId,
+export function getUserByEmailFuzzySearch(input: string, userId: number) {
+  return prisma.user.findMany({
+    where: {
+      AND: [
+        {
+          OR: [
+            {
+              email: {
+                contains: input,
+              },
+            },
+            {
+              name: {
+                contains: input,
+              },
+            },
+          ],
         },
-        userId: userId,
+        {
+          NOT: {
+            Friends: {
+              some: {
+                user2Id: userId,
+              },
+            },
+          },
+        },
+      ],
+    },
+  });
+}
+
+export function findUsersAddForGroup(
+  input: string,
+  userId: number,
+  groupId: number
+) {
+  return prisma.user.findMany({
+    where: {
+      AND: [
+        {
+          OR: [
+            {
+              email: {
+                contains: input,
+              },
+            },
+            {
+              name: {
+                contains: input,
+              },
+            },
+          ],
+        },
+        {
+          NOT: {
+            // id: userId,
+            Groups: {
+              some: {
+                id: groupId,
+              },
+            },
+          },
+        },
+      ],
+    },
+  });
+}
+
+export function getSplitsByGroup(groupId: number, userId: number) {
+  return prisma.split.findMany({
+    where: {
+      Expense: {
+        groupId: groupId,
       },
-    })
-    .then((value) => value);
+      userId: userId,
+    },
+  });
 }
 
 export function getSplitsByExpense(expenseId: number, groupId: number) {
@@ -76,7 +143,6 @@ export function getSplitsByExpense(expenseId: number, groupId: number) {
       },
     },
   });
-  // .then((value) => value);
 }
 
 export function getPaymentsFromGroup(groupId: number, userId: number) {
@@ -140,8 +206,8 @@ export function getAllFriendWithExpensesDetails(userId: number) {
             _sum: {
               amount:
                 friendExpense.payerId == userId
-                  ? -friendExpense._sum!.amount
-                  : friendExpense._sum!.amount,
+                  ? friendExpense._sum!.amount
+                  : -friendExpense._sum!.amount,
             },
             friend: friends.find(
               (friend) =>
@@ -152,20 +218,25 @@ export function getAllFriendWithExpensesDetails(userId: number) {
             ),
           };
         });
-        let result = [];
-        friendExpenses.reduce((res, value) => {
-          if (!res[value.friend.id]) {
-            res[value.friend.id] = {
-              // id: value.friend.id,
+        let result = friends.reduce(
+          (acc, curr) => (
+            (acc[curr.id] = {
               amount: 0,
-              user: value.friend,
-            };
-            result.push(res[value!.friend.id]);
-          }
-          res[value!.friend.id].amount += value._sum.amount;
-          return res;
-        }, {});
-        return result;
+              user: curr,
+            }),
+            acc
+          ),
+          {}
+        );
+        // console.log(friendExpenses, friendExpenses.length > 0);
+        if (friendExpenses.length > 0) {
+          friendExpenses.forEach((value) => {
+            result[value!.friend.id].amount += value._sum.amount;
+          });
+        }
+        return Object.keys(result).map((x) => {
+          return { amount: result[x].amount, user: result[x].user };
+        });
       });
   });
 }
@@ -277,13 +348,13 @@ export async function getGroupSummaries(userId: number) {
   ON "Group"."id" = "public"."_UsersGroups"."A" AND "public"."_UsersGroups"."B" = ${userId} 
   -- INNER JOIN (SELECT * FROM "public"."Expense") "expense" ON "expense"."groupId" = "Group"."id"
   -- JOIN "public"."Split" ON "Split"."expenseId" = "expense"."id" AND "Split"."userId" = ${userId}
-  INNER JOIN (SELECT * FROM "public"."Payment" WHERE "public"."Payment"."paidFromId" = ${userId}) "test" ON "test"."groupId" = "Group"."id" 
+  LEFT JOIN (SELECT * FROM "public"."Payment" WHERE "public"."Payment"."paidFromId" = ${userId}) "test" ON "test"."groupId" = "Group"."id" 
   GROUP BY "Group"."id") "A" JOIN
   (SELECT "Group"."id", "Group"."name", coalesce(SUM("Split"."amount"), 0) as Split 
   FROM "public"."Group" JOIN "public"."_UsersGroups"
   ON "Group"."id" = "public"."_UsersGroups"."A" AND "public"."_UsersGroups"."B" = ${userId} 
-  INNER JOIN (SELECT * FROM "public"."Expense") "expense" ON "expense"."groupId" = "Group"."id"
-  JOIN "public"."Split" ON "Split"."expenseId" = "expense"."id" AND "Split"."userId" = ${userId}
+  LEFT JOIN (SELECT * FROM "public"."Expense") "expense" ON "expense"."groupId" = "Group"."id"
+  LEFT JOIN "public"."Split" ON "Split"."expenseId" = "expense"."id" AND "Split"."userId" = ${userId}
   -- INNER JOIN (SELECT * FROM "public"."Payment" WHERE "public"."Payment"."paidFromId" = ${userId}) "test" ON "test"."groupId" = "Group"."id" 
   GROUP BY "Group"."id") "B" ON "A"."id" = "B"."id"`;
 }
@@ -319,6 +390,35 @@ export function createToken(token: Prisma.OauthTokenCreateInput) {
   });
 }
 
+export function createPayments(
+  payAmount: number,
+  payerId: number,
+  payToId: number,
+  groupId: number
+) {
+  return prisma.payment.create({
+    data: {
+      amount: payAmount,
+      timestamp: new Date(),
+      Group: {
+        connect: {
+          id: groupId,
+        },
+      },
+      PaidFrom: {
+        connect: {
+          id: payerId,
+        },
+      },
+      PaidTo: {
+        connect: {
+          id: payToId,
+        },
+      },
+    },
+  });
+}
+
 export function createUser(user: Prisma.UserCreateInput) {
   return prisma.user.create({
     data: user,
@@ -331,25 +431,27 @@ export function createUser(user: Prisma.UserCreateInput) {
 //   });
 // }
 
-export async function createSplits(splits: Split[]) {
-  const promises = splits.map((split) => {
-    const splitInput: Prisma.SplitCreateInput = {
-      amount: split.amount,
-      Expense: {
-        connect: {
-          id: split.expenseId,
+export async function createSplits(splits: Split[], currentUserId: number) {
+  const promises = splits
+    .filter((x) => x.id != currentUserId)
+    .map((split) => {
+      const splitInput: Prisma.SplitCreateInput = {
+        amount: split.amount,
+        Expense: {
+          connect: {
+            id: split.expenseId,
+          },
         },
-      },
-      User: {
-        connect: {
-          id: split.userId,
+        User: {
+          connect: {
+            id: split.userId,
+          },
         },
-      },
-    };
-    return prisma.split.create({
-      data: splitInput,
+      };
+      return prisma.split.create({
+        data: splitInput,
+      });
     });
-  });
   const res = await Promise.all(promises);
   return res;
 }
@@ -492,6 +594,39 @@ export async function updateUser(user: User) {
   return updatedUser;
 }
 
+export async function inviteUserToGroup(groupId: number, newUserId: number) {
+  const updatedGroup = await prisma.group.update({
+    where: {
+      id: groupId,
+    },
+    data: {
+      Users: {
+        connect: {
+          id: newUserId,
+        },
+      },
+    },
+  });
+
+  return updatedGroup;
+}
+
+export async function removeUserFromGroup(groupId: number, userId: number) {
+  const updatedGroup = await prisma.group.update({
+    where: {
+      id: groupId,
+    },
+    data: {
+      Users: {
+        disconnect: {
+          id: userId,
+        },
+      },
+    },
+  });
+
+  return updatedGroup;
+}
 // Precondition: The user is a member of the group.
 export async function updateGroup(group: Group, updaterUserId: number) {
   const updatedGroup = await prisma.group.update({

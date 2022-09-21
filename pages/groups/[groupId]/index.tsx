@@ -21,6 +21,8 @@ import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
 import CustomModal from "./createExpenseModal";
 import ViewSplitsModal from "./splitExpenseModal";
+import FriendModal from "../../../components/AddFriendModal";
+import { Logout } from "@mui/icons-material";
 
 // const testUser: models.User = {
 //   id: 1,
@@ -41,19 +43,23 @@ const GroupDetailsPage = () => {
   const router = useRouter();
   const { groupId } = router.query;
   const [groupDetails, setGroupDetails] = useState<GroupDetails | null>(null);
-  const [splits, setSplits] = useState<any[] | null>(null);
+  const [splits, setSplits] = useState<any[] | null>([]);
   const [total, setTotal] = useState<number>(0);
   const [open, setOpen] = useState(false);
   const [openv2, setOpenv2] = useState(false);
+  const [openv3, setOpenv3] = useState(false);
 
   const [currentExpenseId, setCurrentExpenseId] = useState<
     number | undefined
   >();
 
   const handleOpen = () => setOpen(true);
+  const handleOpenv3 = () => setOpenv3(true);
   const handleClose = () => setOpen(false);
   const handleOpenv2 = () => setOpenv2(true);
   const handleClosev2 = () => setOpenv2(false);
+  const handleClosev3 = () => setOpenv3(false);
+
   const getSplitsRequired = () => {
     fetch(`${url.api}/user/groups/${groupId}/split`)
       .then((res) => res.json())
@@ -72,10 +78,23 @@ const GroupDetailsPage = () => {
       });
   };
 
+  const kickFromGroup = (userId?: number) => {
+    const postBody = {
+      type: "kick",
+      userId,
+    };
+    fetch(`${url.api}/user/groups/${groupId}`, {
+      method: "POST",
+      body: JSON.stringify(postBody),
+    });
+    getGroupDetails();
+    getSplitsRequired();
+  };
+
   useEffect(() => {
     getGroupDetails();
     getSplitsRequired();
-  }, [open]);
+  }, [open, openv3, openv2]);
 
   useEffect(() => {
     if (splits && groupDetails) {
@@ -89,7 +108,10 @@ const GroupDetailsPage = () => {
   }, [splits, groupDetails]);
 
   return (
-    <Box sx={{ minHeight: "100vh", pl: 3, py: 3 }} bgcolor="background.paper">
+    <Box
+      sx={{ minHeight: "100vh", pl: 3, py: 3, minWidth: "100%" }}
+      bgcolor="background.paper"
+    >
       {groupDetails && (
         <CustomModal
           open={open}
@@ -98,6 +120,13 @@ const GroupDetailsPage = () => {
           groupId={groupId as string}
         />
       )}
+      <FriendModal
+        open={openv3}
+        handleClose={handleClosev3}
+        callback={getGroupDetails}
+        // currentUsers={groupDetails.Users}
+        isUsedForGroup={true}
+      />
       {currentExpenseId && (
         <ViewSplitsModal
           open={openv2}
@@ -106,9 +135,24 @@ const GroupDetailsPage = () => {
           groupId={groupId as string}
         />
       )}
-      <Box sx={{ ml: -1.5, width: "100%", justifyContent: "flex-start" }}>
+      <Box
+        sx={{
+          ml: -1.5,
+          width: "100%",
+          justifyContent: "space-between",
+        }}
+        display="flex"
+      >
         <IconButton onClick={() => router.back()}>
           <ArrowBack fontSize="large" />
+        </IconButton>
+
+        <IconButton
+          onClick={() => {
+            kickFromGroup();
+          }}
+        >
+          <Logout fontSize="large" />
         </IconButton>
       </Box>
       <Grid display="flex" flexDirection="row" container sx={{ mb: 4 }}>
@@ -169,7 +213,16 @@ const GroupDetailsPage = () => {
         <CircularProgress />
       ) : (
         <>
-          <AvatarList friends={groupDetails.Users} />
+          <AvatarList
+            callback={() => {
+              handleOpenv3();
+            }}
+            friends={groupDetails.Users}
+            kickOut={(user) => {
+              kickFromGroup(user.id);
+              getGroupDetails();
+            }}
+          />
           <Typography
             variant="h6"
             sx={{ color: "primary.main", fontWeight: 500, mt: 3 }}
@@ -177,19 +230,24 @@ const GroupDetailsPage = () => {
             Expenses
           </Typography>
           <List>
-            {groupDetails.Expenses.map((_transaction) => {
-              return (
-                <TransactionItem
-                  label={_transaction.description}
-                  date={new Date(_transaction.timestamp)}
-                  rightContent={MoneyLabel(_transaction.amount)}
-                  onClick={() => {
-                    setCurrentExpenseId(_transaction.id);
-                    handleOpenv2();
-                  }}
-                />
-              );
-            })}
+            {splits &&
+              groupDetails &&
+              groupDetails.Expenses.map((expense) => {
+                return (
+                  <TransactionItem
+                    key={expense.id}
+                    label={expense.description}
+                    date={new Date(expense.timestamp)}
+                    rightContent={MoneyLabel(
+                      splits.find((x) => x.expenseId == expense.id)?.amount || 0
+                    )}
+                    onClick={() => {
+                      setCurrentExpenseId(expense.id);
+                      handleOpenv2();
+                    }}
+                  />
+                );
+              })}
           </List>
           <Typography
             variant="h6"
@@ -201,6 +259,7 @@ const GroupDetailsPage = () => {
             {groupDetails.Payment.map((_transaction) => {
               return (
                 <TransactionItem
+                  key={_transaction.id}
                   date={new Date(_transaction.timestamp)}
                   rightContent={MoneyLabel(_transaction.amount)}
                   label={_transaction.PaidFrom.name}

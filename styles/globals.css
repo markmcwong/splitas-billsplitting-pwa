@@ -41,6 +41,7 @@ a {
   flex-direction: column;
   box-shadow: 24;
   padding: 15px;
+  max-height: 75%;
 }
 
 .fab--action {

@@ -17,6 +17,8 @@ import ModalContent from "../../../components/Modal";
 import * as models from "../../../utils/models";
 import "../../../utils/class_extension.ts";
 import * as url from "../../../utils/urls";
+import { check_cookie_by_name } from "../../../utils/class_extension";
+import { grey } from "@mui/material/colors";
 
 type Props = {
   open: boolean;
@@ -28,10 +30,12 @@ type Props = {
 const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
   const [amount, setAmount] = useState<number>(0);
   const [description, setDescription] = useState<string>("");
-  const [splitType, setSplitType] = useState<string>("split");
+  const [splitType, setSplitType] = useState<string>("equal");
   const [userAmounts, setUserAmounts] = useState<Object>(
-    users.reduce((map, obj) => ((map[obj.id] = 0), map), {})
+    users?.reduce((map, obj) => ((map[obj.id] = 0), map), {}) || {}
   );
+
+  const currentUserId = check_cookie_by_name("userId");
 
   const createExpense = (
     amount: number,
@@ -48,36 +52,38 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
     })
       .then((res) => res.json())
       .then((data) => {
-        const len = Object.keys(userAmounts).length;
-        const putBody: {
+        const len = Object.keys(users).length;
+        const putBodys: {
           amount: number;
           userId: number;
           expenseId: number;
-        }[] = Object.keys(userAmounts).map((key) => {
-          return {
-            userId: parseInt(key),
-            amount:
-              (userAmounts[key] as number) == 0
-                ? amount / len
-                : parseFloat(userAmounts[key]),
-            expenseId: data.id,
-          };
-        });
+        }[] = Object.keys(userAmounts)
+          .filter((x: string) => x !== currentUserId!)
+          .map((key) => {
+            return {
+              userId: parseInt(key),
+              amount:
+                splitType == "equal"
+                  ? amount / len
+                  : parseFloat(userAmounts[key]),
+              expenseId: data.id,
+            };
+          });
 
-        console.log(putBody);
         fetch(`${url.api}/user/groups/${groupId}/split`, {
           method: "PUT",
-          body: JSON.stringify(putBody),
+          body: JSON.stringify(putBodys),
+        }).then((res) => {
+          handleClose();
+          resetFields();
         });
-        handleClose();
-        resetFields();
       });
   };
 
   const resetFields = () => {
     setAmount(0);
     setDescription("");
-    setSplitType("split");
+    setSplitType("equal");
     setUserAmounts(users.reduce((map, obj) => ((map[obj.id] = 0), map), {}));
   };
 
@@ -161,53 +167,69 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
           Object.values(userAmounts).reduce(
             (partialSum, a) => partialSum + a,
             0
-          ) != amount && (
+          ) > amount && (
             <Typography
               variant="caption"
               color="error"
               sx={{ lineHeight: 1, mt: 2 }}
             >
-              Amounts do not sum up to expense: ${amount}
+              Total amount is greater than original expense: ${amount}
             </Typography>
           )}
+        <Typography
+          variant="caption"
+          color={grey[500]}
+          sx={{ lineHeight: 1, mt: 2 }}
+        >
+          You are paying: $
+          {splitType == "equal"
+            ? amount / Object.keys(userAmounts).length
+            : amount -
+              Object.values(userAmounts).reduce(
+                (partialSum, a) => partialSum + a,
+                0
+              )}
+        </Typography>
         {splitType == "exact" &&
           users &&
-          users.map((user) => (
-            <ListItem sx={{ ml: 0, pl: 0 }}>
-              <ListItemIcon
-                sx={{
-                  mr: 2,
-                  display: "flex",
-                  flex: "0 0 66%",
-                  borderRadius: 2,
-                }}
-              >
-                <Typography>{user.name.substring(0, 8)}</Typography>
-                {/* <Typography>
+          users
+            .filter((x) => x.id !== parseInt(currentUserId!))
+            .map((user) => (
+              <ListItem sx={{ ml: 0, pl: 0 }} key={user.id}>
+                <ListItemIcon
+                  sx={{
+                    mr: 2,
+                    display: "flex",
+                    flex: "0 0 66%",
+                    borderRadius: 2,
+                  }}
+                >
+                  <Typography>{user.name.substring(0, 8)}</Typography>
+                  {/* <Typography>
                   {date.toLocaleDateString("en-US", { month: "short" })}
                 </Typography> */}
-              </ListItemIcon>
-              <Input
-                sx={{
-                  flex: "0 0 33%",
-                  // borderRadius: 15,
-                }}
-                type="number"
-                value={userAmounts[user.id] as number}
-                startAdornment={
-                  <InputAdornment position="start">$</InputAdornment>
-                }
-                onChange={(e) =>
-                  setUserAmounts({
-                    ...userAmounts,
-                    [user.id]: e.target.value.toCurrencyFormat(),
-                  })
-                }
-                placeholder="Amount"
-                // size="small"
-              />
-            </ListItem>
-          ))}
+                </ListItemIcon>
+                <Input
+                  sx={{
+                    flex: "0 0 33%",
+                    // borderRadius: 15,
+                  }}
+                  type="number"
+                  value={userAmounts[user.id] as number}
+                  startAdornment={
+                    <InputAdornment position="start">$</InputAdornment>
+                  }
+                  onChange={(e) =>
+                    setUserAmounts({
+                      ...userAmounts,
+                      [user.id]: e.target.value.toCurrencyFormat(),
+                    })
+                  }
+                  placeholder="Amount"
+                  // size="small"
+                />
+              </ListItem>
+            ))}
 
         <Button
           variant="outlined"
@@ -218,7 +240,7 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
             Object.values(userAmounts).reduce(
               (partialSum, a) => partialSum + a,
               0
-            ) != amount && splitType == "exact"
+            ) > amount && splitType == "exact"
           }
         >
           Submit
