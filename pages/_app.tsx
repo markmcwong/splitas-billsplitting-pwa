@@ -35,6 +35,8 @@ const theme = createTheme({
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
+  
+  
   return (
     <ThemeProvider theme={theme}>
       <Component {...pageProps} />
