@@ -14,8 +14,12 @@ export default async function handler(
   switch (req.method) {
     case "PUT":
       const parsedAmount = JSON.parse(req.body) as number;
-      models.createFriendExpense(parsedAmount, payload.userId, friendId);
-      res.status(200).json("success");
+      const response = await models.createFriendExpense(
+        parsedAmount,
+        payload.userId,
+        friendId
+      );
+      res.status(200).json(response);
       break;
     default:
       api.allowMethods(req, res, ["PUT"]);

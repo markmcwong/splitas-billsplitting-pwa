@@ -7,6 +7,9 @@ String.prototype.toCurrencyFormat = function (this: string) {
 };
 
 export function check_cookie_by_name(name: string) {
+  if (typeof document === "undefined") {
+    return undefined;
+  }
   var match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
   if (match) {
     console.log(match[2]);

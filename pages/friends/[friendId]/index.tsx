@@ -67,6 +67,8 @@ const FriendDetailsPage = () => {
     });
     setAmount(null);
     setDescription("");
+    handleClose();
+    getTransactions();
   };
 
   useEffect(() => {
@@ -82,7 +84,7 @@ const FriendDetailsPage = () => {
         subtitle={`Between you and ${name}`}
       >
         <>
-          <TextField
+          {/* <TextField
             sx={{
               flex: "0 0 100%",
               my: 2,
@@ -93,7 +95,7 @@ const FriendDetailsPage = () => {
             value={description}
             placeholder="Transaction description"
             onChange={(e) => setDescription(e.target.value)}
-          />
+          /> */}
           <TextField
             sx={{
               flex: "0 0 100%",
@@ -107,7 +109,9 @@ const FriendDetailsPage = () => {
               step: "1",
             }}
             placeholder="Amount you lent"
-            onChange={(e) => setAmount(e.target.value.toCurrencyFormat())}
+            onChange={(e) =>
+              setAmount(parseFloat(parseFloat(e.target.value).toFixed(2)))
+            }
           />
           <Button
             variant="outlined"

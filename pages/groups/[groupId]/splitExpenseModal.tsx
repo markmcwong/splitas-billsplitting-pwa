@@ -235,14 +235,15 @@ const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
           </ListItem>
         ))}
       </List>
-      {originalSplit !== splits &&
+      {splits.length > 0 &&
+        originalSplit !== splits &&
         splits.reduce((a, b) => a + b.amount, 0) > splits[0].Expense.amount && (
           <Typography color="error.main" sx={{ mb: 2 }}>
             Total amount is greater than original expense: $
             {splits[0].Expense.amount}
           </Typography>
         )}
-      {originalSplit !== splits && (
+      {splits.length > 0 && originalSplit !== splits && (
         <Button
           variant="outlined"
           disabled={

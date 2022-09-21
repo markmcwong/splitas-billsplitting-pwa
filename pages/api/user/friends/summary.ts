@@ -17,6 +17,7 @@ export default async function handler(
       const friendsWithExpenses = await models.getAllFriendWithExpensesDetails(
         payload.userId
       );
+      // console.log(friendsWithExpenses);
       res.status(200).json(friendsWithExpenses);
       break;
     default:
