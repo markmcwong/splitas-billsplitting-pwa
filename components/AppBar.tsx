@@ -7,7 +7,7 @@ import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
 import MenuIcon from "@mui/icons-material/Menu";
 
-const TopAppBar = () => {
+const TopAppBar = (props: {headerText: string}) => {
   return (
     <Box sx={{ flexGrow: 1 }}>
       <AppBar position="static">
@@ -16,9 +16,10 @@ const TopAppBar = () => {
             variant="h5"
             gutterBottom
             component="div"
-            sx={{ p: 2, pb: 0 }}
+            sx={{ p: 2, pb: 0, color: 'white'}}
+            
           >
-            Inbox
+            {props.headerText}
           </Typography>
         </Toolbar>
       </AppBar>

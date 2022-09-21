@@ -34,7 +34,8 @@ export default async function handler(
       if (body.type === "invite") {
         models.inviteUserToGroup(groupId, body.userId);
       } else if (body.type === "kick") {
-        models.removeUserFromGroup(groupId, body.userId);
+        const id = body.hasOwnProperty("userId") ? body.userId : payload.userId;
+        models.removeUserFromGroup(groupId, id);
       }
       res.status(200).json("success");
       break;

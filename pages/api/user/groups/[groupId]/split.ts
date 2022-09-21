@@ -20,7 +20,7 @@ export default async function handler(
     case "PUT":
       const input = JSON.parse(req.body) as Split[];
       console.log(input);
-      models.createSplits(input);
+      models.createSplits(input, payload.userId);
       res.status(200).json("success");
       break;
     case "POST":

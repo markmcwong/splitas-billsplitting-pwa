@@ -40,6 +40,7 @@ export function allowMethods(
 const cookieNames = {
   oauthState: "oauth_state",
   session: "session",
+  userId: "userId",
 };
 
 export function getSessionCookie(req: NextApiRequest, res: NextApiResponse) {
@@ -68,6 +69,14 @@ export function setSessionCookie(
   value: string
 ) {
   setCookie(cookieNames.session, value, { req, res });
+}
+
+export function setUserIdCookie(
+  req: NextApiRequest,
+  res: NextApiResponse,
+  value: number
+) {
+  setCookie(cookieNames.userId, value, { req, res });
 }
 
 export function generateStateAndSetCookie(

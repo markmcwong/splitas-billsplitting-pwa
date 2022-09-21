@@ -1,6 +1,7 @@
 import { Prisma } from "@prisma/client";
 import * as models from "../utils/models";
 import * as parsing from "../utils/parsing";
+import { check_cookie_by_name } from "../utils/class_extension";
 import type { GroupSummary } from "../pages/groups/index";
 declare let self: ServiceWorkerGlobalScope;
 self.addEventListener("message", (event) => {
@@ -186,6 +187,21 @@ async function PUT_api_user_friends_friendId_expense(
   const friendId = params.friendId;
   const key = "/api/user/friends/summary";
   const apiCache = await caches.open("apis");
+  const userIdStr = check_cookie_by_name("userId");
+  if (userIdStr === undefined) {
+    return;
+  }
+  const userId = Number.parseInt(userIdStr);
+  const newId = 1;
+  const friendExpense: models.FriendExpense = {
+    id: newId,
+    amount: expenseAmount,
+    payerId: userId,
+    userOwingMoneyId: friendId,
+    timestamp: new Date(),
+  };
+
+  await apiCache.put(key, new Response("TODO"));
 }
 
 // TODO: Notifications, can consider using workbox apis

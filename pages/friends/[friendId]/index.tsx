@@ -1,6 +1,15 @@
-import { Receipt } from "@mui/icons-material";
+import { Delete, Receipt } from "@mui/icons-material";
 import ArrowBack from "@mui/icons-material/ArrowBack";
-import { Box, List, IconButton, Fab, TextField, Button } from "@mui/material";
+import {
+  Box,
+  List,
+  IconButton,
+  Fab,
+  TextField,
+  Button,
+  Stack,
+  Grid,
+} from "@mui/material";
 import { grey } from "@mui/material/colors";
 import Typography from "@mui/material/Typography";
 import { useRouter } from "next/router";
@@ -41,6 +50,14 @@ const FriendDetailsPage = () => {
         );
         console.log(sortedMergedtransactions);
       });
+  };
+
+  const deleteFriend = () => {
+    fetch(`${url.api}/user/friends/${friendId}?friendId=${friendId}`, {
+      method: "DELETE",
+    }).then((res) => {
+      router.back();
+    });
   };
 
   const createExpense = () => {
@@ -102,9 +119,19 @@ const FriendDetailsPage = () => {
           </Button>
         </>
       </ModalContent>
-      <Box sx={{ ml: -1.5, width: "100%", justifyContent: "flex-start" }}>
+      <Box
+        sx={{
+          ml: -1.5,
+          width: "100%",
+          justifyContent: "space-between",
+        }}
+        display="flex"
+      >
         <IconButton onClick={() => router.back()}>
           <ArrowBack fontSize="large" />
+        </IconButton>
+        <IconButton onClick={() => deleteFriend()}>
+          <Delete fontSize="large" />
         </IconButton>
       </Box>
       {/* <TopAppBarNew title="Balance" /> */}
@@ -120,6 +147,7 @@ const FriendDetailsPage = () => {
       >
         {totalFigure < 0 ? "-" : "+"}${Math.abs(totalFigure)}
       </Typography>
+
       <Typography
         variant="h6"
         sx={{ color: "primary.main", fontWeight: 500, mt: 3 }}
@@ -129,11 +157,11 @@ const FriendDetailsPage = () => {
       <List>
         {transactions &&
           transactions.map((_transaction) => (
-              <TransactionItem
-                date={new Date(_transaction.timestamp)}
-                rightContent={MoneyLabel(_transaction.amount, true)}
-                key={_transaction.id}
-              />
+            <TransactionItem
+              date={new Date(_transaction.timestamp)}
+              rightContent={MoneyLabel(_transaction.amount, true)}
+              key={_transaction.id}
+            />
           ))}
       </List>
       <Fab
