@@ -30,6 +30,7 @@
     "@types/node": "18.7.15",
     "@types/react": "18.0.18",
     "@types/react-dom": "18.0.6",
+    "@types/serviceworker": "^0.0.52",
     "eslint": "8.23.0",
     "eslint-config-next": "12.2.5",
     "prisma": "^4.3.1",
