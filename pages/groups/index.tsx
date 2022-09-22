@@ -84,13 +84,12 @@ export default function GroupsPage() {
         aria-describedby="modal-modal-description"
       >
         <Box className="modal-centered">
-          <Typography variant="h6" sx={{ color: "primary.main" }}>
+          <Typography variant="h6" color="primary.main">
             Create New Group
           </Typography>
           <TextField
+            className="container--full-width margin__vertical--2"
             sx={{
-              flex: "0 0 100%",
-              my: 2,
               input: { color: "background.default" },
             }}
             type="text"
@@ -101,7 +100,7 @@ export default function GroupsPage() {
           <Button
             variant="outlined"
             type="submit"
-            sx={{ width: "33%" }}
+            className="form__submit-button--full-width"
             onClick={submitForm}
           >
             Create
@@ -118,28 +117,24 @@ export default function GroupsPage() {
   return (
     <>
       <Box
-        sx={{ minHeight: "100vh", p: 3, minWidth: "100%" }}
         bgcolor="background.paper"
+        className="padding__all-3 container--min-height-maximum container--min-width-maximum"
       >
         <ModalContent />
         <BottomAppBar routeValue={AppRoutesValues.Groups} />
-        <Typography variant="caption" sx={{ color: grey[400] }}>
+        <Typography variant="caption" className="text--light-grey">
           Groups Bill Balance
         </Typography>
         <Typography
           variant="h4"
-          sx={{
-            color: balance < 0 ? "error.main" : "primary.main",
-            fontWeight: 500,
-          }}
+          className="text--semibolded"
+          color={balance < 0 ? "error.main" : "primary.main"}
         >
           ${Math.abs(balance).toFixed(2)}
         </Typography>
         <TextField
+          className="container__item--full-flex container--rounded margin__top--2 text--black"
           sx={{
-            flex: "0 0 100%",
-            borderRadius: 15,
-            mt: 2,
             input: { color: "background.default" },
           }}
           fullWidth
@@ -152,10 +147,7 @@ export default function GroupsPage() {
               </InputAdornment>
             ),
           }}
-          id="outlined-basic"
           variant="outlined"
-          style={{ color: "black" }}
-          // size="small"
         />
         {userWithGroups &&
           userWithGroups
@@ -173,11 +165,11 @@ export default function GroupsPage() {
       </Box>
       <Fab
         color="primary"
-        className="fab--action-offset"
+        className="fab--offset"
         aria-label="add"
         onClick={() => handleOpen()}
       >
-        <AddIcon fontSize="medium" sx={{ color: "white" }} />
+        <AddIcon fontSize="medium" className="fab__icon--white" />
       </Fab>
     </>
   );

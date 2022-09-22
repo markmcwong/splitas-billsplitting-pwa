@@ -15,10 +15,8 @@ import {
 import { useState } from "react";
 import ModalContent from "../../../components/Modal";
 import * as models from "../../../utils/models";
-import "../../../utils/class_extension.ts";
+import * as ce from "../../../utils/class_extension";
 import * as url from "../../../utils/urls";
-import { check_cookie_by_name } from "../../../utils/class_extension";
-import { grey } from "@mui/material/colors";
 
 type Props = {
   open: boolean;
@@ -26,22 +24,20 @@ type Props = {
   users: models.User[];
   groupId: string;
 };
+interface UserAmounts {
+  [key: number]: number;
+}
 
 const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
   const [amount, setAmount] = useState<number>(0);
   const [description, setDescription] = useState<string>("");
   const [splitType, setSplitType] = useState<string>("equal");
-  const [userAmounts, setUserAmounts] = useState<Object>(
-    users?.reduce((map, obj) => ((map[obj.id] = 0), map), {}) || {}
+  const [userAmounts, setUserAmounts] = useState<UserAmounts>(
+    users?.reduce((map, obj) => ((map[obj.id] = 0), map), {} as UserAmounts) ||
+      {}
   );
 
-  const currentUserId = check_cookie_by_name("userId");
-
-  const createExpense = (
-    amount: number,
-    description: string
-    // splitInput: { amount: number; userId: number }[]
-  ) => {
+  const createExpense = (amount: number, description: string) => {
     const postBody = {
       amount,
       description,
@@ -50,25 +46,26 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
       method: "PUT",
       body: JSON.stringify(postBody),
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) {
+          return res.json();
+        }
+        return Promise.reject(res);
+      })
       .then((data) => {
         const len = Object.keys(users).length;
         const putBodys: {
           amount: number;
           userId: number;
           expenseId: number;
-        }[] = Object.keys(userAmounts)
-          // .filter((x: string) => x !== currentUserId!)
-          .map((key) => {
-            return {
-              userId: parseInt(key),
-              amount:
-                splitType == "equal"
-                  ? amount / len
-                  : parseFloat(userAmounts[key]),
-              expenseId: data.id,
-            };
-          });
+        }[] = Object.keys(userAmounts).map((key) => {
+          return {
+            userId: parseInt(key),
+            amount:
+              splitType == "equal" ? amount / len : userAmounts[parseInt(key)],
+            expenseId: data.id,
+          };
+        });
 
         fetch(`${url.api}/user/groups/${groupId}/split`, {
           method: "PUT",
@@ -84,7 +81,9 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
     setAmount(0);
     setDescription("");
     setSplitType("equal");
-    setUserAmounts(users.reduce((map, obj) => ((map[obj.id] = 0), map), {}));
+    setUserAmounts(
+      users.reduce((map, obj) => ((map[obj.id] = 0), map), {} as UserAmounts)
+    );
   };
 
   return (
@@ -99,9 +98,6 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
       <>
         <TextField
           sx={{
-            flex: "0 0 100%",
-            borderRadius: 15,
-            mt: 2,
             input: { color: "background.default" },
           }}
           fullWidth
@@ -117,18 +113,19 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
           }}
           id="outlined-basic"
           variant="outlined"
+          className="form__input"
         />
         <TextField
           sx={{
-            flex: "0 0 100%",
-            borderRadius: 15,
-            mt: 2,
             input: { color: "background.default" },
           }}
           fullWidth
           type="number"
           value={amount}
-          onChange={(e) => setAmount(e.target.value.toCurrencyFormat())}
+          onChange={(e) =>
+            setAmount((e.target.value as string).toCurrencyFormat())
+          }
+          className="form__input"
           placeholder="Amount"
           InputProps={{
             startAdornment: (
@@ -140,7 +137,7 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
           id="outlined-basic"
           variant="outlined"
         />
-        <Grid container alignItems="center" sx={{ py: 2 }}>
+        <Grid container alignItems="center" className="padding__vertical-2">
           <Grid item xs>
             <Typography variant="body1" color="background.default">
               Paid by you and split
@@ -148,8 +145,6 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
           </Grid>
           <Grid item xs={12}>
             <Select
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
               fullWidth
               size="small"
               label="Split Type"
@@ -170,8 +165,8 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
           ) > amount && (
             <Typography
               variant="caption"
-              color="error"
-              sx={{ lineHeight: 1, mt: 2 }}
+              color="error.main"
+              className="modal__validation-message"
             >
               Total amount is greater than original expense: ${amount}
             </Typography>
@@ -179,65 +174,48 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
         {splitType == "equal" && (
           <Typography
             variant="caption"
-            color={grey[500]}
-            sx={{ lineHeight: 1, mt: 2 }}
+            className="modal__validation-message text--grey"
           >
             You are paying: ${amount / Object.keys(userAmounts).length}
-            {/* {splitType == "equal"
-            ? amount / Object.keys(userAmounts).length
-            : amount -
-              Object.values(userAmounts).reduce(
-                (partialSum, a) => partialSum + a,
-                0
-              )} */}
           </Typography>
         )}
         {splitType == "exact" &&
           users &&
-          users
-            // .filter((x) => x.id !== parseInt(currentUserId!))
-            .map((user) => (
-              <ListItem sx={{ ml: 0, pl: 0 }} key={user.id}>
-                <ListItemIcon
-                  sx={{
-                    mr: 2,
-                    display: "flex",
-                    flex: "0 0 66%",
-                    borderRadius: 2,
-                  }}
-                >
-                  <Typography>{user.name.substring(0, 8)}</Typography>
-                  {/* <Typography>
-                  {date.toLocaleDateString("en-US", { month: "short" })}
-                </Typography> */}
-                </ListItemIcon>
-                <Input
-                  sx={{
-                    flex: "0 0 33%",
-                    // borderRadius: 15,
-                  }}
-                  type="number"
-                  value={userAmounts[user.id] as number}
-                  startAdornment={
-                    <InputAdornment position="start">$</InputAdornment>
-                  }
-                  onChange={(e) =>
-                    setUserAmounts({
-                      ...userAmounts,
-                      [user.id]: e.target.value.toCurrencyFormat(),
-                    })
-                  }
-                  placeholder="Amount"
-                  // size="small"
-                />
-              </ListItem>
-            ))}
+          users.map((user) => (
+            <ListItem sx={{ ml: 0, pl: 0 }} key={user.id}>
+              <ListItemIcon
+                sx={{
+                  mr: 2,
+                  display: "flex",
+                  flex: "0 0 66%",
+                  borderRadius: 2,
+                }}
+              >
+                <Typography>{user.name.substring(0, 8)}</Typography>
+              </ListItemIcon>
+              <Input
+                className="container--two-third-width"
+                type="number"
+                value={userAmounts[user.id] as number}
+                startAdornment={
+                  <InputAdornment position="start">$</InputAdornment>
+                }
+                onChange={(e) =>
+                  setUserAmounts({
+                    ...userAmounts,
+                    [user.id]: e.target.value.toCurrencyFormat(),
+                  })
+                }
+                placeholder="Amount"
+              />
+            </ListItem>
+          ))}
 
         <Button
           variant="outlined"
           type="submit"
           onClick={() => createExpense(amount, description)}
-          sx={{ width: "33%", mt: 2 }}
+          className="form__submit-button--full-width"
           disabled={
             Object.values(userAmounts).reduce(
               (partialSum, a) => partialSum + a,

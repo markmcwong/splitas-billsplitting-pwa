@@ -9,21 +9,35 @@ import {
   IconButton,
   Switch,
   Button,
+  Grid,
 } from "@mui/material";
 import { deleteFriend } from "../utils/models";
 import ModalContent from "./Modal";
 import * as models from "../utils/models";
 import * as url from "../utils/urls";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import Stack from "@mui/system/Stack";
 
-type Props = {
+type PropsType = {
   handleClose: () => void;
   open: boolean;
   callback: () => void;
   isUsedForGroup: boolean;
   currentUsers?: models.User[];
+};
+
+type ContactFriendType = {
+  emailAddress: string;
+  name: string;
+};
+
+type friendSearchResultType = {
+  id: number | null;
+  hasAccount: boolean;
+  name: string;
+  email: string;
+  isFriendAlready: boolean;
 };
 
 const FriendModal = ({
@@ -32,14 +46,19 @@ const FriendModal = ({
   callback,
   isUsedForGroup,
   currentUsers,
-}: Props) => {
+}: PropsType) => {
   const [friendEmail, setFriendEmail] = useState<string>("");
   const router = useRouter();
   const { groupId } = router.query;
   const [searchByEmail, setSearchByEmail] = useState<boolean>(true);
   const [friendSearchResult, setFriendSearchResult] = useState<
-    (models.User & { isFriendAlready: boolean })[]
+    friendSearchResultType[]
   >([]);
+  const stateRef = useRef<null | boolean>();
+
+  useEffect(() => {
+    stateRef!.current = searchByEmail;
+  }, []);
 
   useEffect(() => {
     const getData = setTimeout(() => {
@@ -48,24 +67,26 @@ const FriendModal = ({
           `${url.api}/user/friends/search?friendEmail=${friendEmail}&isForGroup=${isUsedForGroup}&groupId=${groupId}`
         )
           .then((res) => res.json())
-          .then((data) =>
+          .then((data) => {
             setFriendSearchResult(
-              data.map((x) => {
+              data.map((x: models.User) => {
                 return { ...x, isFriendAlready: false };
               })
-            )
-          );
+            );
+          });
       }
     }, 500);
 
     return () => {
       clearTimeout(getData);
     };
-  }, [friendEmail]);
+  }, [friendEmail, searchByEmail]);
 
   useEffect(() => {
     if (!searchByEmail) {
       getContacts();
+    } else {
+      setFriendSearchResult([]);
     }
   }, [searchByEmail]);
 
@@ -96,10 +117,11 @@ const FriendModal = ({
     })
       .then((res) => res.json())
       .then((data) => {
-        const res = friendSearchResult.map((x) => {
+        const res = friendSearchResult.map((x: friendSearchResultType) => {
           return {
             ...x,
             id: friendEmail === x.email ? data.userId : null,
+            hasAccount: true,
             isFriendAlready: friendEmail == x.email ? true : x.isFriendAlready,
           };
         });
@@ -112,20 +134,21 @@ const FriendModal = ({
     fetch(`${url.api}/user/contacts`, {})
       .then((res) => res.json())
       .then((data) => {
-        setFriendSearchResult(
-          data.map((x: { emailAddress: string; name: string }) => {
-            const i = currentUsers
-              ? currentUsers!.findIndex((e) => e.email == x.emailAddress)
-              : -1;
-            if (i > -1) console.log(x);
-            return {
-              ...x,
-              email: x.emailAddress,
-              isFriendAlready: i > -1,
-              id: i > -1 ? currentUsers![i].id : null,
-            };
-          })
-        );
+        if (!stateRef.current) {
+          setFriendSearchResult(
+            data.map((x: ContactFriendType) => {
+              const userIdx = currentUsers
+                ? currentUsers!.findIndex((e) => e.email == x.emailAddress)
+                : -1;
+              return {
+                ...x,
+                email: x.emailAddress,
+                isFriendAlready: userIdx > -1,
+                id: userIdx > -1 ? currentUsers![userIdx].id : null,
+              };
+            })
+          );
+        }
       });
   };
 
@@ -157,67 +180,48 @@ const FriendModal = ({
       title="Add new friends"
     >
       <>
-        <Stack
-          direction="row"
-          sx={{ mt: 2, maxWidth: "100%" }}
-          spacing={2}
-          alignItems="center"
-        >
-          <TextField
-            sx={{
-              flex: 1,
-              borderRadius: 15,
-              input: { color: "background.default" },
-            }}
-            // fullWidth
-            value={friendEmail}
-            onChange={(e) => setFriendEmail(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <Search />
-                </InputAdornment>
-              ),
-            }}
-            id="outlined-basic"
-            variant="outlined"
-            size="small"
-            style={{ color: "black" }}
-          />
-          <Stack
-            direction="row"
-            alignItems="center"
-            justifyContent="center"
-            sx={{ px: 1 }}
-          >
-            <Typography color="primary.main" variant="body2">
-              Email
-            </Typography>
-            <Switch
-              value={searchByEmail}
-              onChange={() => {
-                setFriendSearchResult([]);
-                setSearchByEmail(!searchByEmail);
+        <Grid className="margin__top--2">
+          <Grid item xs={12}>
+            <TextField
+              className="form__input--no-margin"
+              value={friendEmail}
+              onChange={(e) => setFriendEmail(e.target.value)}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Search />
+                  </InputAdornment>
+                ),
               }}
-              sx={{ ml: 0 }}
+              id="outlined-basic"
+              variant="outlined"
+              size="small"
             />
-            <Typography color="primary.main" variant="body2">
-              Contacts
-            </Typography>
-          </Stack>
-          {/* <Button
-            sx={{ flex: "0 0 35%" }}
-            variant="contained"
-            onClick={() => {
-              setFriendSearchResult([]);
-              setSearchByEmail(!searchByEmail);
-            }}
-          >
-            <Typography color="white" variant="body2">
-              {"By Email"}
-            </Typography>
-          </Button> */}
-        </Stack>
+          </Grid>
+          <Grid item xs={12}>
+            <Stack
+              direction="row"
+              alignItems="center"
+              justifyContent="center"
+              sx={{ px: 1 }}
+            >
+              <Typography color="primary.main" variant="body2">
+                Email
+              </Typography>
+              <Switch
+                value={searchByEmail}
+                onChange={() => {
+                  setFriendSearchResult([]);
+                  setSearchByEmail(!searchByEmail);
+                }}
+                sx={{ ml: 0 }}
+              />
+              <Typography color="primary.main" variant="body2">
+                Contacts
+              </Typography>
+            </Stack>
+          </Grid>
+        </Grid>
         <Box overflow="scroll">
           {friendSearchResult!
             .filter(
@@ -243,11 +247,6 @@ const FriendModal = ({
                       color="text.primary"
                       width="100%"
                       textAlign="end"
-                      onClick={() => {
-                        // setIsEditing(
-                        //   isEditing.map((_, idx) => (idx == i ? true : _))
-                        // );
-                      }}
                     >
                       {user.email}
                     </Typography>
@@ -258,16 +257,16 @@ const FriendModal = ({
                     if (searchByEmail) {
                       if (friendSearchResult[i].isFriendAlready) {
                         isUsedForGroup
-                          ? addToGroup(user.id, false)
-                          : deleteFriend(user.id);
+                          ? addToGroup(user.id!, false)
+                          : deleteFriend(user.id!);
                       } else {
                         isUsedForGroup
-                          ? addToGroup(user.id, true)
-                          : addFriend(user.id);
+                          ? addToGroup(user.id!, true)
+                          : addFriend(user.id!);
                       }
                     } else {
                       friendSearchResult[i].isFriendAlready
-                        ? deleteFriend(user.id)
+                        ? deleteFriend(user.id!)
                         : addFriendByContact(user.email);
                     }
                     let friendsCopy = [...friendSearchResult];

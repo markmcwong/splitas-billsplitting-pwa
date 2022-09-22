@@ -23,11 +23,10 @@ const AvatarList = ({ friends, callback, kickOut }: Props) => {
 
   return (
     <Box
-      // container
+      className="container--full-width"
       display="flex"
       flexDirection={"row"}
-      // spacing={1.5}
-      sx={{ width: "100%", overflow: "scroll" }}
+      sx={{ overflow: "scroll", minHeight: "70px" }}
     >
       <Box
         // item
@@ -37,8 +36,8 @@ const AvatarList = ({ friends, callback, kickOut }: Props) => {
         alignItems="center"
         sx={{
           mx: 1,
-          maxHeight: 60,
-          minWidth: 60,
+          maxHeight: 50,
+          minWidth: 50,
           borderRadius: 50,
           border: "2px dashed grey",
         }}
@@ -63,11 +62,11 @@ const AvatarList = ({ friends, callback, kickOut }: Props) => {
               alignItems="center"
               sx={{
                 mx: 1,
-                maxHeight: 60,
-                minWidth: 60,
+                maxHeight: 50,
+                minWidth: 50,
                 borderRadius: 50,
-                width: 60,
-                height: 60,
+                width: 50,
+                height: 50,
                 border: "2px dashed grey",
               }}
             >
@@ -92,7 +91,7 @@ const AvatarList = ({ friends, callback, kickOut }: Props) => {
             <Avatar
               alt={friend.name}
               src="https://i.pravatar.cc/150"
-              sx={{ width: 60, height: 60 }}
+              sx={{ width: 50, height: 50 }}
             />
             <Typography sx={{ color: "black" }}>
               {friend.name.split(" ")[0].substring(0, 8)}
