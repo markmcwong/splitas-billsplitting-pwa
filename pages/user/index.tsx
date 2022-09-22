@@ -19,6 +19,15 @@ export default function UserPage() {
   }, []);
 
   const pwaContext = useContext(PwaContext);
+  useEffect(() => {
+    if (!pwaContext) {
+      return;
+    }
+    pwaContext.setPwaData({
+      ...pwaContext.pwaData,
+      isLoggedIn: true,
+    });
+  }, []);
 
   return (
     <Box bgcolor="primary.main">

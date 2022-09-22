@@ -10,6 +10,7 @@ import {
   SetStateAction,
 } from "react";
 import * as urls from "../utils/urls";
+import * as classExtension from "../utils/class_extension";
 
 const TRACKING_ID = "UA-242063911-1"; // Google Analytics Tracking ID
 
@@ -47,6 +48,7 @@ const webPushPublicKey = process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY;
 type PwaData = {
   deferredInstallPrompt?: BeforeInstallPromptEvent;
   shouldAskForPushNotifications: boolean;
+  isLoggedIn: boolean;
 };
 
 // let pwaData: PwaData = {
@@ -198,7 +200,7 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, []);
 
   useEffect(() => {
-    if (pwaData.shouldAskForPushNotifications) {
+    if (pwaData.shouldAskForPushNotifications && pwaData.isLoggedIn) {
       askPermissionAndSubscribePushNotification(pwaData, setPwaData);
     }
   }, [pwaData]);
