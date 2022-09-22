@@ -1,19 +1,8 @@
 import * as crypto from "crypto";
 import * as fs from "fs";
-import * as os from "os";
 
 const RSA = "rsa";
 
-// publicKeyEncoding: {
-//   type: "spki",
-//   format: "pem",
-// },
-// privateKeyEncoding: {
-//   type: "pkcs8",
-//   format: "pem",
-//   cipher: "aes-256-cbc",
-
-// },
 const options: crypto.RSAKeyPairKeyObjectOptions = {
   modulusLength: 1024 * 2,
 };
@@ -28,8 +17,7 @@ const priKeyOptions: crypto.KeyExportOptions<"pem"> = {
   format: "pem",
 };
 
-const home = os.homedir();
-export const keyDir = `${home}/webapp/keys`;
+export const keyDir = `./keys`;
 export const publicKeyPath = `${keyDir}/public.pem`;
 export const privateKeyPath = `${keyDir}/private.pem`;
 export function generateAndStoreKeys() {
