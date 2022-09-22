@@ -26,7 +26,7 @@ const AvatarList = ({ friends, callback, kickOut }: Props) => {
       className="container--full-width"
       display="flex"
       flexDirection={"row"}
-      sx={{ overflow: "scroll", minHeight: "70px" }}
+      sx={{ overflowX: "scroll", minHeight: "75px" }}
     >
       <Box
         // item

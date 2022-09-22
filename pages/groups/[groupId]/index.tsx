@@ -113,7 +113,7 @@ const GroupDetailsPage = () => {
   useEffect(() => {
     getGroupDetails();
     getSplitsRequired();
-  }, [open, openv3, openv2]);
+  }, [open, openv3, openv2, router]);
 
   useEffect(() => {
     if (splits && groupDetails) {

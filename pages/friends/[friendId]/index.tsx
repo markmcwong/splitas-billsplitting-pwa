@@ -22,7 +22,7 @@ const FriendDetailsPage = () => {
 
   useEffect(() => {
     getTransactions();
-  }, []);
+  }, [router]);
 
   /* lifecycle hooks ends */
 
@@ -66,10 +66,13 @@ const FriendDetailsPage = () => {
     fetch(`${url.api}/user/friends/${friendId}/expense?friendId=${friendId}`, {
       method: "PUT",
       body: JSON.stringify(amount),
-    });
-    setAmount(null);
-    handleClose();
-    getTransactions();
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setAmount(null);
+        handleClose();
+        getTransactions();
+      });
   };
 
   /* network functions ends */

@@ -198,29 +198,31 @@ const FriendModal = ({
               size="small"
             />
           </Grid>
-          <Grid item xs={12}>
-            <Stack
-              direction="row"
-              alignItems="center"
-              justifyContent="center"
-              sx={{ px: 1 }}
-            >
-              <Typography color="primary.main" variant="body2">
-                Email
-              </Typography>
-              <Switch
-                value={searchByEmail}
-                onChange={() => {
-                  setFriendSearchResult([]);
-                  setSearchByEmail(!searchByEmail);
-                }}
-                sx={{ ml: 0 }}
-              />
-              <Typography color="primary.main" variant="body2">
-                Contacts
-              </Typography>
-            </Stack>
-          </Grid>
+          {!isUsedForGroup && (
+            <Grid item xs={12}>
+              <Stack
+                direction="row"
+                alignItems="center"
+                justifyContent="center"
+                sx={{ px: 1 }}
+              >
+                <Typography color="primary.main" variant="body2">
+                  Email
+                </Typography>
+                <Switch
+                  value={searchByEmail}
+                  onChange={() => {
+                    setFriendSearchResult([]);
+                    setSearchByEmail(!searchByEmail);
+                  }}
+                  sx={{ ml: 0 }}
+                />
+                <Typography color="primary.main" variant="body2">
+                  Contacts
+                </Typography>
+              </Stack>
+            </Grid>
+          )}
         </Grid>
         <Box overflow="scroll">
           {friendSearchResult!
@@ -248,7 +250,9 @@ const FriendModal = ({
                       width="100%"
                       textAlign="end"
                     >
-                      {user.email}
+                      {user.email.length > 25
+                        ? user.email.substring(0, 22) + "..."
+                        : user.email}
                     </Typography>
                   </Box>
                 </ListItemIcon>
