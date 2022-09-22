@@ -287,3 +287,16 @@ async function PUT_api_user_groups_groupId_expense(
     new Response(JSON.stringify(groupDetails))
   );
 }
+
+self.addEventListener("push", async function (event) {
+  if (event.data === null) {
+    return;
+  }
+  const myNotif = await event.data.json();
+
+  event.waitUntil(
+    self.registration.showNotification(myNotif.title, {
+      body: myNotif.message,
+    })
+  );
+});
