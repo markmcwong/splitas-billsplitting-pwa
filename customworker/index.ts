@@ -1,9 +1,11 @@
 import { Prisma } from "@prisma/client";
 import * as models from "../utils/models";
 import * as parsing from "../utils/parsing";
+import * as urls from "../utils/urls";
 import { check_cookie_by_name } from "../utils/class_extension";
 import type { GroupSummary } from "../pages/groups/index";
 declare let self: ServiceWorkerGlobalScope;
+
 self.addEventListener("message", (event) => {
   // HOW TO TEST THIS?
   // Run this in your browser console:
@@ -285,5 +287,3 @@ async function PUT_api_user_groups_groupId_expense(
     new Response(JSON.stringify(groupDetails))
   );
 }
-
-// TODO: Notifications, can consider using workbox apis

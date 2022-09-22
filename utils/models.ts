@@ -8,6 +8,7 @@ import {
   Expense,
   Split,
 } from "@prisma/client";
+import webPush, { PushSubscription } from "web-push";
 export {
   type OauthToken,
   type User,
@@ -289,8 +290,6 @@ export async function getFriendDetails(userId: number, friendId: number) {
   };
 }
 
-interface GroupListElement {}
-
 export async function getGroupsList(userId: number) {
   // aim: for each group, get all splits belonging to user
 
@@ -329,6 +328,14 @@ export async function getGroupsList(userId: number) {
   GROUP BY Group.id`) as any;
   console.log(paymentsAndSplitsGroupedByGroup);
   return paymentsAndSplitsGroupedByGroup;
+}
+
+export function getGroupById(groupId: number) {
+  return prisma.group.findUniqueOrThrow({
+    where: {
+      id: groupId,
+    },
+  });
 }
 
 export function getGroupDetails(groupId: number) {
@@ -388,7 +395,32 @@ export function getTokenByUser(userId: number) {
         OauthToken: true,
       },
     })
-    .then((user) => user?.OauthToken);
+    .then((user) => user.OauthToken);
+}
+
+export async function getWebPushSubscriptionByUser(
+  userId: number
+): Promise<webPush.PushSubscription | null> {
+  const dbSubscription = (
+    await prisma.user.findUniqueOrThrow({
+      where: {
+        id: userId,
+      },
+      include: {
+        WebPushSubscription: true,
+      },
+    })
+  ).WebPushSubscription;
+  if (dbSubscription === null) {
+    return null;
+  }
+  return {
+    endpoint: dbSubscription.endpoint,
+    keys: {
+      auth: dbSubscription.auth,
+      p256dh: dbSubscription.p256dh,
+    },
+  };
 }
 
 export function getActivities(userId: number) {
@@ -402,6 +434,32 @@ export function getActivities(userId: number) {
 export function createToken(token: Prisma.OauthTokenCreateInput) {
   return prisma.oauthToken.create({
     data: token,
+  });
+}
+
+export function createOrUpdateWebPushSubscription(
+  subscription: PushSubscription,
+  userId: number
+) {
+  return prisma.webPushSubscription.upsert({
+    create: {
+      endpoint: subscription.endpoint,
+      p256dh: subscription.keys.p256dh,
+      auth: subscription.keys.auth,
+      Owner: {
+        connect: {
+          id: userId,
+        },
+      },
+    },
+    update: {
+      endpoint: subscription.endpoint,
+      p256dh: subscription.keys.p256dh,
+      auth: subscription.keys.auth,
+    },
+    where: {
+      userId,
+    },
   });
 }
 

@@ -1,7 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import * as models from "../../../../../utils/models";
 import * as api from "../../../../../utils/api";
-import { Prisma, Split } from "@prisma/client";
+import { prisma, Prisma, Split } from "@prisma/client";
+import webPush from "web-push";
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -16,11 +17,28 @@ export default async function handler(
     return;
   }
   const groupId = api.getGroupId(req);
+  const group = await models.getGroupById(groupId);
   switch (req.method) {
     case "PUT": // TODO: Change to POST
       const input = JSON.parse(req.body) as Split[];
       console.log(input);
       models.createSplits(input, payload.userId);
+
+      for (const split of input) {
+        const subscription = await models.getWebPushSubscriptionByUser(
+          split.userId
+        );
+        if (subscription === null) {
+          continue;
+        }
+        webPush.sendNotification(
+          subscription,
+          JSON.stringify({
+            title: `Split in Group ${group.name}`,
+            message: `${payload.name} created a split worth ${split.amount}`,
+          })
+        );
+      }
       res.status(200).json("success");
       break;
     case "POST": // TODO: Change to PUT

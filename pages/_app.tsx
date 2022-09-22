@@ -9,6 +9,7 @@ import {
   Dispatch,
   SetStateAction,
 } from "react";
+import * as urls from "../utils/urls";
 
 const TRACKING_ID = "UA-242063911-1"; // Google Analytics Tracking ID
 
@@ -41,8 +42,11 @@ const theme = createTheme({
   },
 });
 
+const webPushPublicKey = process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY;
+
 type PwaData = {
   deferredInstallPrompt?: BeforeInstallPromptEvent;
+  shouldAskForPushNotifications: boolean;
 };
 
 // let pwaData: PwaData = {
@@ -75,10 +79,60 @@ function handleAppInstall(
   });
 }
 
+async function askPermissionAndSubscribePushNotification(
+  pwaData: PwaData,
+  setPwaData: Dispatch<SetStateAction<PwaData>>
+) {
+  if (typeof Notification === "undefined") {
+    return;
+  }
+
+  const result = await Notification.requestPermission();
+  setPwaData({
+    ...pwaData,
+    shouldAskForPushNotifications: false,
+  });
+
+  if (result !== "granted") {
+    return;
+  }
+  const notification = new Notification("Welcome!");
+
+  if (webPushPublicKey === undefined) {
+    console.log("No web push public key exposed to browser");
+    return;
+  }
+
+  const pushManager = (await navigator.serviceWorker.getRegistration())
+    ?.pushManager;
+  if (pushManager === undefined) {
+    console.log("Service worker registration is undefined");
+    return;
+  }
+  const subscription = await pushManager.getSubscription();
+  if (subscription !== null) {
+    return;
+  }
+
+  const newSubscription = await pushManager.subscribe({
+    applicationServerKey: webPushPublicKey,
+    userVisibleOnly: true,
+  });
+
+  const response = await fetch(`${urls.api}/user/notification`, {
+    method: "PUT",
+    body: JSON.stringify(newSubscription),
+  });
+  console.log(response.headers);
+}
+
+async function subscribeToWebPush() {}
+
 type PwaContextType = {
   pwaData: PwaData;
   setPwaData: Dispatch<SetStateAction<PwaData>>;
   handleAppInstall: typeof handleAppInstall;
+  askPermissionAndSubscribePushNotification: typeof askPermissionAndSubscribePushNotification;
 };
 
 export const PwaContext = createContext<PwaContextType | null>(null);
@@ -116,6 +170,7 @@ interface BeforeInstallPromptEvent extends Event {
 function MyApp({ Component, pageProps }: AppProps) {
   const [pwaData, setPwaData] = useState<PwaData>({
     deferredInstallPrompt: undefined,
+    shouldAskForPushNotifications: false,
   });
 
   useEffect(() => {
@@ -128,6 +183,21 @@ function MyApp({ Component, pageProps }: AppProps) {
       console.log("Stored install prompt");
     });
   }, []);
+
+  useEffect(() => {
+    if (Notification.permission !== "granted") {
+      setPwaData({
+        ...pwaData,
+        shouldAskForPushNotifications: true,
+      });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (pwaData.shouldAskForPushNotifications) {
+      askPermissionAndSubscribePushNotification(pwaData, setPwaData);
+    }
+  }, [pwaData]);
 
   return (
     <>
@@ -145,7 +215,14 @@ function MyApp({ Component, pageProps }: AppProps) {
         `}
       </Script>
       <ThemeProvider theme={theme}>
-        <PwaContext.Provider value={{ pwaData, setPwaData, handleAppInstall }}>
+        <PwaContext.Provider
+          value={{
+            pwaData,
+            setPwaData,
+            handleAppInstall,
+            askPermissionAndSubscribePushNotification,
+          }}
+        >
           <Component {...pageProps} />
         </PwaContext.Provider>
       </ThemeProvider>
