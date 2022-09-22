@@ -76,14 +76,8 @@ export default function GroupsPage() {
     }
 
     return (
-      <Modal
-        keepMounted
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box className="modal-centered">
+      <Modal keepMounted open={open} onClose={handleClose}>
+        <Box className="modal--centered">
           <Typography variant="h6" color="primary.main">
             Create New Group
           </Typography>
@@ -99,6 +93,7 @@ export default function GroupsPage() {
           />
           <Button
             variant="outlined"
+            disabled={name.length === 0}
             type="submit"
             className="form__submit-button--full-width"
             onClick={submitForm}

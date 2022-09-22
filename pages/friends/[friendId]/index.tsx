@@ -100,7 +100,13 @@ const FriendDetailsPage = () => {
             }}
             placeholder="Amount you lent"
             onChange={(e) =>
-              setAmount(parseFloat(parseFloat(e.target.value).toFixed(2)))
+              setAmount(
+                parseFloat(
+                  parseFloat(
+                    e.target.value === "" ? "0" : e.target.value
+                  ).toFixed(2)
+                )
+              )
             }
           />
           <Button
@@ -108,6 +114,7 @@ const FriendDetailsPage = () => {
             type="submit"
             className="container--full-width margin__vertical--2"
             onClick={createExpense}
+            disabled={amount == null || amount == 0}
           >
             Save
           </Button>

@@ -217,10 +217,13 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
           onClick={() => createExpense(amount, description)}
           className="form__submit-button--full-width"
           disabled={
-            Object.values(userAmounts).reduce(
+            (Object.values(userAmounts).reduce(
               (partialSum, a) => partialSum + a,
               0
-            ) > amount && splitType == "exact"
+            ) > amount &&
+              splitType == "exact") ||
+            description == "" ||
+            amount == 0
           }
         >
           Submit
