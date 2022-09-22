@@ -1,5 +1,6 @@
 import * as crypto from "crypto";
 import * as fs from "fs";
+import * as os from "os";
 
 const RSA = "rsa";
 
@@ -27,21 +28,24 @@ const priKeyOptions: crypto.KeyExportOptions<"pem"> = {
   format: "pem",
 };
 
+const home = os.homedir();
+export const keyDir = `${home}/webapp/keys`;
+export const publicKeyPath = `${keyDir}/public.pem`;
+export const privateKeyPath = `${keyDir}/private.pem`;
 function generateAndStoreKeys() {
   const keyPair = crypto.generateKeyPairSync(RSA, options);
   const pubKeyBuf = keyPair.publicKey.export(pubKeyOptions);
   const priKeyBuf = keyPair.privateKey.export(priKeyOptions);
-  if (!fs.existsSync("keys")) {
-    fs.mkdirSync("keys");
+
+  if (!fs.existsSync(keyDir)) {
+    fs.mkdirSync(keyDir, { recursive: true });
   }
-  fs.writeFileSync("keys/public.pem", pubKeyBuf, {
+  fs.writeFileSync(publicKeyPath, pubKeyBuf, {
     flag: "w+",
   });
-  fs.writeFileSync("keys/private.pem", priKeyBuf, {
+  fs.writeFileSync(privateKeyPath, priKeyBuf, {
     flag: "w+",
   });
 }
 
 generateAndStoreKeys();
-
-export {};
