@@ -1,8 +1,10 @@
 import jsonwebtoken from "jsonwebtoken";
 import * as fs from "fs";
+import * as rsa from "../scripts/rsa";
 import * as models from "./models";
-const publicKey = fs.readFileSync("keys/public.pem");
-const privateKey = fs.readFileSync("keys/private.pem");
+
+const publicKey = fs.readFileSync(rsa.publicKeyPath);
+const privateKey = fs.readFileSync(rsa.privateKeyPath);
 
 export type TokenPayload = {
   userId: number;
