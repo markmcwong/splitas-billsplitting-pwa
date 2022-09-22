@@ -32,7 +32,7 @@ const home = os.homedir();
 export const keyDir = `${home}/webapp/keys`;
 export const publicKeyPath = `${keyDir}/public.pem`;
 export const privateKeyPath = `${keyDir}/private.pem`;
-function generateAndStoreKeys() {
+export function generateAndStoreKeys() {
   const keyPair = crypto.generateKeyPairSync(RSA, options);
   const pubKeyBuf = keyPair.publicKey.export(pubKeyOptions);
   const priKeyBuf = keyPair.privateKey.export(priKeyOptions);
@@ -47,5 +47,3 @@ function generateAndStoreKeys() {
     flag: "w+",
   });
 }
-
-generateAndStoreKeys();
