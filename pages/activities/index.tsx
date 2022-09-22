@@ -5,12 +5,17 @@ import * as url from "../../utils/urls";
 import TopAppBar from "../../components/AppBar";
 import { AppRoutesValues } from "../../utils/urls";
 import { Activity, ActivityType } from "@prisma/client";
+import GroupIcon from "@mui/icons-material/Group";
+import PaymentsIcon from "@mui/icons-material/Payments";
+
 import Link from "next/link";
 import moment from "moment";
 import {
+  Avatar,
   Divider,
   List,
   ListItem,
+  ListItemAvatar,
   ListItemText,
   Typography,
 } from "@mui/material";
@@ -82,13 +87,17 @@ const activityNavigation = (activity: Activity) => {
   return "";
 };
 
-
 const AppPage: NextPage = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
 
   const getRelevantActivities = async () => {
     await fetch(`${url.api}/user/activities`)
-      .then((res) => res.json())
+      .then((resp) => {
+        if (resp.ok) {
+          return resp.json();
+        }
+        return Promise.reject(resp);
+      })
       .then((activities) => {
         console.log(activities); // TODO: Remove
         setActivities(activities);
@@ -103,16 +112,32 @@ const AppPage: NextPage = () => {
     <Box sx={{ minHeight: "100vh" }} bgcolor="background.paper">
       <TopAppBar headerText="Activity" />
       <List sx={{ width: "100%", bgcolor: "background.paper" }}>
-        {activities.filter((a) => displayedActivityTypesSet.has(a.type))
+        {activities
+          .filter((a) => displayedActivityTypesSet.has(a.type))
           .sort((a, b) => b.id - a.id)
           .map((item) => (
             <Fragment key={item.id}>
               <Link href={activityNavigation(item)} key={item.id}>
                 <ListItem alignItems="flex-start" button>
+                  <ListItemAvatar>
+                    <Avatar>
+                      {(item.type === ActivityType.createGroup ||
+                        item.type === ActivityType.updateGroup ||
+                        item.type === ActivityType.deleteGroup) && (
+                        <GroupIcon />
+                      )}
+                      {(item.type === ActivityType.createPayment ||
+                        item.type === ActivityType.createExpense) && (
+                        <PaymentsIcon />
+                      )}
+                    </Avatar>
+                  </ListItemAvatar>
                   <ListItemText
                     primary={
                       <Fragment>
-                        {item.type === ActivityType.createGroup && (
+                        {(item.type === ActivityType.createGroup ||
+                          item.type === ActivityType.updateGroup ||
+                          item.type === ActivityType.deleteGroup) && (
                           <Typography fontWeight="medium" color="black">
                             {item.description}
                           </Typography>
