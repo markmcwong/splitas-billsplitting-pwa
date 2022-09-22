@@ -82,7 +82,6 @@ const activityNavigation = (activity: Activity) => {
   return "";
 };
 
-
 const AppPage: NextPage = () => {
   const [activities, setActivities] = useState<Activity[]>([]);
 
@@ -102,8 +101,12 @@ const AppPage: NextPage = () => {
   return (
     <Box sx={{ minHeight: "100vh" }} bgcolor="background.paper">
       <TopAppBar headerText="Activity" />
-      <List sx={{ width: "100%", bgcolor: "background.paper" }}>
-        {activities.filter((a) => displayedActivityTypesSet.has(a.type))
+      <List
+        className="container--full-width"
+        sx={{ bgcolor: "background.paper" }}
+      >
+        {activities
+          .filter((a) => displayedActivityTypesSet.has(a.type))
           .sort((a, b) => b.id - a.id)
           .map((item) => (
             <Fragment key={item.id}>
