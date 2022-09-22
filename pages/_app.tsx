@@ -185,6 +185,10 @@ function MyApp({ Component, pageProps }: AppProps) {
   }, []);
 
   useEffect(() => {
+    if (typeof Notification === "undefined") {
+      return;
+    }
+
     if (Notification.permission !== "granted") {
       setPwaData({
         ...pwaData,
