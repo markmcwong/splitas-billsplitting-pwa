@@ -1,3 +1,5 @@
+import { getCookies } from "cookies-next";
+
 declare interface String {
   toCurrencyFormat(): number;
 }
