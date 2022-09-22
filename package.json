@@ -8,7 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "genkeys": "ts-node scripts/rsa.ts"
+    "genkeys": "ts-node scripts/rsa.ts",
+    "vercel-build": "prisma generate && prisma migrate deploy && next build"
   },
   "dependencies": {
     "@emotion/react": "^11.10.4",
