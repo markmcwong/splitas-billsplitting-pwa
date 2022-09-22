@@ -11,7 +11,6 @@
     "genkeys": "ts-node scripts/rsa.ts",
     "genkeys-vapid": "web-push generate-vapid-keys",
     "vercel-build": "prisma generate && prisma migrate deploy && mkdir -p keys && npm run genkeys && next build"
-
   },
   "dependencies": {
     "@emotion/react": "^11.10.4",
