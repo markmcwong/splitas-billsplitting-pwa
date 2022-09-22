@@ -59,10 +59,7 @@ type friendWithExpense = {
 };
 
 export default function FriendsPage() {
-  const [friends, setFriends] = useState<Array<friendWithExpense>>([
-    // testUser,
-    // testUser,
-  ]);
+  const [friends, setFriends] = useState<Array<friendWithExpense>>([]);
 
   const [balance, setBalance] = useState<number>(0);
   const [searchString, setSearchString] = useState<string>("");
@@ -74,14 +71,18 @@ export default function FriendsPage() {
     fetch(`${url.api}/user/friends/summary`)
       .then((res) => res.json())
       .then((friends) => {
-        console.log(friends);
-        setFriends(friends);
-        setBalance(
-          friends.reduce(
-            (acc: number, cur: { amount: number }) => acc + cur.amount,
-            0
-          )
-        );
+        if (typeof friends !== "string" && friends.length > 0) {
+          setFriends(friends);
+          setBalance(
+            friends.reduce(
+              (acc: number, cur: { amount: number }) => acc + cur.amount,
+              0
+            )
+          );
+        } else {
+          setFriends([]);
+          setBalance(0);
+        }
       });
   };
 

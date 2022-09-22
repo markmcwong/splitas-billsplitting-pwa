@@ -39,14 +39,21 @@ export default function GroupsPage() {
     fetch(`${url.api}/user/groups/summary`)
       .then((res) => res.json())
       .then((g) => {
-        setUserWithGroups(g);
-        setBalance(
-          g.reduce(
-            (acc: number, curr: { payment: number; split: number }) =>
-              acc + curr.payment - curr.split,
-            0
-          )
-        );
+        if (typeof g !== "string" && g.length > 0) {
+          setUserWithGroups(g);
+          setBalance(
+            typeof g !== "string" && g.length > 0
+              ? g.reduce(
+                  (acc: number, curr: { payment: number; split: number }) =>
+                    acc + curr.payment - curr.split,
+                  0
+                )
+              : 0
+          );
+        } else {
+          setUserWithGroups(null);
+          setBalance(0);
+        }
       });
   };
 
