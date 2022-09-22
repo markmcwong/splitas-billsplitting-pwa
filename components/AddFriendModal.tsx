@@ -99,12 +99,11 @@ const FriendModal = ({
         const res = friendSearchResult.map((x) => {
           return {
             ...x,
-            userId: friendEmail == x.email ? data.userId : null,
+            id: friendEmail === x.email ? data.userId : null,
             isFriendAlready: friendEmail == x.email ? true : x.isFriendAlready,
           };
         });
         setFriendSearchResult(res);
-        console.log(res);
         callback();
       });
   };
@@ -148,7 +147,15 @@ const FriendModal = ({
   };
 
   return (
-    <ModalContent open={open} handleClose={handleClose} title="Add new friends">
+    <ModalContent
+      open={open}
+      handleClose={() => {
+        handleClose();
+        setFriendEmail("");
+        setSearchByEmail(true);
+      }}
+      title="Add new friends"
+    >
       <>
         <Stack
           direction="row"
