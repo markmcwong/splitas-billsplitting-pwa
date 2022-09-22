@@ -13,18 +13,9 @@ export default async function handler(
   const friendId = api.getFriendId(req);
   switch (req.method) {
     case "GET":
-      const {
-        friend: friendPromise,
-        userExpenses: userExpensesPromise,
-        friendExpenses: friendExpensesPromise,
-        commonGroups: commonGroupsPromise,
-      } = models.getFriendDetails(payload.userId, friendId);
-      res.status(200).json({
-        friend: await friendPromise,
-        userExpenses: (await userExpensesPromise) || [],
-        friendExpenses: (await friendExpensesPromise) || [],
-        commonGroups: await commonGroupsPromise,
-      });
+      res
+        .status(200)
+        .json(await models.getFriendDetails(payload.userId, friendId));
       break;
     case "PUT":
       // TODO

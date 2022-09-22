@@ -12,21 +12,23 @@ datasource db {
 }
 
 model User {
-  id               Int          @id @default(autoincrement())
-  hasAccount       Boolean
-  name             String
-  email            String       @unique
-  Friends          FriendPair[] @relation("Friend")
-  friends          FriendPair[] @relation("friend")
-  Groups           Group[]      @relation("UsersGroups")
-  Activities       Activity[]   @relation("User_Activities")
-  PaymentsMade     Payment[]    @relation("PaymentsMade_PaidTo")
-  PaymentsReceived Payment[]    @relation("PaymentsReceived_PaidFrom")
-  Expenses         Expense[]
-  FriendActivities Activity[]   @relation("Friend_FriendActivities")
-  Splits           Split[]
-  OauthToken       OauthToken?  @relation(fields: [tokenId], references: [id])
-  tokenId          Int?         @unique
+  id                    Int                  @id @default(autoincrement())
+  hasAccount            Boolean
+  name                  String
+  email                 String               @unique
+  Friends               FriendPair[]         @relation("Friend")
+  friends               FriendPair[]         @relation("friend")
+  Groups                Group[]              @relation("UsersGroups")
+  Activities            Activity[]           @relation("User_Activities")
+  PaymentsMade          Payment[]            @relation("PaymentsMade_PaidTo")
+  PaymentsReceived      Payment[]            @relation("PaymentsReceived_PaidFrom")
+  Expenses              Expense[]
+  FriendActivities      Activity[]           @relation("Friend_FriendActivities")
+  Splits                Split[]
+  OauthToken            OauthToken?          @relation(fields: [tokenId], references: [id])
+  tokenId               Int?                 @unique
+  WebPushSubscription   WebPushSubscription?
+  webPushSubscriptionId Int?                 @unique
 }
 
 model OauthToken {
@@ -39,6 +41,15 @@ model OauthToken {
   expiresAt    Int?
   sessionState String?
   User         User?
+}
+
+model WebPushSubscription {
+  id       Int    @id @default(autoincrement())
+  endpoint String
+  p256dh   String
+  auth     String
+  Owner    User   @relation(fields: [userId], references: [id])
+  userId   Int    @unique
 }
 
 model FriendPair {

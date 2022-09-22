@@ -13,7 +13,7 @@ export default async function handler(
   }
   const groupId = api.getGroupId(req);
   switch (req.method) {
-    case "PUT":
+    case "PUT": // TODO: Change to POST
       const input = JSON.parse(req.body) as Prisma.ExpenseCreateInput;
       const response = await models.createNewExpense(
         input,

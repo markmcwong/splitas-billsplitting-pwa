@@ -18,7 +18,7 @@ import Modal from "@mui/material/Modal";
 import Button from "@mui/material/Button";
 import MoneyLabel from "../../components/MoneyLabel";
 
-type GroupSummary = {
+export type GroupSummary = {
   id: number;
   name: string;
   payment: number;

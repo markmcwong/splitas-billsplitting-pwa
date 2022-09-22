@@ -45,4 +45,6 @@ next-env.d.ts
 
 temp/
 .env
-fallback-*.js
+
+public/fallback*.js
+
