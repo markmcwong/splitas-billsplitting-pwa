@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as rsa from "../scripts/rsa";
 import * as models from "./models";
 
+rsa.generateAndStoreKeys();
 const publicKey = fs.readFileSync(rsa.publicKeyPath);
 const privateKey = fs.readFileSync(rsa.privateKeyPath);
 
