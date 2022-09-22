@@ -104,8 +104,7 @@
 }
 
 .logo {
-  height: 1em;
-  margin-left: 0.5rem;
+  justify-content: center;
 }
 
 @media (max-width: 600px) {
@@ -115,15 +114,12 @@
   }
 }
 
-@media (prefers-color-scheme: dark) {
+@media (prefers-color-scheme: light) {
   .card,
   .footer {
-    border-color: #222;
+    border-color: white;
   }
   .code {
-    background: #111;
-  }
-  .logo img {
-    filter: invert(1);
+    background: white;
   }
 }

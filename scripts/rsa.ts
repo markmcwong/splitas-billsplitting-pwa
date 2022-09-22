@@ -3,16 +3,6 @@ import * as fs from "fs";
 
 const RSA = "rsa";
 
-// publicKeyEncoding: {
-//   type: "spki",
-//   format: "pem",
-// },
-// privateKeyEncoding: {
-//   type: "pkcs8",
-//   format: "pem",
-//   cipher: "aes-256-cbc",
-
-// },
 const options: crypto.RSAKeyPairKeyObjectOptions = {
   modulusLength: 1024 * 2,
 };
@@ -27,21 +17,21 @@ const priKeyOptions: crypto.KeyExportOptions<"pem"> = {
   format: "pem",
 };
 
-function generateAndStoreKeys() {
+export const keyDir = `./keys`;
+export const publicKeyPath = `${keyDir}/public.pem`;
+export const privateKeyPath = `${keyDir}/private.pem`;
+export function generateAndStoreKeys() {
   const keyPair = crypto.generateKeyPairSync(RSA, options);
   const pubKeyBuf = keyPair.publicKey.export(pubKeyOptions);
   const priKeyBuf = keyPair.privateKey.export(priKeyOptions);
-  if (!fs.existsSync("keys")) {
-    fs.mkdirSync("keys");
+
+  if (!fs.existsSync(keyDir)) {
+    fs.mkdirSync(keyDir, { recursive: true });
   }
-  fs.writeFileSync("keys/public.pem", pubKeyBuf, {
+  fs.writeFileSync(publicKeyPath, pubKeyBuf, {
     flag: "w+",
   });
-  fs.writeFileSync("keys/private.pem", priKeyBuf, {
+  fs.writeFileSync(privateKeyPath, priKeyBuf, {
     flag: "w+",
   });
 }
-
-generateAndStoreKeys();
-
-export {};

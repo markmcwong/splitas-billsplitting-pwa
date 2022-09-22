@@ -1,8 +1,8 @@
 import jsonwebtoken from "jsonwebtoken";
 import * as fs from "fs";
+import * as rsa from "../scripts/rsa";
 import * as models from "./models";
-// const publicKey = fs.readFileSync("keys/public.pem");
-// const privateKey = fs.readFileSync("keys/private.pem");
+
 const publicKey = process.env.JWT_PUBLIC_KEY ?? "";
 const privateKey = process.env.JWT_PRIVATE_KEY ?? "";
 if (publicKey === "" || privateKey === "") {
