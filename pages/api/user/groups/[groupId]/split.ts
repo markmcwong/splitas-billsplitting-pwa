@@ -17,13 +17,13 @@ export default async function handler(
   }
   const groupId = api.getGroupId(req);
   switch (req.method) {
-    case "PUT":
+    case "PUT": // TODO: Change to POST
       const input = JSON.parse(req.body) as Split[];
       console.log(input);
       models.createSplits(input, payload.userId);
       res.status(200).json("success");
       break;
-    case "POST":
+    case "POST": // TODO: Change to PUT
       const parsedAmount = JSON.parse(req.body) as Split[];
       models.updateSplit(parsedAmount);
       res.status(200).json("success");

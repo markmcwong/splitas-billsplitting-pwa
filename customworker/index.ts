@@ -54,8 +54,17 @@ const routeHandlers: Array<CustomRouteHandler> = [
     expectingBody: false,
   },
   {
-    regexp: /api\/user\/friends\/(?<friendId>[\d]+)\/expense$/,
+    regexp: /api\/user\/friends\/(?<friendId>[-\d]+)\/expense$/,
     handlerFunc: PUT_api_user_friends_friendId_expense,
+    method: "PUT",
+    expectingQueryParams: true,
+    expectingBody: true,
+  },
+  {
+    regexp: /api\/user\/groups\/(?<groupId>[-\d]+)\/expense$/,
+    // TODO: Change to POST
+    // TODO: Change to expenses
+    handlerFunc: PUT_api_user_groups_groupId_expense,
     method: "PUT",
     expectingQueryParams: true,
     expectingBody: true,
@@ -71,16 +80,19 @@ async function rootHandler(event: FetchEvent) {
     }
 
     if (routeHandler.regexp.test(url)) {
-      const regexpMatchGroups = routeHandler.regexp.exec(url)?.groups || {};
+      let mergedParams = {};
+      if (routeHandler.expectingQueryParams) {
+        const regexpMatchGroups = routeHandler.regexp.exec(url)?.groups || {};
 
-      const queryParams = routeHandler.expectingQueryParams
-        ? parsing.getJsonFromUrl(url)
-        : {};
+        const queryParams = routeHandler.expectingQueryParams
+          ? parsing.getJsonFromUrl(url)
+          : {};
 
-      const mergedParams = {
-        ...regexpMatchGroups,
-        ...queryParams,
-      };
+        mergedParams = {
+          ...regexpMatchGroups,
+          ...queryParams,
+        };
+      }
 
       const body = routeHandler.expectingBody
         ? await event.request.clone().json() // clone is 1000% important!!!
@@ -91,14 +103,14 @@ async function rootHandler(event: FetchEvent) {
   }
 }
 
-function getUnusedIndex(arr: Array<{ id: number }>): number {
-  let largestIndex = 0;
+function getUnusedOfflineId(arr: Array<{ id: number }>): number {
+  let smallestIndex = 0;
   for (const ele of arr) {
-    if (ele.id > largestIndex) {
-      largestIndex = ele.id;
+    if (ele.id < smallestIndex) {
+      smallestIndex = ele.id;
     }
   }
-  return largestIndex + 1;
+  return smallestIndex - 1;
 }
 
 async function POST_api_user_groups(
@@ -113,7 +125,7 @@ async function POST_api_user_groups(
   const groupSummaries: Array<GroupSummary> =
     (await groupSummaryResponse?.json()) || [];
 
-  const newId = getUnusedIndex(groupSummaries);
+  const newId = getUnusedOfflineId(groupSummaries);
 
   const newGroupSummary: GroupSummary = {
     id: newId,
@@ -159,7 +171,8 @@ async function POST_api_user_friends(
   }
 
   const newId =
-    friendId ?? getUnusedIndex(friendSummaries.map((summary) => summary.user));
+    friendId ??
+    getUnusedOfflineId(friendSummaries.map((summary) => summary.user));
   const newName = "unknown";
   const newEmail = friendEmail ?? "unknown";
   const user: models.User = {
@@ -179,20 +192,49 @@ async function POST_api_user_friends(
   await apiCache.put(key, new Response(JSON.stringify(friendSummaries)));
 }
 
+function getCurrentUserId() {
+  const userIdStr = check_cookie_by_name("userId");
+  if (userIdStr === undefined) {
+    return;
+  }
+  return Number.parseInt(userIdStr);
+}
+
 async function PUT_api_user_friends_friendId_expense(
   request: Request,
   params: { friendId: number },
   expenseAmount: number
 ) {
   const friendId = params.friendId;
-  const key = "/api/user/friends/summary";
+  const friendsSummaryKey = "/api/user/friends/summary";
+  const friendDetailsKey = `/api/user/friends/${friendId}`;
   const apiCache = await caches.open("apis");
-  const userIdStr = check_cookie_by_name("userId");
-  if (userIdStr === undefined) {
+  const userId = getCurrentUserId();
+  if (userId === undefined) {
     return;
   }
-  const userId = Number.parseInt(userIdStr);
   const newId = 1;
+  const friendsSummaryResponse = await apiCache.match(friendsSummaryKey);
+  const friendsSummary: Awaited<
+    ReturnType<typeof models.getAllFriendWithExpensesDetails>
+  > = (await friendsSummaryResponse?.json()) || [];
+  const friendSummaryIndex = friendsSummary.findIndex(
+    (summary) => summary.user.id === friendId
+  );
+  if (friendSummaryIndex !== -1) {
+    friendsSummary[friendSummaryIndex].amount += expenseAmount;
+    await apiCache.put(
+      friendsSummaryKey,
+      new Response(JSON.stringify(friendsSummary))
+    );
+  }
+
+  const friendDetailsResponse = await apiCache.match(friendDetailsKey);
+  if (friendDetailsResponse === undefined) {
+    return;
+  }
+  const friendDetails: Awaited<ReturnType<typeof models.getFriendDetails>> =
+    await friendDetailsResponse.json();
   const friendExpense: models.FriendExpense = {
     id: newId,
     amount: expenseAmount,
@@ -200,8 +242,48 @@ async function PUT_api_user_friends_friendId_expense(
     userOwingMoneyId: friendId,
     timestamp: new Date(),
   };
+  friendDetails.userExpenses.push(friendExpense);
+  await apiCache.put(
+    friendDetailsKey,
+    new Response(JSON.stringify(friendDetails))
+  );
+}
 
-  await apiCache.put(key, new Response("TODO"));
+async function PUT_api_user_groups_groupId_expense(
+  request: Request,
+  params: { groupId: number },
+  body: { amount: number; description: string }
+) {
+  const groupId = params.groupId;
+  const groupDetailsKey = `/api/user/groups/${groupId}`;
+
+  const apiCache = await caches.open("apis");
+  const groupDetailsResponse = await apiCache.match(groupDetailsKey);
+  const groupDetails: Awaited<ReturnType<typeof models.getGroupDetails>> =
+    await groupDetailsResponse?.json();
+  if (!groupDetails) {
+    return;
+  }
+  const userId = getCurrentUserId();
+  if (userId === undefined) {
+    return;
+  }
+  const newId = getUnusedOfflineId(groupDetails.Expenses);
+  const expenseKey = `${groupDetailsKey}/expense/${newId}`; // TODO: Need to merge create expense and create split
+  const newExpense: models.Expense = {
+    id: newId,
+    amount: body.amount,
+    description: body.description,
+    groupId,
+    payerId: userId,
+    timestamp: new Date(),
+  };
+
+  groupDetails.Expenses.push(newExpense);
+  await apiCache.put(
+    groupDetailsKey,
+    new Response(JSON.stringify(groupDetails))
+  );
 }
 
 // TODO: Notifications, can consider using workbox apis

@@ -247,11 +247,11 @@ export function getAllFriendWithExpensesDetails(userId: number) {
   });
 }
 
-export function getFriendDetails(userId: number, friendId: number) {
-  const friend = getUserById(friendId);
-  const friendExpenses = getFriendPairExpenses(friendId, userId);
-  const userExpenses = getFriendPairExpenses(userId, friendId);
-  const commonGroups = prisma.group.findMany({
+export async function getFriendDetails(userId: number, friendId: number) {
+  const friendPromise = getUserById(friendId);
+  const friendExpensesPromise = getFriendPairExpenses(friendId, userId);
+  const userExpensesPromise = getFriendPairExpenses(userId, friendId);
+  const commonGroupsPromise = prisma.group.findMany({
     where: {
       AND: [
         {
@@ -271,11 +271,17 @@ export function getFriendDetails(userId: number, friendId: number) {
       ],
     },
   });
-
+  const [friend, userExpenses, friendExpenses, commonGroups] =
+    await Promise.all([
+      friendPromise,
+      friendExpensesPromise,
+      userExpensesPromise,
+      commonGroupsPromise,
+    ]);
   return {
     friend,
-    userExpenses,
-    friendExpenses,
+    userExpenses: userExpenses || [],
+    friendExpenses: friendExpenses || [],
     commonGroups,
   };
 }
