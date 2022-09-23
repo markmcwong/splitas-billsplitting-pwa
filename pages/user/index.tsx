@@ -57,19 +57,31 @@ export default function UserPage() {
         setProfileImage(u.ProfileImage?.imageString ?? null);
       });
   }, []);
+
   const installPromptContext = useContext(InstallPromptContext);
   const loggedInContext = useContext(LoggedInContext);
+
   useEffect(() => {
     if (!loggedInContext) {
       return;
     }
     loggedInContext.setIsLoggedIn(true);
   }, []);
+
   const handleNameChange = (name: string) => {
     setUser({ name: name });
+    const updatedUser: models.User = {
+      id: user.id,
+      email: user.email,
+      hasAccount: user.hasAccount,
+      name: name,
+      profileImageId: user.profileImageId,
+      tokenId: user.tokenId,
+      webPushSubscriptionId: user.webPushSubscriptionId,
+    };
     fetch(`${url.api}/user`, {
       method: "PUT",
-      body: JSON.stringify(user),
+      body: JSON.stringify(updatedUser),
     });
   };
 
