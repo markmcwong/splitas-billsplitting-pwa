@@ -116,10 +116,7 @@ export default function GroupsPage() {
 
   return (
     <>
-      <Box
-        bgcolor="background.paper"
-        className="padding__all-3 container--min-height-maximum container--min-width-maximum"
-      >
+      <Box bgcolor="background.paper" className="groups-page">
         <ModalContent />
         <BottomAppBar routeValue={AppRoutesValues.Groups} />
         <Typography variant="caption" className="text--light-grey">
@@ -127,13 +124,13 @@ export default function GroupsPage() {
         </Typography>
         <Typography
           variant="h4"
-          className="text--semibolded"
+          className="groups-page__figure"
           color={balance < 0 ? "error.main" : "primary.main"}
         >
           ${Math.abs(balance).toFixed(2)}
         </Typography>
         <TextField
-          className="container__item--full-flex container--rounded margin__top--2 text--black"
+          className="groups-page__input"
           sx={{
             input: { color: "background.default" },
           }}

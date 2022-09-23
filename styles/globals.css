@@ -492,13 +492,36 @@ a {
 /* component-related css ends */
 
 /* page starts */
-.friend-page__subtitle {
+.friends-page__subtitle {
   margin-top: 1.5rem;
   font-weight: 500;
 }
 
-.friend-page__figure {
+.friends-page__figure {
   font-weight: 500;
 }
 
-/* page ends */
+.groups-page {
+  padding: 1.5rem;
+  min-height: 100vh;
+  min-width: 100%;
+}
+
+.groups-page__input {
+  border-radius: 15px;
+  color: black;
+  margin-top: 1rem;
+  flex: 0 0 100%;
+}
+
+.groups-page__figure {
+  font-weight: 500;
+}
+
+.groups-details__info {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: row;
+}
+
+/* page ends */ ;

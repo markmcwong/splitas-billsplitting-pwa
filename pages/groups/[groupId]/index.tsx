@@ -182,7 +182,7 @@ const GroupDetailsPage = () => {
             <Logout fontSize="large" />
           </IconButton>
         </Box>
-        <Grid container className="margin__bottom--2 container--row">
+        <Grid container className="groups-details__info">
           <Grid item xs={5} className="container--row">
             <Box alignItems="flex-start">
               {groupDetails && splits && (
@@ -192,7 +192,7 @@ const GroupDetailsPage = () => {
                   </Typography>
                   <Typography
                     variant="h4"
-                    className="text--semibolded"
+                    className="groups-page__figure"
                     color={total < 0 ? "error.main" : "primary.main"}
                   >
                     {Math.abs(total)}
@@ -216,7 +216,7 @@ const GroupDetailsPage = () => {
               </Typography>
               <Typography
                 variant="h4"
-                className="text--semibolded"
+                className="groups-page__figure"
                 color="primary.main"
               >
                 {groupDetails &&
