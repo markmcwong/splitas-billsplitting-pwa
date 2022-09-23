@@ -14,7 +14,7 @@ export default async function handler(
   }
   const friendId = api.getFriendId(req);
   switch (req.method) {
-    case "PUT": // TODO Change to POST
+    case "POST":
       const parsedAmount = JSON.parse(req.body) as number;
       const response = await models.createFriendExpense(
         parsedAmount,
@@ -36,6 +36,6 @@ export default async function handler(
       res.status(200).json(response);
       break;
     default:
-      api.allowMethods(req, res, ["PUT"]);
+      api.allowMethods(req, res, ["POST"]);
   }
 }

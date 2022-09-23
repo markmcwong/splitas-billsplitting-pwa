@@ -41,28 +41,28 @@ interface CustomRouteHandler {
 
 const routeHandlers: Array<CustomRouteHandler> = [
   {
-    regexp: /api\/user\/groups$/,
+    regexp: /api\/user\/groups\??.*$/,
     handlerFunc: POST_api_user_groups,
     method: "POST",
     expectingQueryParams: false,
     expectingBody: true,
   },
   {
-    regexp: /api\/user\/friends$/,
+    regexp: /api\/user\/friends\??.*$/,
     handlerFunc: POST_api_user_friends,
     method: "POST",
     expectingQueryParams: true,
     expectingBody: false,
   },
   {
-    regexp: /api\/user\/friends\/(?<friendId>[-\d]+)\/expense$/,
-    handlerFunc: PUT_api_user_friends_friendId_expense,
-    method: "PUT",
+    regexp: /api\/user\/friends\/(?<friendId>[-\d]+)\/expense\??.*$/,
+    handlerFunc: POST_api_user_friends_friendId_expense,
+    method: "POST",
     expectingQueryParams: true,
     expectingBody: true,
   },
   {
-    regexp: /api\/user\/groups\/(?<groupId>[-\d]+)\/expense$/,
+    regexp: /api\/user\/groups\/(?<groupId>[-\d]+)\/expense\??.*$/,
     // TODO: Change to expenses
     handlerFunc: POST_api_user_groups_groupId_expense,
     method: "POST",
@@ -201,12 +201,12 @@ async function getCurrentUserId() {
   return userId;
 }
 
-async function PUT_api_user_friends_friendId_expense(
+async function POST_api_user_friends_friendId_expense(
   request: Request,
-  params: { friendId: number },
+  params: { friendId: string },
   expenseAmount: number
 ) {
-  const friendId = params.friendId;
+  const friendId = Number.parseInt(params.friendId);
   const friendsSummaryKey = "/api/user/friends/summary";
   const friendDetailsKey = `/api/user/friends/${friendId}`;
   const apiCache = await caches.open("apis");
@@ -252,10 +252,10 @@ async function PUT_api_user_friends_friendId_expense(
 
 async function POST_api_user_groups_groupId_expense(
   request: Request,
-  params: { groupId: number },
+  params: { groupId: string },
   body: Prisma.ExpenseCreateInput
 ) {
-  const groupId = params.groupId;
+  const groupId = Number.parseInt(params.groupId);
   const groupDetailsKey = `/api/user/groups/${groupId}`;
 
   const apiCache = await caches.open("apis");

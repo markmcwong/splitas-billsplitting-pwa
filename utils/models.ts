@@ -276,7 +276,7 @@ export async function getFriendDetails(userId: number, friendId: number) {
       ],
     },
   });
-  const [friend, userExpenses, friendExpenses, commonGroups] =
+  const [friend, friendExpenses, userExpenses, commonGroups] =
     await Promise.all([
       friendPromise,
       friendExpensesPromise,

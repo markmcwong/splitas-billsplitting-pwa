@@ -18,24 +18,22 @@ import EditIcon from "@mui/icons-material/Edit";
 import EditNameDialog from "../../components/EditNameDialog";
 
 type UserWithProfileImage = Awaited<ReturnType<typeof models.getUserProfile>>;
-const defaultUser: UserWithProfileImage = {
+const defaultUser: models.User = {
   id: 0,
   hasAccount: false,
   name: "",
   email: "",
   tokenId: null,
   webPushSubscriptionId: null,
-  ProfileImage: null,
+  profileImageId: null,
 };
 
 export default function UserPage() {
   const [user, setUser] = useReducer(
-    (
-      s: UserWithProfileImage,
-      a: Partial<UserWithProfileImage>
-    ): UserWithProfileImage => ({ ...s, ...a }),
+    (s: models.User, a: Partial<models.User>): models.User => ({ ...s, ...a }),
     defaultUser
   );
+  const [profileImage, setProfileImage] = useState<string | null>(null);
 
   const [editNameDialogOpen, setEditNameDialogOpen] = useState<boolean>(false);
   useEffect(() => {
@@ -46,7 +44,18 @@ export default function UserPage() {
         }
         return Promise.reject(resp);
       })
-      .then((u) => setUser(u));
+      .then((u: UserWithProfileImage) => {
+        setUser({
+          id: u.id,
+          email: u.email,
+          hasAccount: u.hasAccount,
+          name: u.name,
+          profileImageId: u.profileImageId,
+          tokenId: u.tokenId,
+          webPushSubscriptionId: u.webPushSubscriptionId,
+        });
+        setProfileImage(u.ProfileImage?.imageString ?? null);
+      });
   }, []);
   const installPromptContext = useContext(InstallPromptContext);
   const loggedInContext = useContext(LoggedInContext);
@@ -80,7 +89,7 @@ export default function UserPage() {
           <Box display="flex" justifyContent="center" width="100vw">
             <Avatar
               alt={user?.name ?? ""}
-              src={user?.ProfileImage?.imageString ?? ""}
+              src={profileImage ?? ""}
               sx={{ width: "40vw", height: "40vw", align: "center" }}
             />
           </Box>
