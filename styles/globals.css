@@ -409,7 +409,7 @@ a {
 .contact-item__avatar {
   max-height: 45px;
   max-width: 45px;
-  padding-right: 0.5rem;
+  /* padding-right: 0.5rem; */
 }
 
 .contact-item__content {
