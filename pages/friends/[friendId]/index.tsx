@@ -41,8 +41,8 @@ const FriendDetailsPage = () => {
       .then((transactions) => {
         const { userExpenses, friendExpenses } = transactions;
         const mergedTransactionsSortedInTime = [
-          ...friendExpenses,
-          ...userExpenses.map((expense: FriendExpense) => ({
+          ...userExpenses,
+          ...friendExpenses.map((expense: FriendExpense) => ({
             ...expense,
             amount: -expense.amount,
           })),
