@@ -34,7 +34,6 @@ type SplitsType = models.Split & {
 const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
   const [splits, setSplits] = useState<SplitsType[]>([]);
   const [originalSplit, setOriginalSplit] = useState<any>(null);
-  // const [originalSum, setOriginalSum] = useState<number>(0);
   const [isEditing, setIsEditing] = useState<boolean[]>([]);
   const currentUserId = check_cookie_by_name("userId");
 
@@ -45,7 +44,6 @@ const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
         .then((splits) => {
           setSplits(splits);
           setOriginalSplit(splits);
-          // setOriginalSum(splits.reduce((a, b) => a + b.amount, 0));
           setIsEditing(splits.map(() => false));
         });
     }
@@ -131,21 +129,12 @@ const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
               className="padding__bottom-2 padding__right-2"
             >
               <Grid item xs={12}>
-                <Typography
-                  variant="body1"
-                  color="text.primary"
-                  // className="padding__vertical-1"
-                >
+                <Typography variant="body1" color="text.primary">
                   Total Expense:
                 </Typography>
               </Grid>
               <Grid item xs>
-                <Typography
-                  variant="body1"
-                  color="text.primary"
-                  // className="padding__vertical-1"
-                  // textAlign="right"
-                >
+                <Typography variant="body1" color="text.primary">
                   {splits[0].Expense.amount}
                 </Typography>
               </Grid>
@@ -174,7 +163,11 @@ const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
                   borderRadius: 2,
                 }}
               >
-                <Typography>{split.User.name.substring(0, 8)}</Typography>
+                <Typography>
+                  {split.User.name.length > 20
+                    ? split.User.name.substring(0, 17) + "..."
+                    : split.User.name}
+                </Typography>
               </ListItemIcon>
               {isEditing[i] === true ? (
                 <Input
@@ -239,7 +232,7 @@ const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
             variant="outlined"
             disabled={
               isEditing.some((x) => x) ||
-              splits.reduce((a, b) => a + b.amount, 0) >
+              splits.reduce((a, b) => a + b.amount, 0) !=
                 splits[0].Expense.amount
             }
             onClick={() => updateSplits()}

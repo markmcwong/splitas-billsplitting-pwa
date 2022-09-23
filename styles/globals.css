@@ -308,3 +308,11 @@ a {
 }
 
 /* modal-related css ends */
+
+/* component-related css starts */
+
+.contact__item--disabled {
+  pointer-events: none;
+}
+
+/* component-related css ends */

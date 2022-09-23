@@ -12,8 +12,8 @@ import {
   Button,
   Divider,
 } from "@mui/material";
-import { useState } from "react";
 import { Prisma } from "@prisma/client";
+import { useEffect, useState } from "react";
 import ModalContent from "../../../components/Modal";
 import * as models from "../../../utils/models";
 import * as ce from "../../../utils/class_extension";
@@ -37,6 +37,7 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
     users?.reduce((map, obj) => ((map[obj.id] = 0), map), {} as UserAmounts) ||
       {}
   );
+  const [userAmountsSum, setUserAmountsSum] = useState<number>(0);
 
   const createExpense = (amount: number, description: string) => {
     // We do not include Group and Payer here, as these info are obtained from the query params and session token.
@@ -54,7 +55,6 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
         },
       },
     };
-    console.log(userAmounts);
     fetch(`${url.api}/user/groups/${groupId}/expense`, {
       method: "POST",
       body: JSON.stringify(postBody),
@@ -77,6 +77,12 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
       users.reduce((map, obj) => ((map[obj.id] = 0), map), {} as UserAmounts)
     );
   };
+
+  useEffect(() => {
+    setUserAmountsSum(
+      Object.values(userAmounts).reduce((acc, curr) => acc + curr, 0)
+    );
+  }, [userAmounts]);
 
   return (
     <ModalContent
@@ -149,18 +155,18 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
           </Grid>
         </Grid>
         <Divider />
-        {splitType == "exact" &&
-          users &&
-          Object.values(userAmounts).reduce(
-            (partialSum, a) => partialSum + a,
-            0
-          ) > amount && (
+        {users &&
+          (splitType == "exact"
+            ? userAmountsSum != amount
+            : userAmountsSum > amount) && (
             <Typography
               variant="caption"
               color="error.main"
               className="modal__validation-message"
             >
-              Total amount is greater than original expense: ${amount}
+              Total amount is{" "}
+              {splitType == "exact" ? "not equal to" : "greater than"} original
+              expense: ${amount}
             </Typography>
           )}
         {splitType == "equal" && (
@@ -209,13 +215,9 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
           onClick={() => createExpense(amount, description)}
           className="form__submit-button--full-width"
           disabled={
-            (Object.values(userAmounts).reduce(
-              (partialSum, a) => partialSum + a,
-              0
-            ) > amount &&
-              splitType == "exact") ||
-            description == "" ||
-            amount == 0
+            splitType == "exact"
+              ? userAmountsSum != amount
+              : userAmountsSum > amount || description == "" || amount == 0
           }
         >
           Submit

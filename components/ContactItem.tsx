@@ -4,18 +4,27 @@ import Grid from "@mui/material/Grid";
 import { Typography } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import Link from "next/link";
-import type { ContactInfo } from "../utils/oauth";
 
 const ContactItem = (
   friend: any,
   rightContent?: JSX.Element,
   hrefPrefix: string = "",
-  color: string = "transparent",
   textColor: string = "black"
 ) => {
   return (
-    <Link href={`/${hrefPrefix}/${friend.id}?name=${friend.name}`}>
-      <Grid bgcolor={color} display="flex" flexDirection="row" sx={{ my: 1 }}>
+    <Link
+      href={
+        friend.id > 0
+          ? `/${hrefPrefix}/${friend.id}?name=${friend.name}`
+          : `/${hrefPrefix}/#`
+      }
+    >
+      <Grid
+        bgcolor="transparent"
+        display="flex"
+        flexDirection="row"
+        sx={{ my: 1 }}
+      >
         <Grid display="flex" item container xs={1} sx={{ my: 1, mr: 3 }}>
           <Avatar
             sx={{ maxHeight: 45, maxWidth: 45 }}
@@ -30,7 +39,10 @@ const ContactItem = (
           xs
           justifyContent="center"
         >
-          <Typography variant="body2" sx={{ color: textColor }}>
+          <Typography
+            variant="body2"
+            sx={{ color: friend.id > 0 ? textColor : grey[400] }}
+          >
             {friend.email != null && friend.email}
           </Typography>
           <Typography
