@@ -79,7 +79,7 @@ export default function UserPage() {
         <Stack spacing={0.5}>
           <Box display="flex" justifyContent="center" width="100vw">
             <Avatar
-              // alt={user?.name ?? ""}
+              alt={user?.name ?? ""}
               src={user?.ProfileImage?.imageString ?? ""}
               sx={{ width: "40vw", height: "40vw", align: "center" }}
             />
