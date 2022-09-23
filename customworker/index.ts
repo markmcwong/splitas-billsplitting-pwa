@@ -2,7 +2,6 @@ import { Prisma } from "@prisma/client";
 import * as models from "../utils/models";
 import * as parsing from "../utils/parsing";
 import * as urls from "../utils/urls";
-import { check_cookie_by_name } from "../utils/class_extension";
 import type { GroupSummary } from "../pages/groups/index";
 declare let self: ServiceWorkerGlobalScope;
 
@@ -64,10 +63,9 @@ const routeHandlers: Array<CustomRouteHandler> = [
   },
   {
     regexp: /api\/user\/groups\/(?<groupId>[-\d]+)\/expense$/,
-    // TODO: Change to POST
     // TODO: Change to expenses
-    handlerFunc: PUT_api_user_groups_groupId_expense,
-    method: "PUT",
+    handlerFunc: POST_api_user_groups_groupId_expense,
+    method: "POST",
     expectingQueryParams: true,
     expectingBody: true,
   },
@@ -77,12 +75,14 @@ async function rootHandler(event: FetchEvent) {
   const url = event.request.url;
 
   for (const routeHandler of routeHandlers) {
+    console.log("Attempting to match handler", routeHandler.regexp);
     if (routeHandler.method !== event.request.method) {
       continue;
     }
-
     if (routeHandler.regexp.test(url)) {
+      console.log("matched handler", routeHandler.regexp);
       let mergedParams = {};
+
       if (routeHandler.expectingQueryParams) {
         const regexpMatchGroups = routeHandler.regexp.exec(url)?.groups || {};
 
@@ -120,7 +120,6 @@ async function POST_api_user_groups(
   _: unknown,
   groupCreateInput: Prisma.GroupCreateInput
 ) {
-  console.log(groupCreateInput);
   const key = "/api/user/groups/summary";
   const apiCache = await caches.open("apis");
   const groupSummaryResponse = await apiCache.match(key);
@@ -196,12 +195,10 @@ async function POST_api_user_friends(
   await apiCache.put(key, new Response(JSON.stringify(friendSummaries)));
 }
 
-function getCurrentUserId() {
-  const userIdStr = check_cookie_by_name("userId");
-  if (userIdStr === undefined) {
-    return;
-  }
-  return Number.parseInt(userIdStr);
+async function getCurrentUserId() {
+  const userIdStr = (await cookieStore.get("userId")).value;
+  const userId = Number.parseInt(userIdStr);
+  return userId;
 }
 
 async function PUT_api_user_friends_friendId_expense(
@@ -213,7 +210,7 @@ async function PUT_api_user_friends_friendId_expense(
   const friendsSummaryKey = "/api/user/friends/summary";
   const friendDetailsKey = `/api/user/friends/${friendId}`;
   const apiCache = await caches.open("apis");
-  const userId = getCurrentUserId();
+  const userId = await getCurrentUserId();
   if (userId === undefined) {
     return;
   }
@@ -253,10 +250,10 @@ async function PUT_api_user_friends_friendId_expense(
   );
 }
 
-async function PUT_api_user_groups_groupId_expense(
+async function POST_api_user_groups_groupId_expense(
   request: Request,
   params: { groupId: number },
-  body: { amount: number; description: string }
+  body: Prisma.ExpenseCreateInput
 ) {
   const groupId = params.groupId;
   const groupDetailsKey = `/api/user/groups/${groupId}`;
@@ -265,15 +262,17 @@ async function PUT_api_user_groups_groupId_expense(
   const groupDetailsResponse = await apiCache.match(groupDetailsKey);
   const groupDetails: Awaited<ReturnType<typeof models.getGroupDetails>> =
     await groupDetailsResponse?.json();
+  console.log("groupDetails", groupDetails);
   if (!groupDetails) {
     return;
   }
-  const userId = getCurrentUserId();
+  const userId = await getCurrentUserId();
+  console.log("userId", userId);
   if (userId === undefined) {
     return;
   }
   const newId = getUnusedOfflineId(groupDetails.Expenses);
-  const expenseKey = `${groupDetailsKey}/expense/${newId}`; // TODO: Need to merge create expense and create split
+
   const newExpense: models.Expense = {
     id: newId,
     amount: body.amount,
@@ -287,6 +286,25 @@ async function PUT_api_user_groups_groupId_expense(
   await apiCache.put(
     groupDetailsKey,
     new Response(JSON.stringify(groupDetails))
+  );
+  const expenseKey = `${groupDetailsKey}/expense/${newId}`;
+  const expenseSplitList: Array<models.Split> = [];
+  const splits: models.Split[] = [];
+  let data = body.Splits?.createMany?.data;
+  console.log("splitdata", data);
+  if (data !== undefined) {
+    for (const split of data as Array<{ userId: number; amount: number }>) {
+      splits.push({
+        id: -1, // as there is no further nesting of resources within splits, this is okay
+        amount: split.amount,
+        userId: split.userId,
+        expenseId: newId,
+      });
+    }
+  }
+  await apiCache.put(
+    expenseKey,
+    new Response(JSON.stringify(expenseSplitList))
   );
 }
 

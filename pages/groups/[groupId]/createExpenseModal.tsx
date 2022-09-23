@@ -13,6 +13,7 @@ import {
   Divider,
 } from "@mui/material";
 import { useState } from "react";
+import { Prisma } from "@prisma/client";
 import ModalContent from "../../../components/Modal";
 import * as models from "../../../utils/models";
 import * as ce from "../../../utils/class_extension";
@@ -38,16 +39,19 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
   );
 
   const createExpense = (amount: number, description: string) => {
-    const postBody = {
+    // We do not include Group and Payer here, as these info are obtained from the query params and session token.
+    const postBody: Prisma.ExpenseCreateInput = {
       amount,
       description,
       Splits: {
-        create: Object.keys(userAmounts).map((key) => {
-          return {
-            amount: userAmounts[parseInt(key)],
-            userId: parseInt(key),
-          };
-        }),
+        createMany: {
+          data: Object.keys(userAmounts).map((key) => {
+            return {
+              amount: userAmounts[parseInt(key)],
+              userId: parseInt(key),
+            };
+          }),
+        },
       },
     };
     console.log(userAmounts);
