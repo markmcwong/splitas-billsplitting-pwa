@@ -36,7 +36,7 @@ const FriendDetailsPage = () => {
     fetch(`${url.api}/user/friends/${friendId}`)
       .then((res) => {
         if (res.ok) return res.json();
-        return Promise.reject(res);
+        throw new Error("Something went wrong");
       })
       .then((transactions) => {
         const { userExpenses, friendExpenses } = transactions;
@@ -54,6 +54,9 @@ const FriendDetailsPage = () => {
             0
           )
         );
+      })
+      .catch((error) => {
+        if (!navigator.onLine) router.push(`${url.server}/_offline`);
       });
   };
 
