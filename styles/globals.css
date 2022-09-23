@@ -306,6 +306,8 @@ a {
   bottom: 0;
   left: 0;
   right: 0;
+  -webkit-transform: translateZ(0);
+  z-index: 1000;
 }
 
 /* nav-bar and menu-related css ends */
@@ -378,15 +380,16 @@ a {
   background-color: "transparent";
   display: flex;
   flex-direction: row;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
   margin-left: 0rem;
 }
 
 .contact-item__texts-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: column !important;
   justify-content: center;
   align-items: flex-start;
+  padding-left: 1.5rem;
 }
 
 .contact-item__avatar-container {
