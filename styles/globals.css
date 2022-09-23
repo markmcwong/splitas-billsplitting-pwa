@@ -383,9 +383,10 @@ a {
 }
 
 .contact-item__texts-container {
-  justify-content: center;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
 }
 
 .contact-item__avatar-container {
@@ -398,6 +399,7 @@ a {
 .contact-item__avatar {
   max-height: 45px;
   max-width: 45px;
+  padding-right: 0.5rem;
 }
 
 .contact-item__content {

@@ -107,7 +107,11 @@ const ViewSplitsModal = ({
       handleClose={handleClose}
       title={"Expense Details"}
       rightContent={
-        splits.some((split) => split.User.id === parseInt(currentUserId!))
+        splits.some(
+          (split) =>
+            split.User.id === parseInt(currentUserId!) &&
+            split.Expense.Payer.id !== parseInt(currentUserId!)
+        )
           ? PayButton()
           : null
       }
