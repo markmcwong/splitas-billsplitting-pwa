@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import EditNameDialog from "../../components/EditNameDialog";
+import { NextRouter, useRouter } from "next/router";
 
 type UserWithProfileImage = Awaited<ReturnType<typeof models.getUserProfile>>;
 const defaultUser: models.User = {
@@ -27,6 +28,19 @@ const defaultUser: models.User = {
   webPushSubscriptionId: null,
   profileImageId: null,
 };
+// https://stackoverflow.com/questions/2144386/how-to-delete-a-cookie
+function removeItem(sKey: string, sDomain: string) {
+  document.cookie =
+    encodeURIComponent(sKey) +
+    "=; expires=Thu, 01 Jan 1970 00:00:00 GMT" +
+    (sDomain ? "; domain=" + sDomain : "");
+}
+
+function signOut(router: NextRouter) {
+  removeItem("session", location.hostname);
+  removeItem("userId", location.hostname);
+  router.push("/");
+}
 
 export default function UserPage() {
   const [user, setUser] = useReducer(
@@ -34,6 +48,7 @@ export default function UserPage() {
     defaultUser
   );
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const router = useRouter();
 
   const [editNameDialogOpen, setEditNameDialogOpen] = useState<boolean>(false);
   useEffect(() => {
@@ -146,6 +161,7 @@ export default function UserPage() {
               color="secondary"
               size="large"
               sx={{ width: "66%", borderRadius: "12px" }}
+              onClick={(e) => signOut(router)}
             >
               Sign Out
             </Button>
