@@ -64,7 +64,7 @@ const FriendDetailsPage = () => {
 
   const createExpense = () => {
     fetch(`${url.api}/user/friends/${friendId}/expense?friendId=${friendId}`, {
-      method: "PUT",
+      method: "POST",
       body: JSON.stringify(amount),
     })
       .then((res) => res.json())

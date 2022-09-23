@@ -25,7 +25,6 @@ export default async function handler(
       );
       const group = await models.getGroupById(groupId);
       const splitInput = input.Splits?.createMany?.data as Array<models.Split>;
-      console.log(splitInput);
       for (const split of splitInput) {
         const subscription = await models.getWebPushSubscriptionByUser(
           split.userId

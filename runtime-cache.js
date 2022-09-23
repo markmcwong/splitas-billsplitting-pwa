@@ -147,34 +147,22 @@ module.exports = [
     },
   },
   {
-    // urlPattern: ({ url }) => {
-    //   const isSameOrigin = self.origin === url.origin;
-    //   if (!isSameOrigin) return false;
-    //   const pathname = url.pathname;
-    //   console.log("POST", pathname, pathname.startsWith("/api/"));
-    //   if (pathname.startsWith("/api/")) return true;
-    //   return false;
-    // },
-    // handler: "NetworkFirst",
-    // method: "POST",
-    // options: {
-    //   cacheName: "others",
-    //   expiration: {
-    //     maxEntries: 32,
-    //     maxAgeSeconds: 24 * 60 * 60, // 24 hours
-    //   },
-    //   networkTimeoutSeconds: 10,
-    //   backgroundSync: {
-    //     name: "apiposts",
-    //   },
-    // },
-
     urlPattern: /\/api\/.*$/i,
     handler: "NetworkOnly",
     method: "POST",
     options: {
       backgroundSync: {
         name: "apipost",
+      },
+    },
+  },
+  {
+    urlPattern: /\/api\/.*$/i,
+    handler: "NetworkOnly",
+    method: "PUT",
+    options: {
+      backgroundSync: {
+        name: "apiput",
       },
     },
   },
