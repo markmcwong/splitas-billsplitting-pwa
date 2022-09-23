@@ -7,8 +7,15 @@ import { Delete } from "@mui/icons-material";
 
 /* type definition starts */
 
+export type FriendType = models.User & {
+  ProfileImage: {
+    id: number;
+    imageString: string;
+  } | null;
+};
+
 type PropsType = {
-  friends: models.User[];
+  friends: FriendType[];
   callback: () => void;
   kickOut: (user: models.User) => void;
 };
@@ -33,7 +40,7 @@ const AvatarList = ({ friends, callback, kickOut }: PropsType) => {
       <Box className="avatar-list__add-button" onClick={() => callback()}>
         <AddIcon className="avatar-list__add-icon" fontSize="medium" />
       </Box>
-      {friends.map((friend: models.User, i: number) => {
+      {friends.map((friend: FriendType, i: number) => {
         return avatarClicked[i] ? (
           <Box
             className="container--column container--centered"

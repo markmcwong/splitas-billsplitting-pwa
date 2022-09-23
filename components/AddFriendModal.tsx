@@ -254,11 +254,7 @@ const FriendModal = ({
             .map((user, i) => (
               <ListItem className="modal-friend__list-item">
                 <Avatar src={user.photo ?? ""}></Avatar>
-                <ListItemIcon
-                  sx={{
-                    flex: "0 0 95%",
-                  }}
-                >
+                <ListItemIcon className="container--flex-1">
                   <Box className="container--column">
                     <Typography variant="h6" color="text.primary">
                       {user.name.length > 16

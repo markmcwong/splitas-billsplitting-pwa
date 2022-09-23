@@ -1,23 +1,23 @@
-import { useState, useEffect } from "react";
-import Box from "@mui/material/Box";
-import BottomAppBar from "../../components/BottomAppBar";
-import { AppRoutesValues } from "../../utils/urls";
-import * as models from "../../utils/models";
-import * as url from "../../utils/urls";
-import TextField from "@mui/material/TextField";
-import ContactItem from "../../components/ContactItem";
-import InputAdornment from "@mui/material/InputAdornment";
 import { Add, Search } from "@mui/icons-material";
-import Typography from "@mui/material/Typography";
+import Box from "@mui/material/Box";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
+import InputAdornment from "@mui/material/InputAdornment";
+import TextField from "@mui/material/TextField";
+import Typography from "@mui/material/Typography";
+import { useEffect, useState } from "react";
+import FriendModal from "../../components/AddFriendModal";
+import { FriendType } from "../../components/AvatarList";
+import BottomAppBar from "../../components/BottomAppBar";
+import ContactItem from "../../components/ContactItem";
 import MoneyLabel from "../../components/MoneyLabel";
 import "../../utils/class_extension.ts";
-import FriendModal from "../../components/AddFriendModal";
+import * as url from "../../utils/urls";
+import { AppRoutesValues } from "../../utils/urls";
 
 type friendWithExpense = {
   amount: number;
-  user: models.User;
+  user: FriendType;
 };
 
 const AddFriendItem = (props: { callback: () => void }) => {

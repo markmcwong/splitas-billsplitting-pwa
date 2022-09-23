@@ -355,7 +355,11 @@ export function getGroupDetails(groupId: number) {
           PaidFrom: true,
         },
       },
-      Users: true,
+      Users: {
+        include: {
+          ProfileImage: true,
+        },
+      },
     },
   });
 }
