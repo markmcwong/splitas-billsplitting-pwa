@@ -111,14 +111,10 @@ const AppPage: NextPage = () => {
   return (
     <Box sx={{ minHeight: "100vh" }} bgcolor="background.paper">
       <TopAppBar headerText="Activity" />
-<<<<<<< HEAD
-      <List sx={{ width: "100%", bgcolor: "background.paper" }}>
-=======
       <List
         className="container--full-width"
         sx={{ bgcolor: "background.paper" }}
       >
->>>>>>> d3e026ff6b45ff5db95fa0d4ace0868ea11c3a61
         {activities
           .filter((a) => displayedActivityTypesSet.has(a.type))
           .sort((a, b) => b.id - a.id)
