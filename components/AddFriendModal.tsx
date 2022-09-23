@@ -83,6 +83,7 @@ const FriendModal = ({
   }, [friendEmail, searchByEmail]);
 
   useEffect(() => {
+    stateRef!.current = searchByEmail;
     if (!searchByEmail) {
       getContacts();
     } else {
@@ -134,6 +135,7 @@ const FriendModal = ({
     fetch(`${url.api}/user/contacts`, {})
       .then((res) => res.json())
       .then((data) => {
+        console.log(stateRef.current);
         if (!stateRef.current) {
           setFriendSearchResult(
             data.map((x: ContactFriendType) => {
