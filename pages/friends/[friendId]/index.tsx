@@ -1,16 +1,6 @@
 import { Delete, Receipt } from "@mui/icons-material";
 import ArrowBack from "@mui/icons-material/ArrowBack";
-import {
-  Box,
-  List,
-  IconButton,
-  Fab,
-  TextField,
-  Button,
-  Stack,
-  Grid,
-} from "@mui/material";
-import { grey } from "@mui/material/colors";
+import { Box, List, IconButton, Fab, TextField, Button } from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -22,33 +12,45 @@ import MoneyLabel from "../../../components/MoneyLabel";
 import "../../../utils/class_extension.ts";
 
 const FriendDetailsPage = () => {
+  /* lifecycle hooks starts */
   const router = useRouter();
   const { friendId, name } = router.query;
-  const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const [open, setOpen] = useState<boolean>(false);
   const [amount, setAmount] = useState<number | null>();
-  const [description, setDescription] = useState<string>("");
   const [transactions, setTransactions] = useState<Array<FriendExpense>>([]);
   const [totalFigure, setTotalFigure] = useState<number>(0);
 
+  useEffect(() => {
+    getTransactions();
+  }, [router]);
+
+  /* lifecycle hooks ends */
+
+  /* helper method starts */
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+  /* helper method ends */
+
+  /* network functions starts */
   const getTransactions = () => {
     fetch(`${url.api}/user/friends/${friendId}`)
       .then((res) => res.json())
       .then((transactions) => {
         const { userExpenses, friendExpenses } = transactions;
-        const sortedMergedtransactions = [
+        const mergedTransactionsSortedInTime = [
           ...userExpenses,
           ...friendExpenses.map((expense: FriendExpense) => ({
             ...expense,
             amount: -expense.amount,
           })),
         ].sort((x, y) => x.timestamp - y.timestamp);
-        setTransactions(sortedMergedtransactions);
+        setTransactions(mergedTransactionsSortedInTime);
         setTotalFigure(
-          sortedMergedtransactions.reduce((acc, curr) => acc + curr.amount, 0)
+          mergedTransactionsSortedInTime.reduce(
+            (acc, curr) => acc + curr.amount,
+            0
+          )
         );
-        console.log(sortedMergedtransactions);
       });
   };
 
@@ -64,19 +66,19 @@ const FriendDetailsPage = () => {
     fetch(`${url.api}/user/friends/${friendId}/expense?friendId=${friendId}`, {
       method: "PUT",
       body: JSON.stringify(amount),
-    });
-    setAmount(null);
-    setDescription("");
-    handleClose();
-    getTransactions();
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        setAmount(null);
+        handleClose();
+        getTransactions();
+      });
   };
 
-  useEffect(() => {
-    getTransactions();
-  }, []);
+  /* network functions ends */
 
   return (
-    <Box sx={{ minHeight: "100vh", p: 3 }} bgcolor="background.paper">
+    <Box bgcolor="background.paper" className="page">
       <ModalContent
         open={open}
         handleClose={handleClose}
@@ -84,53 +86,41 @@ const FriendDetailsPage = () => {
         subtitle={`Between you and ${name}`}
       >
         <>
-          {/* <TextField
-            sx={{
-              flex: "0 0 100%",
-              my: 2,
-              input: { color: "background.default" },
-            }}
-            type="text"
-            name="transactionDescription"
-            value={description}
-            placeholder="Transaction description"
-            onChange={(e) => setDescription(e.target.value)}
-          /> */}
           <TextField
+            className="container__item--full-flex"
             sx={{
-              flex: "0 0 100%",
               input: { color: "background.default" },
             }}
             type="number"
             name="transactionAmount"
             value={amount}
             inputProps={{
-              maxLength: 13,
+              maxLength: 10,
               step: "1",
             }}
             placeholder="Amount you lent"
             onChange={(e) =>
-              setAmount(parseFloat(parseFloat(e.target.value).toFixed(2)))
+              setAmount(
+                parseFloat(
+                  parseFloat(
+                    e.target.value === "" ? "0" : e.target.value
+                  ).toFixed(2)
+                )
+              )
             }
           />
           <Button
             variant="outlined"
             type="submit"
-            sx={{ width: "33%", my: 2 }}
+            className="container--full-width margin__vertical--2"
             onClick={createExpense}
+            disabled={amount == null || amount == 0}
           >
             Save
           </Button>
         </>
       </ModalContent>
-      <Box
-        sx={{
-          ml: -1.5,
-          width: "100%",
-          justifyContent: "space-between",
-        }}
-        display="flex"
-      >
+      <Box className="action-bar--top-separated">
         <IconButton onClick={() => router.back()}>
           <ArrowBack fontSize="large" />
         </IconButton>
@@ -138,15 +128,14 @@ const FriendDetailsPage = () => {
           <Delete fontSize="large" />
         </IconButton>
       </Box>
-      {/* <TopAppBarNew title="Balance" /> */}
-      <Typography variant="caption" sx={{ color: grey[400] }}>
+      <Typography variant="caption" className="text--light-grey">
         Transaction between {name}
       </Typography>
       <Typography
         variant="h4"
+        className="text--semibolded"
         sx={{
           color: totalFigure < 0 ? "error.main" : "primary.main",
-          fontWeight: 500,
         }}
       >
         {totalFigure < 0 ? "-" : "+"}${Math.abs(totalFigure)}
@@ -154,11 +143,12 @@ const FriendDetailsPage = () => {
 
       <Typography
         variant="h6"
-        sx={{ color: "primary.main", fontWeight: 500, mt: 3 }}
+        className="margin__top--3 text--semibolded"
+        sx={{ color: "primary.main" }}
       >
         Transaction
       </Typography>
-      <List>
+      <List className="container__flex-1-scrollable">
         {transactions &&
           transactions.map((_transaction) => (
             <TransactionItem
@@ -170,19 +160,19 @@ const FriendDetailsPage = () => {
       </List>
       <Fab
         color="primary"
-        className="fab--action"
+        className="fab"
         aria-label="add"
         variant="extended"
         onClick={() => handleOpen()}
       >
-        <Receipt fontSize="medium" sx={{ color: "white", mr: 1 }} />
-        <Typography color="white">Add Transaction</Typography>
+        <Receipt
+          fontSize="medium"
+          className="fab__icon--white margin__right--1"
+        />
+        <Typography className="text--white">Add Transaction</Typography>
       </Fab>
     </Box>
   );
 };
 
 export default FriendDetailsPage;
-function AddFriendItem() {
-  throw new Error("Function not implemented.");
-}

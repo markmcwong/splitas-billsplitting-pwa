@@ -1,20 +1,45 @@
-import type { NextPage } from "next";
-import Link from "next/link";
 import Box from "@mui/material/Box";
 import BottomAppBar from "../../components/BottomAppBar";
 import TopAppBar from "../../components/AppBar";
 import { AppRoutesValues } from "../../utils/urls";
-import { useEffect, useState, useContext } from "react";
+import { useEffect, useState, useContext, useReducer } from "react";
 import * as url from "../../utils/urls";
 import * as models from "../../utils/models";
 import { LoggedInContext, InstallPromptContext } from "../_app";
-import { Button } from "@mui/material";
+import {
+  Avatar,
+  Button,
+  Divider,
+  IconButton,
+  Stack,
+  Typography,
+} from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import EditNameDialog from "../../components/EditNameDialog";
+
+const defaultUser: models.User = {
+  id: 0,
+  hasAccount: false,
+  name: "",
+  email: "",
+  tokenId: null,
+};
 
 export default function UserPage() {
-  const [user, setUser] = useState<models.User | undefined>(undefined);
+  const [user, setUser] = useReducer(
+    (s: models.User, a: Partial<models.User>) => ({ ...s, ...a }),
+    defaultUser
+  );
+  const [editNameDialogOpen, setEditNameDialogOpen] = useState<boolean>(false);
+
   useEffect(() => {
     fetch(`${url.api}/user`)
-      .then((res) => res.json())
+      .then((resp) => {
+        if (resp.ok) {
+          return resp.json();
+        }
+        return Promise.reject(resp);
+      })
       .then((u) => setUser(u));
   }, []);
   const installPromptContext = useContext(InstallPromptContext);
@@ -23,37 +48,82 @@ export default function UserPage() {
     if (!loggedInContext) {
       return;
     }
-    console.log("setting logged in");
     loggedInContext.setIsLoggedIn(true);
   }, []);
+  const handleNameChange = (name: string) => {
+    setUser({ name: name });
+    fetch(`${url.api}/user`, {
+      method: "PUT",
+      body: JSON.stringify(user),
+    });
+  };
 
   return (
-    <Box bgcolor="primary.main">
-      <TopAppBar headerText="" />
-      <div>Homepage</div>
-      <div>
-        Welcome, <span>{user?.email ?? ""}</span>!
-      </div>
-      {installPromptContext?.deferredInstallPrompt && (
-        <Button
-          variant="contained"
-          onClick={(e) =>
-            installPromptContext.handleAppInstall(
-              installPromptContext.deferredInstallPrompt!,
-              installPromptContext.setDeferredInstallPrompt
-            )
-          }
-        >
-          Install
-        </Button>
-      )}
-      <Link href={`${url.server}/groups`}>
-        <span style={{ color: "blue" }}>Groups</span>
-      </Link>
-      <br></br>
-      <Link href={`${url.server}/friends`}>
-        <span style={{ color: "blue" }}>Friends</span>
-      </Link>
+    <Box bgcolor="background.paper">
+      <TopAppBar headerText="Profile" />
+
+      <EditNameDialog
+        open={editNameDialogOpen}
+        handleClose={() => setEditNameDialogOpen(false)}
+        handleSubmit={handleNameChange}
+        user={user}
+      />
+
+      <Stack spacing={4} sx={{ padding: "2em 0" }}>
+        <Stack spacing={0.5}>
+          <Box display="flex" justifyContent="center" width="100vw">
+            <Avatar
+              alt={user?.name ?? ""}
+              src=""
+              sx={{ width: "40vw", height: "40vw", align: "center" }}
+            />
+          </Box>
+          <Typography flexGrow={1} align="center" variant="h5">
+            {user?.name}
+            <IconButton
+              aria-label="menu"
+              onClick={() => setEditNameDialogOpen(true)}
+            >
+              <EditIcon />
+            </IconButton>
+          </Typography>
+          <Typography flexGrow={1} align="center" color="#424242">
+            {user?.email}
+          </Typography>
+          <div></div>
+        </Stack>
+        <Divider />
+        <Stack spacing={2}>
+          {installPromptContext?.deferredInstallPrompt && (
+            <Typography flexGrow={1} align="center">
+              <Button
+                variant="contained"
+                color="secondary"
+                size="large"
+                sx={{ width: "66%", borderRadius: "12px" }}
+                onClick={(e) =>
+                  installPromptContext.handleAppInstall(
+                    installPromptContext.deferredInstallPrompt!,
+                    installPromptContext.setDeferredInstallPrompt
+                  )
+                }
+              >
+                Install App Locally
+              </Button>
+            </Typography>
+          )}
+          <Typography flexGrow={1} align="center">
+            <Button
+              variant="contained"
+              color="secondary"
+              size="large"
+              sx={{ width: "66%", borderRadius: "12px" }}
+            >
+              Sign Out
+            </Button>
+          </Typography>
+        </Stack>
+      </Stack>
       <BottomAppBar routeValue={AppRoutesValues.Profile} />
     </Box>
   );

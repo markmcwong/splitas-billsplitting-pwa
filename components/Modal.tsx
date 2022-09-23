@@ -25,15 +25,9 @@ const ModalContent = ({
   rightContent,
 }: Props) => {
   return (
-    <Modal
-      open={open}
-      // keepMounted
-      onClose={handleClose}
-      aria-labelledby="modal-modal-title"
-      aria-describedby="modal-modal-description"
-    >
-      <Box className="modal-centered">
-        <Grid sx={{ flex: 1, mb: 1 }} flexDirection="row" display="flex">
+    <Modal open={open} onClose={handleClose}>
+      <Box className="modal--centered">
+        <Grid sx={{ mb: 1 }} flexDirection="row" display="flex">
           <Grid item xs>
             <Typography variant="h6" component="h2" color="background.default">
               {title}

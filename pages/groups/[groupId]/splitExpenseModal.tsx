@@ -1,11 +1,8 @@
-import { Receipt, MoneyRounded, Splitscreen, Check } from "@mui/icons-material";
+import { Check } from "@mui/icons-material";
 import {
-  TextField,
   InputAdornment,
   Grid,
   Typography,
-  Select,
-  MenuItem,
   ListItem,
   ListItemIcon,
   Input,
@@ -13,7 +10,6 @@ import {
   Divider,
   List,
   IconButton,
-  ModalClasses,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import ModalContent from "../../../components/Modal";
@@ -30,19 +26,15 @@ type Props = {
   groupId: string;
 };
 
-type SplitType = {
+type SplitsType = models.Split & {
+  Expense: models.Expense & { Payer: models.User };
   User: models.User;
-  Expense: models.Expense;
-  id: number;
-  expenseId: number;
-  userId: number;
-  amount: number;
 };
 
 const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
-  const [splits, setSplits] = useState<SplitType[]>([]);
+  const [splits, setSplits] = useState<SplitsType[]>([]);
   const [originalSplit, setOriginalSplit] = useState<any>(null);
-  const [originalSum, setOriginalSum] = useState<number>(0);
+  // const [originalSum, setOriginalSum] = useState<number>(0);
   const [isEditing, setIsEditing] = useState<boolean[]>([]);
   const currentUserId = check_cookie_by_name("userId");
 
@@ -53,7 +45,7 @@ const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
         .then((splits) => {
           setSplits(splits);
           setOriginalSplit(splits);
-          setOriginalSum(splits.reduce((a, b) => a + b.amount, 0));
+          // setOriginalSum(splits.reduce((a, b) => a + b.amount, 0));
           setIsEditing(splits.map(() => false));
         });
     }
@@ -102,10 +94,6 @@ const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
     if (expenseId !== undefined && groupId !== undefined) getSplitsByExpense();
   }, [expenseId]);
 
-  useEffect(() => {
-    console.log(splits, "hi");
-  }, [splits]);
-
   return (
     <ModalContent
       open={open}
@@ -117,144 +105,149 @@ const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
           : null
       }
     >
-      {splits.length > 0 && (
-        <>
-          <Grid display="flex" container sx={{ py: 2 }}>
-            <Grid item xs={4}>
-              <Typography variant="body1" color="text.primary">
-                Paid by:
-              </Typography>
+      <>
+        {splits.length > 0 && (
+          <>
+            <Grid display="flex" container sx={{ py: 2 }}>
+              <Grid item xs={4}>
+                <Typography variant="body1" color="text.primary">
+                  Paid by:
+                </Typography>
+              </Grid>
+              <Grid item xs>
+                <Typography
+                  variant="body1"
+                  color="text.primary"
+                  // textAlign="right"
+                  className="padding__right-2"
+                >
+                  {splits[0].Expense.Payer.name}
+                </Typography>
+              </Grid>
             </Grid>
-            <Grid item xs>
-              <Typography
-                variant="body1"
-                color="text.primary"
-                sx={{ pr: 2 }}
-                textAlign="right"
-              >
-                {splits[0].Expense.Payer.name}
-              </Typography>
-            </Grid>
-          </Grid>
-          <Grid display="flex" container sx={{ pb: 2, pr: 2 }}>
-            <Grid item xs={4}>
-              <Typography variant="body1" color="text.primary" sx={{ py: 1 }}>
-                Total Expense:
-              </Typography>
-            </Grid>
-            <Grid item xs>
-              <Typography
-                variant="body1"
-                color="text.primary"
-                sx={{ py: 1 }}
-                textAlign="right"
-              >
-                {splits[0].Expense.amount}
-              </Typography>
-            </Grid>
-          </Grid>
-        </>
-      )}
-      <Grid
-        sx={{ flex: 1, alignItems: "center" }}
-        flexDirection="row"
-        display="flex"
-      >
-        <Grid item xs>
-          <Typography variant="h6" component="h2" color="background.default">
-            View Splits{" "}
-          </Typography>
-        </Grid>
-        <Grid item xs={5}>
-          <Typography variant="caption" color={grey[400]}>
-            (Edit by double clicking on the amount)
-          </Typography>
-        </Grid>
-      </Grid>
-      <Divider />
-      <List>
-        {splits.map((split, i) => (
-          <ListItem key={i} sx={{ ml: 0, pl: 0, display: "flex" }}>
-            <ListItemIcon
-              sx={{
-                display: "flex",
-                flex: "0 0 66%",
-                borderRadius: 2,
-              }}
+            <Grid
+              display="flex"
+              container
+              className="padding__bottom-2 padding__right-2"
             >
-              <Typography>{split.User.name.substring(0, 8)}</Typography>
-            </ListItemIcon>
-            {isEditing[i] === true ? (
-              <Input
+              <Grid item xs={12}>
+                <Typography
+                  variant="body1"
+                  color="text.primary"
+                  // className="padding__vertical-1"
+                >
+                  Total Expense:
+                </Typography>
+              </Grid>
+              <Grid item xs>
+                <Typography
+                  variant="body1"
+                  color="text.primary"
+                  // className="padding__vertical-1"
+                  // textAlign="right"
+                >
+                  {splits[0].Expense.amount}
+                </Typography>
+              </Grid>
+            </Grid>
+          </>
+        )}
+        <Grid>
+          <Grid item xs={12}>
+            <Typography variant="h6" component="h2" color="background.default">
+              View Splits{" "}
+            </Typography>
+          </Grid>
+          <Grid item xs={12}>
+            <Typography variant="caption" color={grey[400]}>
+              (Edit by double clicking on the amount)
+            </Typography>
+          </Grid>
+        </Grid>
+        <Divider />
+        <List>
+          {splits.map((split, i) => (
+            <ListItem key={i} sx={{ ml: 0, pl: 0, display: "flex" }}>
+              <ListItemIcon
+                className="container--two-third-width container--row"
                 sx={{
-                  flex: "0 0 33%",
-                }}
-                type="number"
-                value={split.amount}
-                startAdornment={
-                  <InputAdornment position="start">$</InputAdornment>
-                }
-                onChange={(e) => {
-                  let splitsCopy = [...splits];
-                  splitsCopy[i] = {
-                    ...splitsCopy[i],
-                    amount: parseInt(e.target.value),
-                  };
-                  setSplits(splitsCopy);
-                }}
-                placeholder="Amount"
-                // size="small"
-                endAdornment={
-                  <InputAdornment position="start">
-                    <IconButton
-                      onClick={() => {
-                        setIsEditing(
-                          isEditing.map((_, idx) => (idx == i ? false : _))
-                        );
-                      }}
-                    >
-                      <Check />
-                    </IconButton>
-                  </InputAdornment>
-                }
-              />
-            ) : (
-              <Typography
-                color="text.primary"
-                width="100%"
-                textAlign="end"
-                onClick={() => {
-                  setIsEditing(
-                    isEditing.map((_, idx) => (idx == i ? true : _))
-                  );
+                  borderRadius: 2,
                 }}
               >
-                {split.amount}
-              </Typography>
-            )}
-          </ListItem>
-        ))}
-      </List>
-      {splits.length > 0 &&
-        originalSplit !== splits &&
-        splits.reduce((a, b) => a + b.amount, 0) > splits[0].Expense.amount && (
-          <Typography color="error.main" sx={{ mb: 2 }}>
-            Total amount is greater than original expense: $
-            {splits[0].Expense.amount}
-          </Typography>
+                <Typography>{split.User.name.substring(0, 8)}</Typography>
+              </ListItemIcon>
+              {isEditing[i] === true ? (
+                <Input
+                  className="container--third-width"
+                  type="number"
+                  value={split.amount}
+                  startAdornment={
+                    <InputAdornment position="start">$</InputAdornment>
+                  }
+                  onChange={(e) => {
+                    let splitsCopy = [...splits];
+                    splitsCopy[i] = {
+                      ...splitsCopy[i],
+                      amount: parseInt(e.target.value),
+                    };
+                    setSplits(splitsCopy);
+                  }}
+                  placeholder="Amount"
+                  // size="small"
+                  endAdornment={
+                    <InputAdornment position="start">
+                      <IconButton
+                        onClick={() => {
+                          setIsEditing(
+                            isEditing.map((_, idx) => (idx == i ? false : _))
+                          );
+                        }}
+                      >
+                        <Check />
+                      </IconButton>
+                    </InputAdornment>
+                  }
+                />
+              ) : (
+                <Typography
+                  color="text.primary"
+                  className="container--full-width"
+                  textAlign="end"
+                  onClick={() => {
+                    setIsEditing(
+                      isEditing.map((_, idx) => (idx == i ? true : _))
+                    );
+                  }}
+                >
+                  {split.amount}
+                </Typography>
+              )}
+            </ListItem>
+          ))}
+        </List>
+        {splits.length > 0 &&
+          originalSplit !== splits &&
+          splits.reduce((a, b) => a + b.amount, 0) >
+            splits[0].Expense.amount && (
+            <Typography color="error.main" className="margin__bottom--2">
+              Total amount is greater than original expense: $
+              {splits[0].Expense.amount}
+            </Typography>
+          )}
+        {splits.length > 0 && originalSplit !== splits && (
+          <Button
+            variant="outlined"
+            disabled={
+              isEditing.some((x) => x) ||
+              splits.reduce((a, b) => a + b.amount, 0) >
+                splits[0].Expense.amount
+            }
+            onClick={() => updateSplits()}
+          >
+            Submit
+          </Button>
         )}
-      {splits.length > 0 && originalSplit !== splits && (
-        <Button
-          variant="outlined"
-          disabled={
-            isEditing.some((x) => x) ||
-            splits.reduce((a, b) => a + b.amount, 0) > splits[0].Expense.amount
-          }
-          onClick={() => updateSplits()}
-        >
-          Submit
-        </Button>
-      )}
+      </>
     </ModalContent>
   );
 };
