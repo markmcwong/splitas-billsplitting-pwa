@@ -383,7 +383,14 @@ export async function getGroupSummaries(userId: number) {
 }
 
 export function getUserProfile(userId: number) {
-  return getUserById(userId);
+  return prisma.user.findFirstOrThrow({
+    where: {
+      id: userId,
+    },
+    include: {
+      ProfileImage: true,
+    },
+  });
 }
 
 export function getTokenByUser(userId: number) {
@@ -554,14 +561,14 @@ export async function createGroup(
       userId: initialUserId,
       type: "createGroup",
       groupId: createdGroup.id,
-      description: "Created a group!",
+      description: `Created Group ${group.name}!`,
     },
   });
 
   return createdGroup;
 }
 
-export function createNewExpense(
+export async function createNewExpense(
   group: Prisma.ExpenseCreateInput,
   groupId: number,
   payerId: number
@@ -580,26 +587,14 @@ export function createNewExpense(
     },
     timestamp: new Date(),
   };
-
-  return prisma.expense.create({
-    data: expense,
-  });
-}
-
-// creatorUserId should be equal to expense.Payer.id, but I decided to be explicit here.
-export async function createExpense(
-  expense: Prisma.ExpenseCreateInput,
-  creatorUserId: number
-) {
   const createdExpense = await prisma.expense.create({
     data: expense,
   });
-
   await prisma.activity.create({
     data: {
       type: "createExpense",
-      userId: creatorUserId,
-      description: "Created an expense!",
+      userId: payerId,
+      description: `Created an expense worth ${expense.amount}`,
       expenseId: createdExpense.id,
     },
   });
@@ -623,13 +618,23 @@ export async function createFriend(userId: number, friendId: number) {
       skipDuplicates: true,
     })
   ).count;
+  const friend = await prisma.user.findUnique({
+    where: {
+      id: friendId,
+    },
+  });
+
+  if (friend === null) {
+    return;
+  }
+
   if (count > 0) {
     await prisma.activity.create({
       data: {
         userId,
         type: "createFriend",
         friendId,
-        description: "Made a friend!",
+        description: `Befriended ${friend.name}`,
       },
     });
   }
@@ -661,7 +666,7 @@ export async function updateUser(user: User) {
     data: {
       userId: user.id,
       type: "updateUser",
-      description: "Updated your profile!",
+      description: `Updated your profile with name ${user.name}`,
     },
   });
 
@@ -714,7 +719,7 @@ export async function updateGroup(group: Group, updaterUserId: number) {
     data: {
       userId: updaterUserId,
       type: "updateGroup",
-      description: `Updated the group ${group.name}!`,
+      description: `Updated Group ${group.name}`,
       groupId: updatedGroup.id,
     },
   });
@@ -741,7 +746,7 @@ export async function leaveGroup(groupId: number, leaverUserId: number) {
     data: {
       userId: leaverUserId,
       type: "leaveGroup",
-      description: `Left the group ${updatedGroup.name}`,
+      description: `Left Group ${updatedGroup.name}`,
       groupId,
     },
   });
@@ -807,7 +812,7 @@ export async function deleteGroup(groupId: number, deleterUserId: number) {
     data: {
       type: "deleteGroup",
       userId: deleterUserId,
-      description: `Deleted the group ${deletedGroup.name}`,
+      description: `Deleted Group ${deletedGroup.name}`,
     },
   });
 }

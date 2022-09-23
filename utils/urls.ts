@@ -1,8 +1,10 @@
-export const server =
-  process.env.NODE_ENV === "development"
-    ? "http://localhost:3000"
-    : "https://2022-a3-2022-a3-group-10.vercel.app";
+// One of these 2:
+// "http://localhost:3000"
+// "https://2022-a3-2022-a3-group-10.vercel.app";
 
+export const server =
+  process.env.NEXT_PUBLIC_SERVER ||
+  "https://2022-a3-2022-a3-group-10.vercel.app";
 export const api = `${server}/api`;
 export const oauthRedirect = `${server}/auth`;
 export const homepage = `${server}/user`;

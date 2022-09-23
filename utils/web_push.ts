@@ -11,3 +11,29 @@ if (
 }
 
 webPush.setVapidDetails(`mailto:${webPushEmail}`, publicKey, privateKey);
+
+export type PushNotificationContent = {
+  title: string;
+  message: string;
+};
+
+export function generateNotificationFromUserCreateGroupExpense(
+  creatorName: string,
+  groupName: string,
+  splitAmount: number
+): PushNotificationContent {
+  return {
+    title: `${creatorName} added expense in Group ${groupName}`,
+    message: `You owe a split of ${splitAmount}`,
+  };
+}
+
+export function generateNotificationFromUserCreateFriendExpense(
+  creatorName: string,
+  amount: number
+): PushNotificationContent {
+  return {
+    title: `${creatorName} added expense`,
+    message: `You owe ${amount}`,
+  };
+}

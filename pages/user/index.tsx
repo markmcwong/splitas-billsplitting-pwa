@@ -17,17 +17,23 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import EditNameDialog from "../../components/EditNameDialog";
 
-const defaultUser: models.User = {
+type UserWithProfileImage = Awaited<ReturnType<typeof models.getUserProfile>>;
+const defaultUser: UserWithProfileImage = {
   id: 0,
   hasAccount: false,
   name: "",
   email: "",
   tokenId: null,
+  webPushSubscriptionId: null,
+  ProfileImage: null,
 };
 
 export default function UserPage() {
   const [user, setUser] = useReducer(
-    (s: models.User, a: Partial<models.User>) => ({ ...s, ...a }),
+    (
+      s: UserWithProfileImage,
+      a: Partial<UserWithProfileImage>
+    ): UserWithProfileImage => ({ ...s, ...a }),
     defaultUser
   );
   const [editNameDialogOpen, setEditNameDialogOpen] = useState<boolean>(false);
@@ -78,7 +84,7 @@ export default function UserPage() {
               sx={{ width: "40vw", height: "40vw", align: "center" }}
             />
           </Box>
-          <Typography flexGrow={1} align="center" variant="h5">
+          <Typography flexGrow={1} align="center" variant="h5" color="#424242">
             {user?.name}
             <IconButton
               aria-label="menu"
@@ -87,6 +93,7 @@ export default function UserPage() {
               <EditIcon />
             </IconButton>
           </Typography>
+
           <Typography flexGrow={1} align="center" color="#424242">
             {user?.email}
           </Typography>

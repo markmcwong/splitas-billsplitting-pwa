@@ -21,14 +21,18 @@ const googleOAuthClient = new google.auth.OAuth2(
   clientSecret,
   url.oauthRedirect
 );
+
 const scopes = [
   "profile",
   "email",
   "https://www.googleapis.com/auth/contacts.readonly",
+  "https://www.googleapis.com/auth/contacts.other.readonly",
+  "https://www.googleapis.com/auth/admin.directory.user.readonly",
 ];
 
 google.options({ auth: googleOAuthClient });
 const people = google.people("v1");
+const admin = google.admin("directory_v1");
 
 const googleIssuerPromise = Issuer.discover("https://accounts.google.com");
 const clientPromise: Promise<BaseClient> = googleIssuerPromise.then(
@@ -47,7 +51,7 @@ export async function getAuthEndpointWithParams(state: string) {
   const client = await clientPromise;
   return client.authorizationUrl({
     scope:
-      "openid profile email https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/contacts.other.readonly",
+      "openid profile email https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/contacts.other.readonly https://www.googleapis.com/auth/admin.directory.user.readonly",
     state,
     access_type: "offline", // google specific
     prompt: "consent",
@@ -92,6 +96,18 @@ export async function getUserEmail(accessToken: string) {
   return userInfo.email;
 }
 
+export async function getUserProfileImage(
+  userEmail: string,
+  credentials: Credentials
+) {
+  googleOAuthClient.setCredentials(credentials);
+  const response = await admin.users.photos.get({
+    userKey: userEmail,
+  });
+
+  return response.data.photoData;
+}
+
 async function getContacts(pageToken?: string) {
   return people.otherContacts.list({
     pageSize: 100,
@@ -108,7 +124,7 @@ async function getContacts(pageToken?: string) {
   // });
 }
 
-type ContactInfo = {
+export type ContactInfo = {
   name: string;
   emailAddress: string;
 };

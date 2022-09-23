@@ -29,6 +29,14 @@ model User {
   tokenId               Int?                 @unique
   WebPushSubscription   WebPushSubscription?
   webPushSubscriptionId Int?                 @unique
+  ProfileImage          Image?               @relation(fields: [profileImageId], references: [id])
+  profileImageId        Int?
+}
+
+model Image {
+  id          Int    @id @default(autoincrement())
+  imageString String
+  User        User[]
 }
 
 model OauthToken {
