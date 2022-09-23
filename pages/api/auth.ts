@@ -103,6 +103,7 @@ export default async function handler(
       id: user.tokenId!,
       ...tokenSharedFields,
     };
+
     await models.updateToken(oauthToken);
   }
 

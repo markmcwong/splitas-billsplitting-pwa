@@ -36,8 +36,8 @@ export default function UserPage() {
     ): UserWithProfileImage => ({ ...s, ...a }),
     defaultUser
   );
-  const [editNameDialogOpen, setEditNameDialogOpen] = useState<boolean>(false);
 
+  const [editNameDialogOpen, setEditNameDialogOpen] = useState<boolean>(false);
   useEffect(() => {
     fetch(`${url.api}/user`)
       .then((resp) => {
@@ -79,8 +79,8 @@ export default function UserPage() {
         <Stack spacing={0.5}>
           <Box display="flex" justifyContent="center" width="100vw">
             <Avatar
-              alt={user?.name ?? ""}
-              src=""
+              // alt={user?.name ?? ""}
+              src={user?.ProfileImage?.imageString ?? ""}
               sx={{ width: "40vw", height: "40vw", align: "center" }}
             />
           </Box>
