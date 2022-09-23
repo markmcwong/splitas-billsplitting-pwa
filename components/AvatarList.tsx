@@ -57,7 +57,7 @@ const AvatarList = ({ friends, callback, kickOut }: PropsType) => {
           >
             <Avatar
               alt={friend.name}
-              src="https://i.pravatar.cc/150"
+              src={friend.ProfileImage?.imageString ?? ""}
               className="avatar-list__avatar"
             />
             <Typography className="avatar-list__label">
