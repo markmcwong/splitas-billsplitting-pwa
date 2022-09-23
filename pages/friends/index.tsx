@@ -7,36 +7,30 @@ import * as url from "../../utils/urls";
 import TextField from "@mui/material/TextField";
 import ContactItem from "../../components/ContactItem";
 import InputAdornment from "@mui/material/InputAdornment";
-import { Add, Check, Input, List, Search } from "@mui/icons-material";
-import TopAppBarNew from "../../components/TopBarNew";
+import { Add, Search } from "@mui/icons-material";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
 import grey from "@mui/material/colors/grey";
 import IconButton from "@mui/material/IconButton";
-import Modal from "@mui/material/Modal";
-import ModalContent from "../../components/Modal";
 import MoneyLabel from "../../components/MoneyLabel";
 import "../../utils/class_extension.ts";
-import { ListItem, ListItemIcon } from "@mui/material";
 import FriendModal from "../../components/AddFriendModal";
+
+type friendWithExpense = {
+  amount: number;
+  user: models.User;
+};
 
 const AddFriendItem = (props: { callback: () => void }) => {
   return (
     <Grid container spacing={2}>
-      <Grid
-        display="flex"
-        item
-        container
-        alignItems="center"
-        xs={1}
-        sx={{ my: 1, mr: 3 }}
-      >
+      <Grid item xs={1} className="list-item__icon-container">
         <IconButton onClick={() => props.callback()}>
           <Add fontSize="large" />
         </IconButton>
       </Grid>
-      <Grid display="flex" item xs alignItems="center" sx={{ my: 0 }}>
-        <Typography variant="body2" sx={{ color: grey[500] }}>
+      <Grid item xs className="container--align-centered">
+        <Typography variant="body2" className="text--grey">
           Add new friends
         </Typography>
       </Grid>
@@ -44,29 +38,12 @@ const AddFriendItem = (props: { callback: () => void }) => {
   );
 };
 
-// mock User data
-const testUser: models.User = {
-  id: 1,
-  hasAccount: true,
-  name: "Test User",
-  email: "email.com",
-  tokenId: 0,
-};
-
-type friendWithExpense = {
-  amount: number;
-  user: models.User;
-};
-
 export default function FriendsPage() {
-  const [friends, setFriends] = useState<Array<friendWithExpense>>([
-    // testUser,
-    // testUser,
-  ]);
-
+  const [friends, setFriends] = useState<Array<friendWithExpense>>([]);
   const [balance, setBalance] = useState<number>(0);
   const [searchString, setSearchString] = useState<string>("");
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState<boolean>(false);
+
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
@@ -74,14 +51,18 @@ export default function FriendsPage() {
     fetch(`${url.api}/user/friends/summary`)
       .then((res) => res.json())
       .then((friends) => {
-        console.log(friends);
-        setFriends(friends);
-        setBalance(
-          friends.reduce(
-            (acc: number, cur: { amount: number }) => acc + cur.amount,
-            0
-          )
-        );
+        if (typeof friends !== "string" && friends.length > 0) {
+          setFriends(friends);
+          setBalance(
+            friends.reduce(
+              (acc: number, cur: { amount: number }) => acc + cur.amount,
+              0
+            )
+          );
+        } else {
+          setFriends([]);
+          setBalance(0);
+        }
       });
   };
 
@@ -90,7 +71,7 @@ export default function FriendsPage() {
   }, []);
 
   return (
-    <Box sx={{ minHeight: "100vh", p: 3 }} bgcolor="background.paper">
+    <Box bgcolor="background.paper" className="page">
       <FriendModal
         open={open}
         handleClose={handleClose}
@@ -99,28 +80,26 @@ export default function FriendsPage() {
         currentUsers={friends.map((x) => x.user)}
       />
 
-      <Typography variant="caption" sx={{ color: grey[400] }}>
+      <Typography variant="caption" className="text--light-grey">
         {`Currently you ${balance < 0 ? "owed" : "lent"}`}
       </Typography>
       <Typography
         variant="h4"
+        className="text--semibolded"
         sx={{
           color: balance < 0 ? "error.main" : "primary.main",
-          fontWeight: 500,
         }}
       >
         ${Math.abs(balance).toFixed(2)}
       </Typography>
       <TextField
         sx={{
-          flex: "0 0 100%",
-          borderRadius: 15,
-          mt: 2,
           input: { color: "background.default" },
         }}
         fullWidth
         value={searchString}
         onChange={(e) => setSearchString(e.target.value)}
+        className="form__input"
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">
@@ -128,17 +107,10 @@ export default function FriendsPage() {
             </InputAdornment>
           ),
         }}
-        id="outlined-basic"
         variant="outlined"
-        style={{ color: "black" }}
       />
 
-      <AddFriendItem
-        callback={() => {
-          console.log("Modal Opened");
-          handleOpen();
-        }}
-      />
+      <AddFriendItem callback={handleOpen} />
 
       {friends
         .filter(

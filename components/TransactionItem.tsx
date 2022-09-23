@@ -27,7 +27,7 @@ const TransactionItem = ({
   onClick = () => {},
 }: TransactionItemProps) => {
   return (
-    <ListItem sx={{ ml: 0, pl: 0 }} onClick={onClick} on>
+    <ListItem sx={{ ml: 0, pl: 0 }} onClick={onClick}>
       <ListItemIcon
         sx={{
           flexDirection: "column",

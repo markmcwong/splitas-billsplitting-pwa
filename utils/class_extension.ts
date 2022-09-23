@@ -1,7 +1,7 @@
-import { getCookies } from "cookies-next";
-
-declare interface String {
-  toCurrencyFormat(): number;
+declare global {
+  interface String {
+    toCurrencyFormat(): number;
+  }
 }
 
 String.prototype.toCurrencyFormat = function (this: string) {

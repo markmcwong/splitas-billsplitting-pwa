@@ -15,6 +15,7 @@ export {
   type Group,
   type Expense,
   type FriendExpense,
+  type Split,
 };
 const prisma = new PrismaClient();
 
