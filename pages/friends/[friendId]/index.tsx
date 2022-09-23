@@ -80,6 +80,7 @@ const FriendDetailsPage = () => {
   };
 
   const createExpense = () => {
+    setIsLoading(true);
     fetch(`${url.api}/user/friends/${friendId}/expense?friendId=${friendId}`, {
       method: "POST",
       body: JSON.stringify(amount),
@@ -92,6 +93,7 @@ const FriendDetailsPage = () => {
         setAmount(null);
         handleClose();
         getTransactions();
+        setIsLoading(false);
       });
   };
 
@@ -134,7 +136,7 @@ const FriendDetailsPage = () => {
             type="submit"
             className="form__submit-button--full-width"
             onClick={createExpense}
-            disabled={amount == null || amount == 0}
+            disabled={amount == null || amount == 0 || isLoading}
           >
             Save
           </Button>

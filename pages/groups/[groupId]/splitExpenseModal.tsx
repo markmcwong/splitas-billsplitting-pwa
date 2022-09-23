@@ -42,6 +42,7 @@ const ViewSplitsModal = ({
   const [originalSplit, setOriginalSplit] = useState<any>(null);
   const [isEditing, setIsEditing] = useState<boolean[]>([]);
   const currentUserId = check_cookie_by_name("userId");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     if (expenseId !== undefined && groupId !== undefined) getSplitsByExpense();
@@ -52,7 +53,10 @@ const ViewSplitsModal = ({
   const getSplitsByExpense = () => {
     if (expenseId !== null && groupId !== null) {
       fetch(`${url.api}/user/groups/${groupId}/expense/${expenseId}`)
-        .then((res) => res.json())
+        .then((res) => {
+          if (res.ok) return res.json();
+          return Promise.reject(res);
+        })
         .then((splits) => {
           setSplits(splits);
           setOriginalSplit(splits);
@@ -71,11 +75,15 @@ const ViewSplitsModal = ({
       method: "POST",
       body: JSON.stringify(postBody),
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) return res.json();
+        return Promise.reject(res);
+      })
       .then(() => handleClose());
   };
 
   const updateSplits = () => {
+    setIsLoading(true);
     const postBody = splits.map((split) => {
       return { id: split.id, amount: split.amount };
     });
@@ -83,8 +91,14 @@ const ViewSplitsModal = ({
       method: "POST",
       body: JSON.stringify(postBody),
     })
-      .then((res) => res.json())
-      .then(() => handleClose());
+      .then((res) => {
+        if (res.ok) return res.json();
+        return Promise.reject(res);
+      })
+      .then(() => {
+        setIsLoading(false);
+        handleClose();
+      });
   };
   /* Network functions end */
 
@@ -246,7 +260,8 @@ const ViewSplitsModal = ({
             disabled={
               isEditing.some((x) => x) ||
               splits.reduce((a, b) => a + b.amount, 0) !=
-                splits[0].Expense.amount
+                splits[0].Expense.amount ||
+              isLoading
             }
             onClick={() => updateSplits()}
           >
