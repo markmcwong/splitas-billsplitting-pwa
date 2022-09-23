@@ -1,27 +1,33 @@
 {
-  "theme_color" : "#f69435",
-  "background_color" : "#ffffff",
-  "display" : "fullscreen",
-  "scope" : "/",
-  "start_url" : "/",
-  "name" : "PayMeLah",
-  "short_name" : "PayMeLah",
-  "description" : "insert description here",
+  "theme_color": "#f69435",
+  "background_color": "#ffffff",
+  "display": "fullscreen",
+  "scope": "/",
+  "start_url": "/",
+  "name": "Splitas",
+  "short_name": "Splitas",
+  "description": "An friendly app to manage your expense-splitting needs!",
   "icons": [
     {
-        "src": "/icon-128.png",
-        "sizes": "128x128",
-        "type": "image/png"
+      "src": "/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png"
     },
     {
-        "src": "/icon-256.png",
-        "sizes": "256x256",
-        "type": "image/png"
+      "src": "/icon-256.png",
+      "sizes": "256x256",
+      "type": "image/png"
     },
     {
-        "src": "/icon-512.png",
-        "sizes": "512x512",
-        "type": "image/png"
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
-    ]
+  ]
 }
