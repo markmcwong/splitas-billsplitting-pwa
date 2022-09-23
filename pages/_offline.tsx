@@ -2,6 +2,7 @@ import Head from "next/head";
 import Image from 'next/image';
 import { Typography, Button, Link } from "@mui/material";
 import styles from '../styles/Home.module.css';
+import * as urls from "../utils/urls";
 
 const Fallback = () => (
   <>
@@ -10,7 +11,7 @@ const Fallback = () => (
     </Head>
     <div className={styles.main}>
       <span className={styles.logo}>
-        <Image src="/lost_connection.png" alt="Lost connection" width={400} height={400} />
+        <Image src={urls.server + "/lost_connection.png"} alt="Lost connection" width={400} height={400} />
       </span>
       <div className="container--align-centered">
         <h2>Oops, it appears you are offline!</h2>
