@@ -109,7 +109,7 @@ const AppPage: NextPage = () => {
 
   return (
     <Box sx={{ minHeight: "100vh" }} bgcolor="background.paper">
-      <TopAppBar headerText="Activity" />
+      {/* <TopAppBar headerText="Activity" /> */}
       <List
         className="container--full-width"
         sx={{ bgcolor: "background.paper" }}
