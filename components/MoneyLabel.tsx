@@ -2,7 +2,11 @@ import Box from "@mui/material/Box";
 import grey from "@mui/material/colors/grey";
 import Typography from "@mui/material/Typography";
 
-const MoneyLabel = (dollar: number, labelEnabled: boolean = false) => {
+const MoneyLabel = (
+  dollar: number,
+  labelEnabled: boolean = false,
+  isOffline: boolean = false
+) => {
   const cents = parseInt((dollar % 1).toFixed(2).split(".")[1]);
   return (
     <Box display="flex" flexDirection="column" alignItems="center">
@@ -15,7 +19,9 @@ const MoneyLabel = (dollar: number, labelEnabled: boolean = false) => {
         <Typography
           variant="h6"
           sx={{
-            color: dollar < 0 ? "error.main" : "primary.main",
+            color: isOffline
+                ? grey[400]
+                : dollar < 0 ? "error.main" : "primary.main",
             display: "inline-block",
           }}
         >
@@ -25,7 +31,11 @@ const MoneyLabel = (dollar: number, labelEnabled: boolean = false) => {
           <Typography
             variant="body2"
             sx={{
-              color: dollar < 0 ? "error.main" : "primary.main",
+              color: isOffline
+                ? grey[400]
+                : dollar < 0
+                ? "error.main"
+                : "primary.main",
               display: "inline-block",
             }}
           >
