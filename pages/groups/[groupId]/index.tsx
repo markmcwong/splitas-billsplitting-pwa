@@ -19,14 +19,14 @@ import List from "@mui/material/List";
 import MoneyLabel from "../../../components/MoneyLabel";
 import Fab from "@mui/material/Fab";
 import AddIcon from "@mui/icons-material/Add";
-import CustomModal from "./createExpenseModal";
+import CreateExpenseModal from "./createExpenseModal";
 import ViewSplitsModal from "./splitExpenseModal";
 import FriendModal from "../../../components/AddFriendModal";
 import { Logout } from "@mui/icons-material";
 import { check_cookie_by_name } from "../../../utils/class_extension";
 import { Stack } from "@mui/material";
 
-type GroupDetails = models.Group & {
+type GroupDetailsType = models.Group & {
   Expenses: models.Expense[];
   Payment: (Payment & { PaidFrom: models.User })[];
   Users: models.User[];
@@ -55,42 +55,72 @@ const StackedPriceLabel = (
 };
 
 const GroupDetailsPage = () => {
+  /* Lifecycle hooks start */
   const router = useRouter();
   const { groupId } = router.query;
-  const [groupDetails, setGroupDetails] = useState<GroupDetails | null>(null);
+  const [groupDetails, setGroupDetails] = useState<GroupDetailsType | null>(
+    null
+  );
   const [splits, setSplits] = useState<SplitsType[] | null>([]);
   const [total, setTotal] = useState<number>(0);
-  const [open, setOpen] = useState(false);
-  const [openv2, setOpenv2] = useState(false);
-  const [openv3, setOpenv3] = useState(false);
+  const [createModalOpenStatus, setCreateModalOpenStatus] = useState(false);
+  const [viewModalStatus, setViewModalStatus] = useState(false);
+  const [friendModalStatus, setFriendModalStatus] = useState(false);
   const currentUserId = check_cookie_by_name("userId");
 
   const [currentExpenseId, setCurrentExpenseId] = useState<
     number | undefined
   >();
 
-  const handleOpen = () => setOpen(true);
-  const handleOpenv3 = () => setOpenv3(true);
-  const handleClose = () => setOpen(false);
-  const handleOpenv2 = () => setOpenv2(true);
-  const handleClosev2 = () => setOpenv2(false);
-  const handleClosev3 = () => setOpenv3(false);
+  const createModalOpen = () => setCreateModalOpenStatus(true);
+  const createModalClose = () => setCreateModalOpenStatus(false);
+  const friendModalOpen = () => setFriendModalStatus(true);
+  const friendModalClose = () => setFriendModalStatus(false);
+  const viewModalOpen = () => setViewModalStatus(true);
+  const viewModalClose = () => setViewModalStatus(false);
 
+  useEffect(() => {
+    getGroupDetails();
+    getSplitsRequired();
+  }, [createModalOpenStatus, friendModalStatus, viewModalStatus, router]);
+
+  useEffect(() => {
+    if (splits && groupDetails) {
+      const othersPayingAmount = splits!
+        .map((x) =>
+          x.Expense.payerId == parseInt(currentUserId!) ? 0 : x.amount
+        )
+        .reduce((a, b) => a + b, 0);
+      setTotal(
+        groupDetails!.Payment.filter((x) => x.paidFromId == 1)
+          .map((y) => y.amount)
+          .reduce((a, b) => a + b, 0) - othersPayingAmount
+      );
+    }
+  }, [splits, groupDetails]);
+
+  /* Lifecycle hooks end */
+
+  /* Network functions start */
   const getSplitsRequired = () => {
     fetch(`${url.api}/user/groups/${groupId}/split`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) return res.json();
+        return Promise.reject(res);
+      })
       .then((splits) => {
         setSplits(splits);
-        console.log("splits: ", splits);
       });
   };
 
   const getGroupDetails = () => {
     fetch(`${url.api}/user/groups/${groupId}`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) return res.json();
+        return Promise.reject(res);
+      })
       .then((groupDetails) => {
         setGroupDetails(groupDetails);
-        console.log(groupDetails);
       });
   };
 
@@ -103,53 +133,37 @@ const GroupDetailsPage = () => {
       method: "POST",
       body: JSON.stringify(postBody),
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) return res.json();
+        return Promise.reject(res);
+      })
       .then((data) => {
         getGroupDetails();
         getSplitsRequired();
       });
   };
-
-  useEffect(() => {
-    getGroupDetails();
-    getSplitsRequired();
-  }, [open, openv3, openv2, router]);
-
-  useEffect(() => {
-    if (splits && groupDetails) {
-      setTotal(
-        groupDetails!.Payment.filter((x) => x.paidFromId == 1)
-          .map((y) => y.amount)
-          .reduce((a, b) => a + b, 0) -
-          splits!
-            .map((x) =>
-              x.Expense.payerId == parseInt(currentUserId!) ? 0 : x.amount
-            )
-            .reduce((a, b) => a + b, 0)
-      );
-    }
-  }, [splits, groupDetails]);
+  /* Network functions end */
 
   return (
     <Box bgcolor="background.paper" className="page__group--no-padding-right">
       {groupDetails && (
-        <CustomModal
-          open={open}
-          handleClose={handleClose}
+        <CreateExpenseModal
+          open={createModalOpenStatus}
+          handleClose={createModalClose}
           users={groupDetails.Users}
           groupId={groupId as string}
         />
       )}
       <FriendModal
-        open={openv3}
-        handleClose={handleClosev3}
+        open={friendModalStatus}
+        handleClose={friendModalClose}
         callback={getGroupDetails}
         isUsedForGroup={true}
       />
       {currentExpenseId && (
         <ViewSplitsModal
-          open={openv2}
-          handleClose={handleClosev2}
+          open={viewModalStatus}
+          handleClose={viewModalClose}
           expenseId={currentExpenseId}
           groupId={groupId as string}
         />
@@ -227,9 +241,7 @@ const GroupDetailsPage = () => {
       ) : (
         <>
           <AvatarList
-            callback={() => {
-              handleOpenv3();
-            }}
+            callback={friendModalOpen}
             friends={groupDetails.Users}
             kickOut={(user) => {
               kickFromGroup(user.id);
@@ -259,7 +271,7 @@ const GroupDetailsPage = () => {
                     )}
                     onClick={() => {
                       setCurrentExpenseId(expense.id);
-                      handleOpenv2();
+                      viewModalOpen();
                     }}
                   />
                 );
@@ -291,7 +303,7 @@ const GroupDetailsPage = () => {
         color="primary"
         className="fab--offset"
         aria-label="add"
-        onClick={() => handleOpen()}
+        onClick={() => createModalOpen()}
       >
         <AddIcon fontSize="medium" className="fab__icon--white" />
       </Fab>

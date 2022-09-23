@@ -26,15 +26,23 @@ export type GroupSummary = {
 };
 
 export default function GroupsPage() {
+  /* Lifecycle hooks start */
   const [userWithGroups, setUserWithGroups] = useState<GroupSummary[] | null>(
     null
   );
   const [searchString, setSearchString] = useState<string>("");
   const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
   const [balance, setBalance] = useState<number>(0);
 
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  useEffect(() => {
+    fetchGroup();
+  }, []);
+  /* Lifecycle hooks end */
+
+  /* Network functions start */
   const fetchGroup = () => {
     fetch(`${url.api}/user/groups/summary`)
       .then((res) => res.json())
@@ -56,6 +64,7 @@ export default function GroupsPage() {
         }
       });
   };
+  /* Network functions end */
 
   const ModalContent = () => {
     const [name, setName] = useState<string>("");
@@ -77,7 +86,7 @@ export default function GroupsPage() {
 
     return (
       <Modal keepMounted open={open} onClose={handleClose}>
-        <Box className="modal--centered">
+        <Box className="modal">
           <Typography variant="h6" color="primary.main">
             Create New Group
           </Typography>
@@ -104,10 +113,6 @@ export default function GroupsPage() {
       </Modal>
     );
   };
-
-  useEffect(() => {
-    fetchGroup();
-  }, []);
 
   return (
     <>

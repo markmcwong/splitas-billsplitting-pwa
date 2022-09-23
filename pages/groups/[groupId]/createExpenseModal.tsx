@@ -19,25 +19,42 @@ import * as models from "../../../utils/models";
 import * as ce from "../../../utils/class_extension";
 import * as url from "../../../utils/urls";
 
-type Props = {
+type PropsType = {
   open: boolean;
   handleClose: () => void;
   users: models.User[];
   groupId: string;
 };
-interface UserAmounts {
+interface UserAmountsType {
   [key: number]: number;
 }
 
-const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
+const CreateExpenseModal = ({
+  open,
+  handleClose,
+  users,
+  groupId,
+}: PropsType) => {
+  /* Lifecycle hooks start */
   const [amount, setAmount] = useState<number>(0);
   const [description, setDescription] = useState<string>("");
   const [splitType, setSplitType] = useState<string>("equal");
-  const [userAmounts, setUserAmounts] = useState<UserAmounts>(
-    users?.reduce((map, obj) => ((map[obj.id] = 0), map), {} as UserAmounts) ||
-      {}
+  const [userAmounts, setUserAmounts] = useState<UserAmountsType>(
+    users?.reduce(
+      (map, obj) => ((map[obj.id] = 0), map),
+      {} as UserAmountsType
+    ) || {}
   );
   const [userAmountsSum, setUserAmountsSum] = useState<number>(0);
+
+  useEffect(() => {
+    setUserAmountsSum(
+      Object.values(userAmounts).reduce((acc, curr) => acc + curr, 0)
+    );
+  }, [userAmounts]);
+  /* Lifecycle hooks end */
+
+  /* Network functions start */
 
   const createExpense = (amount: number, description: string) => {
     const len = Object.keys(userAmounts).length;
@@ -72,21 +89,20 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
         resetFields();
       });
   };
+  /* Network functions end */
 
+  /* helper function to reset state */
   const resetFields = () => {
     setAmount(0);
     setDescription("");
     setSplitType("equal");
     setUserAmounts(
-      users.reduce((map, obj) => ((map[obj.id] = 0), map), {} as UserAmounts)
+      users.reduce(
+        (map, obj) => ((map[obj.id] = 0), map),
+        {} as UserAmountsType
+      )
     );
   };
-
-  useEffect(() => {
-    setUserAmountsSum(
-      Object.values(userAmounts).reduce((acc, curr) => acc + curr, 0)
-    );
-  }, [userAmounts]);
 
   return (
     <ModalContent
@@ -231,4 +247,4 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
   );
 };
 
-export default CustomModal;
+export default CreateExpenseModal;

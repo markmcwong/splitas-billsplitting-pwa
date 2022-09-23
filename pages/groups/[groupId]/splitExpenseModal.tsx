@@ -19,7 +19,7 @@ import * as models from "../../../utils/models";
 import grey from "@mui/material/colors/grey";
 import { check_cookie_by_name } from "../../../utils/class_extension";
 
-type Props = {
+type PropsType = {
   open: boolean;
   handleClose: () => void;
   expenseId?: number;
@@ -31,12 +31,24 @@ type SplitsType = models.Split & {
   User: models.User;
 };
 
-const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
+const ViewSplitsModal = ({
+  open,
+  handleClose,
+  expenseId,
+  groupId,
+}: PropsType) => {
+  /* Lifecycle hooks start */
   const [splits, setSplits] = useState<SplitsType[]>([]);
   const [originalSplit, setOriginalSplit] = useState<any>(null);
   const [isEditing, setIsEditing] = useState<boolean[]>([]);
   const currentUserId = check_cookie_by_name("userId");
 
+  useEffect(() => {
+    if (expenseId !== undefined && groupId !== undefined) getSplitsByExpense();
+  }, [expenseId]);
+  /* Lifecycle hooks end */
+
+  /* Network functions start */
   const getSplitsByExpense = () => {
     if (expenseId !== null && groupId !== null) {
       fetch(`${url.api}/user/groups/${groupId}/expense/${expenseId}`)
@@ -63,6 +75,19 @@ const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
       .then(() => handleClose());
   };
 
+  const updateSplits = () => {
+    const postBody = splits.map((split) => {
+      return { id: split.id, amount: split.amount };
+    });
+    fetch(`${url.api}/user/groups/${groupId}/split`, {
+      method: "POST",
+      body: JSON.stringify(postBody),
+    })
+      .then((res) => res.json())
+      .then(() => handleClose());
+  };
+  /* Network functions end */
+
   const PayButton = () => {
     return (
       <Button
@@ -75,22 +100,6 @@ const ViewSplitsModal = ({ open, handleClose, expenseId, groupId }: Props) => {
       </Button>
     );
   };
-
-  const updateSplits = () => {
-    const postBody = splits.map((split) => {
-      return { id: split.id, amount: split.amount };
-    });
-    fetch(`${url.api}/user/groups/${groupId}/split`, {
-      method: "POST",
-      body: JSON.stringify(postBody),
-    })
-      .then((res) => res.json())
-      .then(() => handleClose());
-  };
-
-  useEffect(() => {
-    if (expenseId !== undefined && groupId !== undefined) getSplitsByExpense();
-  }, [expenseId]);
 
   return (
     <ModalContent

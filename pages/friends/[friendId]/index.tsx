@@ -34,12 +34,15 @@ const FriendDetailsPage = () => {
   /* network functions starts */
   const getTransactions = () => {
     fetch(`${url.api}/user/friends/${friendId}`)
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) return res.json();
+        return Promise.reject(res);
+      })
       .then((transactions) => {
         const { userExpenses, friendExpenses } = transactions;
         const mergedTransactionsSortedInTime = [
-          ...userExpenses,
-          ...friendExpenses.map((expense: FriendExpense) => ({
+          ...friendExpenses,
+          ...userExpenses.map((expense: FriendExpense) => ({
             ...expense,
             amount: -expense.amount,
           })),
@@ -67,7 +70,10 @@ const FriendDetailsPage = () => {
       method: "PUT",
       body: JSON.stringify(amount),
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) return res.json();
+        return Promise.reject(res);
+      })
       .then((data) => {
         setAmount(null);
         handleClose();
@@ -112,7 +118,7 @@ const FriendDetailsPage = () => {
           <Button
             variant="outlined"
             type="submit"
-            className="container--full-width margin__vertical--2"
+            className="form__submit-button--full-width"
             onClick={createExpense}
             disabled={amount == null || amount == 0}
           >
@@ -133,7 +139,7 @@ const FriendDetailsPage = () => {
       </Typography>
       <Typography
         variant="h4"
-        className="text--semibolded"
+        className="friend-page__figure"
         sx={{
           color: totalFigure < 0 ? "error.main" : "primary.main",
         }}
@@ -143,7 +149,7 @@ const FriendDetailsPage = () => {
 
       <Typography
         variant="h6"
-        className="margin__top--3 text--semibolded"
+        className="friend-page__subtitle"
         sx={{ color: "primary.main" }}
       >
         Transaction

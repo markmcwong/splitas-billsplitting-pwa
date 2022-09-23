@@ -7,7 +7,7 @@ import { Delete } from "@mui/icons-material";
 
 /* type definition starts */
 
-type Props = {
+type PropsType = {
   friends: models.User[];
   callback: () => void;
   kickOut: (user: models.User) => void;
@@ -15,7 +15,7 @@ type Props = {
 
 /* type definition ends */
 
-const AvatarList = ({ friends, callback, kickOut }: Props) => {
+const AvatarList = ({ friends, callback, kickOut }: PropsType) => {
   /* Lifecycle hook starts */
 
   const [avatarClicked, setAvatarClicked] = useState<boolean[]>(

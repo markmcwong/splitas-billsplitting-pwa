@@ -9,13 +9,8 @@ const MoneyLabel = (
 ) => {
   const cents = parseInt((dollar % 1).toFixed(2).split(".")[1]);
   return (
-    <Box display="flex" flexDirection="column" alignItems="center">
-      <Box
-        display="flex"
-        flexDirection="row"
-        alignItems="center"
-        sx={{ textAlign: "end" }}
-      >
+    <Box className="money-label__container">
+      <Box className="money-label__text-container">
         <Typography
           variant="h6"
           sx={{
@@ -46,7 +41,7 @@ const MoneyLabel = (
         )}
       </Box>
       {labelEnabled && (
-        <Typography variant="body2" sx={{ color: grey[400], mt: -1 }}>
+        <Typography variant="body2" className="money-label__status">
           {dollar < 0 ? "owed" : "lent"}
         </Typography>
       )}

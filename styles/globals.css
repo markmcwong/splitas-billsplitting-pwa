@@ -276,6 +276,7 @@ a {
 .list-item__icon-container {
   /* margin-top: 1rem; */
   /* margin-bottom: 1rem; */
+  padding-right: 1.5rem;
   margin-right: 1.5rem;
   display: flex;
   align-items: center;
@@ -311,7 +312,7 @@ a {
 
 /* modal-related css starts */
 
-.modal--centered {
+.modal {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -324,6 +325,21 @@ a {
   padding: 15px;
   max-height: 85%;
   /* min-height: 50%; */
+}
+
+.modal__content {
+  margin-bottom: 0.5rem;
+  flex-direction: row;
+  display: flex;
+}
+
+.modal__title {
+  color: #082341;
+}
+
+.modal__subtitle {
+  color: #bdbdbd;
+  padding-bottom: 0.5rem;
 }
 
 .modal__validation-message {
@@ -363,12 +379,31 @@ a {
   display: flex;
   flex-direction: row;
   margin-top: 0.5rem;
-  margin-left: 0.5rem;
+  margin-left: 0rem;
+}
+
+.contact-item__texts-container {
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-item__avatar-container {
+  margin-right: 1.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  display: flex;
 }
 
 .contact-item__avatar {
   max-height: 45px;
   max-width: 45px;
+}
+
+.contact-item__content {
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
 }
 
 .avatar-list__container {
@@ -420,4 +455,50 @@ a {
   height: 50px;
 }
 
+.money-label__container {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+}
+
+.money-label__text-container {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  text-align: right;
+}
+
+.money-label__status {
+  color: #bdbdbd;
+  margin-top: -0.5rem !important;
+}
+
+.transaction-item__date {
+  flex-direction: column;
+  align-items: center;
+  margin-right: 1rem;
+  border-radius: 6px;
+  box-shadow: 3px 5px;
+  border: 0.4px solid black;
+}
+
+.transaction-item {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  padding-bottom: 1rem;
+  padding-top: 0 !important;
+}
+
 /* component-related css ends */
+
+/* page starts */
+.friend-page__subtitle {
+  margin-top: 1.5rem;
+  font-weight: 500;
+}
+
+.friend-page__figure {
+  font-weight: 500;
+}
+
+/* page ends */
