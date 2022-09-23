@@ -174,7 +174,11 @@ export function getFriendsList(userId: number) {
       include: {
         Friends: {
           include: {
-            User2: true,
+            User2: {
+              include: {
+                ProfileImage: true,
+              },
+            },
           },
         },
       },

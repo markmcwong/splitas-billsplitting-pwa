@@ -4,9 +4,14 @@ import Grid from "@mui/material/Grid";
 import { Typography } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import Link from "next/link";
+import * as models from "../utils/models";
+
+type FriendWithProfileImage = Awaited<
+  ReturnType<typeof models.getFriendsList>
+>[number];
 
 const ContactItem = (
-  friend: any,
+  friend: FriendWithProfileImage,
   rightContent?: JSX.Element,
   hrefPrefix: string = "",
   textColor: string = "black"
@@ -29,7 +34,7 @@ const ContactItem = (
           <Avatar
             sx={{ maxHeight: 45, maxWidth: 45 }}
             alt="name"
-            src="https://i.pravatar.cc/300"
+            src={friend.ProfileImage?.imageString ?? ""}
           />
         </Grid>
         <Grid

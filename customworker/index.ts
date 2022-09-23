@@ -41,18 +41,19 @@ interface CustomRouteHandler {
 
 const routeHandlers: Array<CustomRouteHandler> = [
   {
+    regexp: /api\/user\/groups\/(?<groupId>[-\d]+)\/expense\??.*$/,
+    // TODO: Change to expenses
+    handlerFunc: POST_api_user_groups_groupId_expense,
+    method: "POST",
+    expectingQueryParams: true,
+    expectingBody: true,
+  },
+  {
     regexp: /api\/user\/groups\??.*$/,
     handlerFunc: POST_api_user_groups,
     method: "POST",
     expectingQueryParams: false,
     expectingBody: true,
-  },
-  {
-    regexp: /api\/user\/friends\??.*$/,
-    handlerFunc: POST_api_user_friends,
-    method: "POST",
-    expectingQueryParams: true,
-    expectingBody: false,
   },
   {
     regexp: /api\/user\/friends\/(?<friendId>[-\d]+)\/expense\??.*$/,
@@ -62,12 +63,11 @@ const routeHandlers: Array<CustomRouteHandler> = [
     expectingBody: true,
   },
   {
-    regexp: /api\/user\/groups\/(?<groupId>[-\d]+)\/expense\??.*$/,
-    // TODO: Change to expenses
-    handlerFunc: POST_api_user_groups_groupId_expense,
+    regexp: /api\/user\/friends\??.*$/,
+    handlerFunc: POST_api_user_friends,
     method: "POST",
     expectingQueryParams: true,
-    expectingBody: true,
+    expectingBody: false,
   },
 ];
 
