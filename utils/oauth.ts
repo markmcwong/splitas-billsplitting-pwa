@@ -4,6 +4,8 @@ import { Credentials } from "google-auth-library";
 import * as url from "./urls";
 import { GaxiosResponse } from "googleapis-common";
 import * as parsing from "./parsing";
+import * as fs from "fs";
+import fetch from "node-fetch";
 
 const getJsonFromUrl = parsing.getJsonFromUrl;
 
@@ -27,12 +29,10 @@ const scopes = [
   "email",
   "https://www.googleapis.com/auth/contacts.readonly",
   "https://www.googleapis.com/auth/contacts.other.readonly",
-  "https://www.googleapis.com/auth/admin.directory.user.readonly",
 ];
 
 google.options({ auth: googleOAuthClient });
 const people = google.people("v1");
-const admin = google.admin("directory_v1");
 
 const googleIssuerPromise = Issuer.discover("https://accounts.google.com");
 const clientPromise: Promise<BaseClient> = googleIssuerPromise.then(
@@ -51,7 +51,7 @@ export async function getAuthEndpointWithParams(state: string) {
   const client = await clientPromise;
   return client.authorizationUrl({
     scope:
-      "openid profile email https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/contacts.other.readonly https://www.googleapis.com/auth/admin.directory.user.readonly",
+      "openid profile email https://www.googleapis.com/auth/contacts.readonly https://www.googleapis.com/auth/contacts.other.readonly",
     state,
     access_type: "offline", // google specific
     prompt: "consent",
@@ -96,16 +96,34 @@ export async function getUserEmail(accessToken: string) {
   return userInfo.email;
 }
 
+const imageUrlToBase64 = async (url: string) => {
+  const response = await fetch(url);
+  let contentType = response.headers.get("Content-Type");
+  let buffer = await response.buffer();
+  return "data:" + contentType + ";base64," + buffer.toString("base64");
+};
+
 export async function getUserProfileImage(
   userEmail: string,
   credentials: Credentials
 ) {
   googleOAuthClient.setCredentials(credentials);
-  const response = await admin.users.photos.get({
-    userKey: userEmail,
+  console.log(userEmail);
+
+  const response = await people.people.get({
+    resourceName: "people/me",
+    personFields: "photos",
   });
 
-  return response.data.photoData;
+  const photos = response.data.photos;
+  if (photos === undefined) {
+    return undefined;
+  }
+  const url = photos[0].url;
+  if (!url) {
+    return undefined;
+  }
+  return imageUrlToBase64(url);
 }
 
 async function getContacts(pageToken?: string) {
