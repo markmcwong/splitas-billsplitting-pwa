@@ -17,6 +17,7 @@ import AddIcon from "@mui/icons-material/Add";
 import Modal from "@mui/material/Modal";
 import Button from "@mui/material/Button";
 import MoneyLabel from "../../components/MoneyLabel";
+import CircularProgress from "@mui/material/CircularProgress";
 
 export type GroupSummary = {
   id: number;
@@ -33,6 +34,7 @@ export default function GroupsPage() {
   const [searchString, setSearchString] = useState<string>("");
   const [open, setOpen] = useState(false);
   const [balance, setBalance] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -44,6 +46,7 @@ export default function GroupsPage() {
 
   /* Network functions start */
   const fetchGroup = () => {
+    setIsLoading(true);
     fetch(`${url.api}/user/groups/summary`)
       .then((res) => res.json())
       .then((g) => {
@@ -62,6 +65,7 @@ export default function GroupsPage() {
           setUserWithGroups(null);
           setBalance(0);
         }
+        setIsLoading(false);
       });
   };
   /* Network functions end */
@@ -147,7 +151,10 @@ export default function GroupsPage() {
           }}
           variant="outlined"
         />
-        {userWithGroups &&
+        {isLoading ? (
+          <CircularProgress className="progress" />
+        ) : (
+          userWithGroups &&
           userWithGroups
             .filter((x) =>
               x.name.toLowerCase().includes(searchString.toLowerCase())
@@ -158,7 +165,9 @@ export default function GroupsPage() {
                 MoneyLabel(group.payment - group.split),
                 "groups"
               )
-            )}
+            )
+        )}
+
         <BottomAppBar routeValue={AppRoutesValues.Groups} />
       </Box>
       <Fab
