@@ -25,11 +25,12 @@ import FriendModal from "../../../components/AddFriendModal";
 import { Logout } from "@mui/icons-material";
 import { check_cookie_by_name } from "../../../utils/class_extension";
 import { Stack } from "@mui/material";
+import { FriendType } from "../../../components/AvatarList";
 
 type GroupDetailsType = models.Group & {
   Expenses: models.Expense[];
   Payment: (Payment & { PaidFrom: models.User })[];
-  Users: models.User[];
+  Users: FriendType[];
 };
 
 type SplitsType = models.Split & { Expense: models.Expense };
@@ -106,10 +107,14 @@ const GroupDetailsPage = () => {
     fetch(`${url.api}/user/groups/${groupId}/split`)
       .then((res) => {
         if (res.ok) return res.json();
-        return Promise.reject(res);
+        throw new Error("Something went wrong");
       })
       .then((splits) => {
+        console.log(navigator);
         setSplits(splits);
+      })
+      .catch((err) => {
+        if (!navigator.onLine) router.push(`${url.server}/_offline`);
       });
   };
 
@@ -117,10 +122,13 @@ const GroupDetailsPage = () => {
     fetch(`${url.api}/user/groups/${groupId}`)
       .then((res) => {
         if (res.ok) return res.json();
-        return Promise.reject(res);
+        throw new Error("Something went wrong");
       })
       .then((groupDetails) => {
         setGroupDetails(groupDetails);
+      })
+      .catch((err) => {
+        if (!navigator.onLine) router.push(`${url.server}/_offline`);
       });
   };
 
