@@ -102,7 +102,7 @@ export default function UserPage() {
 
   return (
     <Box bgcolor="background.paper">
-      <TopAppBar headerText="Profile" />
+      {/* <TopAppBar headerText="Profile" /> */}
 
       <EditNameDialog
         open={editNameDialogOpen}
