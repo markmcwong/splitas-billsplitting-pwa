@@ -154,10 +154,6 @@ const FriendModal = ({
       });
   };
 
-  useEffect(() => {
-    console.log(friendSearchResult);
-  }, [friendSearchResult]);
-
   const addToGroup = (userId: number, isInviting: boolean) => {
     const postBody = {
       type: isInviting ? "invite" : "kick",
