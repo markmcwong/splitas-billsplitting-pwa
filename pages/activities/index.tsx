@@ -99,7 +99,6 @@ const AppPage: NextPage = () => {
         return Promise.reject(resp);
       })
       .then((activities) => {
-        console.log(activities); // TODO: Remove
         setActivities(activities);
       });
   };

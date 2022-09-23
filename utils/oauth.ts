@@ -130,7 +130,7 @@ async function getContacts(pageToken?: string) {
   return people.otherContacts.list({
     pageSize: 100,
     pageToken,
-    readMask: "emailAddresses,names",
+    readMask: "emailAddresses,names,photos",
   });
   // Alternative
   // return people.people.connections.list({
@@ -143,16 +143,17 @@ async function getContacts(pageToken?: string) {
 }
 
 export type ContactInfo = {
-  name: string;
+  name: string | null;
   emailAddress: string;
+  photo: string | null;
 };
 
 export async function getAllContacts(
   credentials: Credentials
-): Promise<ContactInfo> {
+): Promise<Array<ContactInfo>> {
   googleOAuthClient.setCredentials(credentials);
   let pageToken: string | undefined = undefined;
-  const allContacts = [];
+  const allContacts: Array<ContactInfo> = [];
   while (true) {
     const response: GaxiosResponse<people_v1.Schema$ListOtherContactsResponse> =
       await getContacts(pageToken);
@@ -166,11 +167,20 @@ export async function getAllContacts(
           info.emailAddresses != undefined &&
           info.emailAddresses.length > 0
       )
-      .map((info) => ({
-        // TODO: As there is no guaranteed return order, this can fail. Even if we sort, the user may just create a new email address.
-        name: info.names![0].displayName as string,
-        emailAddress: info.emailAddresses![0].value as string,
-      }));
+      .map((info) => {
+        let photo = null;
+        let photos = info.photos;
+        if (photos === undefined || photos.length === 0) {
+        } else {
+          photo = photos[0].url;
+        }
+        return {
+          name: info.names![0].displayName || "",
+          emailAddress: info.emailAddresses![0].value || null,
+          photo,
+        };
+      })
+      .filter((info) => info.emailAddress !== null);
     allContacts.push(...contactInfos);
     if (pageToken === undefined) {
       return allContacts;

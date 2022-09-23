@@ -10,11 +10,13 @@ import {
   Switch,
   Button,
   Grid,
+  Avatar,
 } from "@mui/material";
 import { deleteFriend } from "../utils/models";
 import ModalContent from "./Modal";
 import * as models from "../utils/models";
 import * as url from "../utils/urls";
+import * as oauth from "../utils/oauth";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import Stack from "@mui/system/Stack";
@@ -29,16 +31,12 @@ type PropsType = {
   currentUsers?: models.User[];
 };
 
-type ContactFriendType = {
-  emailAddress: string;
-  name: string;
-};
-
 type friendSearchResultType = {
   id: number | null;
   hasAccount: boolean;
   name: string;
   email: string;
+  photo: string | null;
   isFriendAlready: boolean;
 };
 
@@ -158,12 +156,13 @@ const FriendModal = ({
         console.log(stateRef.current);
         if (!stateRef.current) {
           setFriendSearchResult(
-            data.map((x: ContactFriendType) => {
+            data.map((x: oauth.ContactInfo) => {
               const userIdx = currentUsers
                 ? currentUsers!.findIndex((e) => e.email == x.emailAddress)
                 : -1;
               return {
                 ...x,
+                photo: x.photo,
                 email: x.emailAddress,
                 isFriendAlready: userIdx > -1,
                 id: userIdx > -1 ? currentUsers![userIdx].id : null,
@@ -254,6 +253,7 @@ const FriendModal = ({
             )
             .map((user, i) => (
               <ListItem className="modal-friend__list-item">
+                <Avatar src={user.photo ?? ""}></Avatar>
                 <ListItemIcon
                   sx={{
                     flex: "0 0 95%",
