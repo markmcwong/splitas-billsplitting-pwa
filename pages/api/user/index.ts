@@ -18,7 +18,12 @@ export default async function handler(
       res.status(200).json(userProfile);
       break;
     case "PUT":
-      userProfile = await models.updateUser(req.body as models.User);
+      const parsedProfile = JSON.parse(req.body) as models.User;
+      if (payload.userId !== parsedProfile.id) {
+        res.status(400).json("Unable to update profile of a different user");
+        return;
+      }
+      userProfile = await models.updateUser(parsedProfile);
       res.status(200).json(userProfile);
       break;
     default:
