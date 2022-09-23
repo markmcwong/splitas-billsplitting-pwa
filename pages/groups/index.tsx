@@ -66,6 +66,7 @@ export default function GroupsPage() {
   };
   /* Network functions end */
 
+  /* Modal for creating new group */
   const ModalContent = () => {
     const [name, setName] = useState<string>("");
     function submitForm(e: React.MouseEvent<HTMLElement>) {
