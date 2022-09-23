@@ -2,22 +2,22 @@ import { Delete, Receipt } from "@mui/icons-material";
 import ArrowBack from "@mui/icons-material/ArrowBack";
 import {
   Box,
-  List,
-  IconButton,
-  Fab,
-  TextField,
   Button,
   CircularProgress,
+  Fab,
+  IconButton,
+  List,
+  TextField,
 } from "@mui/material";
 import Typography from "@mui/material/Typography";
+import { type FriendExpense } from "@prisma/client";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import ModalContent from "../../../components/Modal";
-import TransactionItem from "../../../components/TransactionItem";
-import * as url from "../../../utils/urls";
-import { type FriendExpense } from "@prisma/client";
 import MoneyLabel from "../../../components/MoneyLabel";
+import TransactionItem from "../../../components/TransactionItem";
 import "../../../utils/class_extension.ts";
+import * as url from "../../../utils/urls";
 
 const FriendDetailsPage = () => {
   /* lifecycle hooks starts */
