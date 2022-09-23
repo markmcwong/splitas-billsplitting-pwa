@@ -1,35 +1,34 @@
+import { Logout } from "@mui/icons-material";
+import AddIcon from "@mui/icons-material/Add";
+import ArrowBack from "@mui/icons-material/ArrowBack";
+import { Stack } from "@mui/material";
 import Box from "@mui/material/Box";
-import { grey } from "@mui/material/colors";
+import CircularProgress from "@mui/material/CircularProgress";
 import Divider from "@mui/material/Divider";
+import Fab from "@mui/material/Fab";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
+import List from "@mui/material/List";
 import Typography from "@mui/material/Typography";
-import React, { useState, useEffect } from "react";
-import AvatarList from "../../../components/AvatarList";
-import BottomAppBar from "../../../components/BottomAppBar";
-import * as models from "../../../utils/models";
-import { AppRoutesValues } from "../../../utils/urls";
-import ArrowBack from "@mui/icons-material/ArrowBack";
-import * as url from "../../../utils/urls";
 import { Payment } from "@prisma/client";
 import { useRouter } from "next/router";
-import CircularProgress from "@mui/material/CircularProgress";
-import TransactionItem from "../../../components/TransactionItem";
-import List from "@mui/material/List";
+import { useEffect, useState } from "react";
+import FriendModal from "../../../components/AddFriendModal";
+import AvatarList, { FriendType } from "../../../components/AvatarList";
+import BottomAppBar from "../../../components/BottomAppBar";
 import MoneyLabel from "../../../components/MoneyLabel";
-import Fab from "@mui/material/Fab";
-import AddIcon from "@mui/icons-material/Add";
+import TransactionItem from "../../../components/TransactionItem";
+import { check_cookie_by_name } from "../../../utils/class_extension";
+import * as models from "../../../utils/models";
+import * as url from "../../../utils/urls";
+import { AppRoutesValues } from "../../../utils/urls";
 import CreateExpenseModal from "./createExpenseModal";
 import ViewSplitsModal from "./splitExpenseModal";
-import FriendModal from "../../../components/AddFriendModal";
-import { Logout } from "@mui/icons-material";
-import { check_cookie_by_name } from "../../../utils/class_extension";
-import { Stack } from "@mui/material";
 
 type GroupDetailsType = models.Group & {
   Expenses: models.Expense[];
   Payment: (Payment & { PaidFrom: models.User })[];
-  Users: models.User[];
+  Users: FriendType[];
 };
 
 type SplitsType = models.Split & { Expense: models.Expense };
@@ -106,10 +105,14 @@ const GroupDetailsPage = () => {
     fetch(`${url.api}/user/groups/${groupId}/split`)
       .then((res) => {
         if (res.ok) return res.json();
-        return Promise.reject(res);
+        throw new Error("Something went wrong");
       })
       .then((splits) => {
+        console.log(navigator);
         setSplits(splits);
+      })
+      .catch((err) => {
+        if (!navigator.onLine) router.push(`${url.server}/_offline`);
       });
   };
 
@@ -117,10 +120,13 @@ const GroupDetailsPage = () => {
     fetch(`${url.api}/user/groups/${groupId}`)
       .then((res) => {
         if (res.ok) return res.json();
-        return Promise.reject(res);
+        throw new Error("Something went wrong");
       })
       .then((groupDetails) => {
         setGroupDetails(groupDetails);
+      })
+      .catch((err) => {
+        if (!navigator.onLine) router.push(`${url.server}/_offline`);
       });
   };
 
@@ -237,11 +243,11 @@ const GroupDetailsPage = () => {
         </Typography>
       </>
       {groupDetails === null ? (
-        <CircularProgress />
+        <CircularProgress className="progress" />
       ) : (
         <>
           <AvatarList
-            callback={friendModalOpen}
+            callback={() => navigator.onLine && friendModalOpen()}
             friends={groupDetails.Users}
             kickOut={(user) => {
               kickFromGroup(user.id);

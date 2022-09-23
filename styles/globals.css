@@ -20,12 +20,12 @@ a {
     color-scheme: light;
   }
   body {
-    color: white;
+    color: black;
     background: white;
   }
 }
 
-/* fab related css starts */
+/* fab and spinner related css starts */
 
 .fab {
   position: fixed !important;
@@ -41,6 +41,13 @@ a {
 
 .fab__icon--white {
   color: white;
+}
+
+.progress {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 /* fab related css ends */
@@ -306,6 +313,8 @@ a {
   bottom: 0;
   left: 0;
   right: 0;
+  -webkit-transform: translateZ(0);
+  z-index: 1000;
 }
 
 /* nav-bar and menu-related css ends */
@@ -378,13 +387,13 @@ a {
   background-color: "transparent";
   display: flex;
   flex-direction: row;
-  margin-top: 0.5rem;
+  margin-top: 0.75rem;
   margin-left: 0rem;
 }
 
 .contact-item__texts-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: column !important;
   justify-content: center;
   align-items: flex-start;
 }
@@ -394,6 +403,7 @@ a {
   margin-top: 0.5rem;
   margin-bottom: 0.5rem;
   display: flex;
+  padding-right: 1.5rem;
 }
 
 .contact-item__avatar {

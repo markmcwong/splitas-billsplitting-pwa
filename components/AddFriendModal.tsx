@@ -253,7 +253,7 @@ const FriendModal = ({
             )
             .map((user, i) => (
               <ListItem className="modal-friend__list-item">
-                <Avatar src={user.photo ?? ""}></Avatar>
+                <Avatar src={user.photo ?? ""} sx={{ mr: 1 }}></Avatar>
                 <ListItemIcon className="container--flex-1">
                   <Box className="container--column">
                     <Typography variant="h6" color="text.primary">
@@ -266,8 +266,8 @@ const FriendModal = ({
                       width="100%"
                       textAlign="end"
                     >
-                      {user.email.length > 25
-                        ? user.email.substring(0, 22) + "..."
+                      {user.email.length > 21
+                        ? user.email.substring(0, 18) + "..."
                         : user.email}
                     </Typography>
                   </Box>

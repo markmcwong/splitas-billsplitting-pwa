@@ -1,34 +1,40 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+The list of group members, including matriculation numbers, names and a description of the contributions of each member to the assignment.
+The URL to your application, i.e. your application must be accessible online somewhere.
+The name of your application.
+Set-up instructions for local testing (good to have).
 
-## Getting Started
+# Splitas
 
-First, run the development server:
+Try out our app here:
+https://2022-a3-2022-a3-group-10.vercel.app/
 
-```bash
-npm run dev
-# or
-yarn dev
-```
+## Our team
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Groups members
+- Mark Wong: A0219963R (Design, Frontend, Backend)
+- Owen Yap: A0233504R (Frontend, Design)
+- Ryan Peh: A0219687L (Deployment, Frontend)
+- Sun Jia Cheng: A0214263N (PWA features, Backend)
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+## Instructions for Local testing
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+It is better to test a PWA on the production version than the development version as caching features are missing from the development version. The following environment variables are needed:
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+- DATABASE_URL
+- PAYMELAH_CLIENT_ID
+- PAYMELAH_CLIENT_SECRET
+- NEXT_PUBLIC_SERVER
+- WEB_PUSH_PRIVATE_KEY
+- NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY
+- WEB_PUSH_EMAIL
+- JWT_PUBLIC_KEY
+- JWT_PRIVATE_KEY
 
-## Learn More
+Note that PAYMELAH_CLIENT_ID, PAYMELAH_CLIENT_SECRET are secrets to the Google Cloud Project PayMeLah, which is inaccessible to external testers. However, it is still possible to setup your own Cloud project and set it. Also note that Splitas was previously called PayMeLah, and we changed the name quite late when we found out a project of the same name exists.
 
-To learn more about Next.js, take a look at the following resources:
+There are generation commands you can find in package.json to generate some of the public/private key pairs needed.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- `npx prisma generate` to generate Typescript types and code
+- `npx prisma migrate dev` to update the db
+- `npm run build` to build the production version of the application into the .next folder
+- `npm run start` to start
