@@ -245,11 +245,11 @@ const GroupDetailsPage = () => {
         </Typography>
       </>
       {groupDetails === null ? (
-        <CircularProgress />
+        <CircularProgress className="progress" />
       ) : (
         <>
           <AvatarList
-            callback={friendModalOpen}
+            callback={() => navigator.onLine && friendModalOpen()}
             friends={groupDetails.Users}
             kickOut={(user) => {
               kickFromGroup(user.id);

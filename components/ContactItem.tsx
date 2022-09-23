@@ -17,6 +17,7 @@ const ContactItem = (
   hrefPrefix: string = "",
   textColor: string = "black"
 ) => {
+  console.log(friend);
   return (
     <Link
       href={
@@ -26,17 +27,20 @@ const ContactItem = (
       }
     >
       <Grid className="contact-item__container">
-        <Grid item container xs={1} className="contact-item__avatar-container ">
-          <Avatar
-            alt={`${friend.name}-avatar`}
-            src={
-              "ProfileImage" in friend
-                ? friend.ProfileImage?.imageString ?? ""
-                : ""
-            }
-            className="contact-item__avatar"
-          />
-        </Grid>
+        {"ProfileImage" in friend && (
+          <Grid
+            item
+            container
+            xs={1}
+            className="contact-item__avatar-container"
+          >
+            <Avatar
+              alt={`${friend.name}-avatar`}
+              src={friend.ProfileImage?.imageString ?? ""}
+              className="contact-item__avatar"
+            />
+          </Grid>
+        )}
         <Grid className="contact-item__texts-container" item xs>
           <Typography
             variant="body2"

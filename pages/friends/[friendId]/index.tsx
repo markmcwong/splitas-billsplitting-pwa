@@ -1,6 +1,14 @@
 import { Delete, Receipt } from "@mui/icons-material";
 import ArrowBack from "@mui/icons-material/ArrowBack";
-import { Box, List, IconButton, Fab, TextField, Button } from "@mui/material";
+import {
+  Box,
+  List,
+  IconButton,
+  Fab,
+  TextField,
+  Button,
+  CircularProgress,
+} from "@mui/material";
 import Typography from "@mui/material/Typography";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
@@ -19,6 +27,7 @@ const FriendDetailsPage = () => {
   const [amount, setAmount] = useState<number | null>();
   const [transactions, setTransactions] = useState<Array<FriendExpense>>([]);
   const [totalFigure, setTotalFigure] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     getTransactions();
@@ -33,6 +42,7 @@ const FriendDetailsPage = () => {
 
   /* network functions starts */
   const getTransactions = () => {
+    setIsLoading(true);
     fetch(`${url.api}/user/friends/${friendId}`)
       .then((res) => {
         if (res.ok) return res.json();
@@ -54,6 +64,7 @@ const FriendDetailsPage = () => {
             0
           )
         );
+        setIsLoading(false);
       })
       .catch((error) => {
         if (!navigator.onLine) router.push(`${url.server}/_offline`);
@@ -157,16 +168,20 @@ const FriendDetailsPage = () => {
       >
         Transaction
       </Typography>
-      <List className="container__flex-1-scrollable">
-        {transactions &&
-          transactions.map((_transaction) => (
-            <TransactionItem
-              date={new Date(_transaction.timestamp)}
-              rightContent={MoneyLabel(_transaction.amount, true)}
-              key={_transaction.id}
-            />
-          ))}
-      </List>
+      {isLoading ? (
+        <CircularProgress className="progress" />
+      ) : (
+        <List className="container__flex-1-scrollable">
+          {transactions &&
+            transactions.map((_transaction) => (
+              <TransactionItem
+                date={new Date(_transaction.timestamp)}
+                rightContent={MoneyLabel(_transaction.amount, true)}
+                key={_transaction.id}
+              />
+            ))}
+        </List>
+      )}
       <Fab
         color="primary"
         className="fab"

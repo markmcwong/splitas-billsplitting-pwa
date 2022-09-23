@@ -1,5 +1,6 @@
 import { Add, Search } from "@mui/icons-material";
 import Box from "@mui/material/Box";
+import CircularProgress from "@mui/material/CircularProgress";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
 import InputAdornment from "@mui/material/InputAdornment";
@@ -43,6 +44,7 @@ export default function FriendsPage() {
   const [balance, setBalance] = useState<number>(0);
   const [searchString, setSearchString] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -54,6 +56,7 @@ export default function FriendsPage() {
 
   /* network function starts */
   const friendSummary = () => {
+    setIsLoading(true);
     fetch(`${url.api}/user/friends/summary`)
       .then((res) => res.json())
       .then((friends) => {
@@ -69,6 +72,7 @@ export default function FriendsPage() {
           setFriends([]);
           setBalance(0);
         }
+        setIsLoading(false);
       });
   };
   /* network function ends */
@@ -83,47 +87,59 @@ export default function FriendsPage() {
         currentUsers={friends.map((x) => x.user)}
       />
 
-      <Typography variant="caption" className="text--light-grey">
-        {`Currently you ${balance < 0 ? "owed" : "lent"}`}
-      </Typography>
-      <Typography
-        variant="h4"
-        className="friend-page__figure"
-        sx={{
-          color: balance < 0 ? "error.main" : "primary.main",
-        }}
-      >
-        ${Math.abs(balance).toFixed(2)}
-      </Typography>
-      <TextField
-        sx={{
-          input: { color: "background.default" },
-        }}
-        fullWidth
-        value={searchString}
-        onChange={(e) => setSearchString(e.target.value)}
-        className="form__input"
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <Search />
-            </InputAdornment>
-          ),
-        }}
-        variant="outlined"
-      />
+      {isLoading ? (
+        <CircularProgress className="progress" />
+      ) : (
+        <>
+          <Typography variant="caption" className="text--light-grey">
+            {`Currently you ${balance < 0 ? "owed" : "lent"}`}
+          </Typography>
+          <Typography
+            variant="h4"
+            className="friend-page__figure"
+            sx={{
+              color: balance < 0 ? "error.main" : "primary.main",
+            }}
+          >
+            ${Math.abs(balance).toFixed(2)}
+          </Typography>
+          <TextField
+            sx={{
+              input: { color: "background.default" },
+            }}
+            fullWidth
+            value={searchString}
+            onChange={(e) => setSearchString(e.target.value)}
+            className="form__input"
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Search />
+                </InputAdornment>
+              ),
+            }}
+            variant="outlined"
+          />
 
-      <AddFriendItem callback={handleOpen} />
+          <AddFriendItem callback={() => navigator.onLine && handleOpen()} />
 
-      {friends
-        .filter(
-          (x) =>
-            x.user.name.toLowerCase().includes(searchString.toLowerCase()) ||
-            x.user.email.includes(searchString.toLowerCase())
-        )
-        .map((friend) =>
-          ContactItem(friend.user, MoneyLabel(friend.amount, true), "friends")
-        )}
+          {friends
+            .filter(
+              (x) =>
+                x.user.name
+                  .toLowerCase()
+                  .includes(searchString.toLowerCase()) ||
+                x.user.email.includes(searchString.toLowerCase())
+            )
+            .map((friend) =>
+              ContactItem(
+                friend.user,
+                MoneyLabel(friend.amount, true),
+                "friends"
+              )
+            )}
+        </>
+      )}
       <BottomAppBar routeValue={AppRoutesValues.Friends} />
     </Box>
   );
