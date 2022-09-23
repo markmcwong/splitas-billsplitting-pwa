@@ -22,7 +22,7 @@ export default async function handler(
   }
 
   const { redirectUrl } = JSON.parse(req.body) as RequestBody;
-
+  console.log(redirectUrl);
   if (redirectUrl === undefined) {
     // TODO
     res.status(400).send("TODO: Implement error flow");

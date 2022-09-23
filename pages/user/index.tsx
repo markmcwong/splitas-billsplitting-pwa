@@ -7,7 +7,7 @@ import { AppRoutesValues } from "../../utils/urls";
 import { useEffect, useState, useContext } from "react";
 import * as url from "../../utils/urls";
 import * as models from "../../utils/models";
-import { PwaContext } from "../_app";
+import { LoggedInContext, InstallPromptContext } from "../_app";
 import { Button } from "@mui/material";
 
 export default function UserPage() {
@@ -17,32 +17,30 @@ export default function UserPage() {
       .then((res) => res.json())
       .then((u) => setUser(u));
   }, []);
-
-  const pwaContext = useContext(PwaContext);
+  const installPromptContext = useContext(InstallPromptContext);
+  const loggedInContext = useContext(LoggedInContext);
   useEffect(() => {
-    if (!pwaContext) {
+    if (!loggedInContext) {
       return;
     }
-    pwaContext.setPwaData({
-      ...pwaContext.pwaData,
-      isLoggedIn: true,
-    });
+    console.log("setting logged in");
+    loggedInContext.setIsLoggedIn(true);
   }, []);
 
   return (
     <Box bgcolor="primary.main">
-      <TopAppBar />
+      <TopAppBar headerText="" />
       <div>Homepage</div>
       <div>
         Welcome, <span>{user?.email ?? ""}</span>!
       </div>
-      {pwaContext?.pwaData?.deferredInstallPrompt && (
+      {installPromptContext?.deferredInstallPrompt && (
         <Button
           variant="contained"
           onClick={(e) =>
-            pwaContext.handleAppInstall(
-              pwaContext.pwaData,
-              pwaContext.setPwaData
+            installPromptContext.handleAppInstall(
+              installPromptContext.deferredInstallPrompt!,
+              installPromptContext.setDeferredInstallPrompt
             )
           }
         >
