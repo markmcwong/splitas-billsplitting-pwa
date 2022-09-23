@@ -2,8 +2,8 @@ html,
 body {
   padding: 0;
   margin: 0;
-  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, Segoe UI, Roboto,
+    Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
 }
 
 a {
@@ -51,12 +51,12 @@ a {
   color: white;
 }
 
-.text--black{
+.text--black {
   color: black;
 }
 
-.text--light-black{
-  color: #082341
+.text--light-black {
+  color: #082341;
 }
 
 .text--line-height-1 {
@@ -112,7 +112,7 @@ a {
 }
 
 .container--flex-1 {
-  flex: 1
+  flex: 1;
 }
 
 .container--centered {
@@ -124,6 +124,11 @@ a {
 .container--row {
   display: flex;
   flex-direction: row;
+}
+
+.container--column {
+  display: flex;
+  flex-direction: column;
 }
 
 .container--align-centered {
@@ -161,12 +166,17 @@ a {
 }
 
 .container__item--full-flex {
-  flex: "0 0 100%",
+  flex: "0 0 100%";
 }
 
 /* container/grid related css ends */
 
 /* margin/padding related css starts */
+
+.margin__horizontal--1 {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
 
 .margin__vertical--1 {
   margin-top: 0.5rem;
@@ -245,7 +255,6 @@ a {
   width: 100%;
 }
 
-
 .form__input--no-margin {
   color: black;
   flex: "0 0 100%";
@@ -257,11 +266,17 @@ a {
   margin-top: 1rem;
 }
 
+.form__switch {
+  margin-left: 0 !important;
+  /* padding-left: 0 !important; */
+}
+
 /* list-related css starts */
 
 .list-item__icon-container {
   /* margin-top: 1rem; */
   /* margin-bottom: 1rem; */
+  padding-right: 1.5rem;
   margin-right: 1.5rem;
   display: flex;
   align-items: center;
@@ -278,11 +293,26 @@ a {
   margin-left: -0.75rem;
 }
 
+.app-bar {
+  position: static;
+}
+
+.app-bar__text {
+  padding: 1rem 1rem 0 1rem;
+}
+
+.nav-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
 /* nav-bar and menu-related css ends */
 
 /* modal-related css starts */
 
-.modal--centered {
+.modal {
   position: absolute;
   top: 50%;
   left: 50%;
@@ -297,6 +327,21 @@ a {
   /* min-height: 50%; */
 }
 
+.modal__content {
+  margin-bottom: 0.5rem;
+  flex-direction: row;
+  display: flex;
+}
+
+.modal__title {
+  color: #082341;
+}
+
+.modal__subtitle {
+  color: #bdbdbd;
+  padding-bottom: 0.5rem;
+}
+
 .modal__validation-message {
   line-height: 1;
   margin-top: 1rem;
@@ -307,12 +352,176 @@ a {
   margin-top: 1rem;
 }
 
+.modal-friend__list-item {
+  margin-left: 0;
+  padding-left: 0;
+  display: flex;
+}
+
+.model-friend__list {
+  overflow-y: scroll;
+}
+
+.model-friend__form-controls {
+  margin-top: 1rem;
+}
+
 /* modal-related css ends */
 
 /* component-related css starts */
 
-.contact__item--disabled {
+.contact-item--disabled {
   pointer-events: none;
 }
 
+.contact-item__container {
+  background-color: "transparent";
+  display: flex;
+  flex-direction: row;
+  margin-top: 0.5rem;
+  margin-left: 0rem;
+}
+
+.contact-item__texts-container {
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.contact-item__avatar-container {
+  margin-right: 1.5rem;
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+  display: flex;
+}
+
+.contact-item__avatar {
+  max-height: 45px;
+  max-width: 45px;
+}
+
+.contact-item__content {
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.avatar-list__container {
+  overflow-x: scroll;
+  min-height: 75px;
+  width: 100%;
+  display: flex;
+  flex-direction: row;
+}
+
+.avatar-list__add-button {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  max-height: 50px;
+  min-width: 50px;
+  border-radius: 50px;
+  border: 2px dashed grey;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.avatar-list__add-icon {
+  color: #9e9e9e;
+}
+
+.avatar-list__delete-container {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  max-height: 50px;
+  min-width: 50px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50px;
+  border: 2px dashed grey;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.avatar-list__label {
+  color: black;
+}
+
+.avatar-list__avatar {
+  width: 50px;
+  height: 50px;
+}
+
+.money-label__container {
+  align-items: flex-end;
+  display: flex;
+  flex-direction: column;
+}
+
+.money-label__text-container {
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  text-align: right;
+}
+
+.money-label__status {
+  color: #bdbdbd;
+  margin-top: -0.5rem !important;
+}
+
+.transaction-item__date {
+  flex-direction: column;
+  align-items: center;
+  margin-right: 1rem;
+  border-radius: 6px;
+  box-shadow: 3px 5px;
+  border: 0.4px solid black;
+}
+
+.transaction-item {
+  margin-left: 0 !important;
+  padding-left: 0 !important;
+  padding-bottom: 1rem;
+  padding-top: 0 !important;
+}
+
 /* component-related css ends */
+
+/* page starts */
+.friends-page__subtitle {
+  margin-top: 1.5rem;
+  font-weight: 500;
+}
+
+.friends-page__figure {
+  font-weight: 500;
+}
+
+.groups-page {
+  padding: 1.5rem;
+  min-height: 100vh;
+  min-width: 100%;
+}
+
+.groups-page__input {
+  border-radius: 15px;
+  color: black;
+  margin-top: 1rem;
+  flex: 0 0 100%;
+}
+
+.groups-page__figure {
+  font-weight: 500;
+}
+
+.groups-details__info {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: row;
+}
+
+/* page ends */ ;

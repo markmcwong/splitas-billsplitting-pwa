@@ -18,7 +18,6 @@ type TransactionItemProps = {
 };
 
 const TransactionItem = ({
-  // friend,
   rightContent = MoneyLabel(21.54),
   color = "transparent",
   textColor = "black",
@@ -27,17 +26,8 @@ const TransactionItem = ({
   onClick = () => {},
 }: TransactionItemProps) => {
   return (
-    <ListItem sx={{ ml: 0, pl: 0, pb: 2, pt: 0 }} onClick={onClick}>
-      <ListItemIcon
-        sx={{
-          flexDirection: "column",
-          alignItems: "center",
-          mr: 2,
-          borderRadius: 2,
-          boxShadow: "3px 5px",
-          border: "0.4px solid black",
-        }}
-      >
+    <ListItem className="transaction-item" onClick={onClick}>
+      <ListItemIcon className="transaction-item__date">
         <Typography>{date.getDate()}</Typography>
         <Typography>
           {date.toLocaleDateString("en-US", { month: "short" })}
@@ -60,7 +50,6 @@ const TransactionItem = ({
           variant: "caption",
         }}
       />
-      {/* <Typography color="background.default">test</Typography> */}
       {rightContent}
     </ListItem>
   );

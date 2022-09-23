@@ -9,7 +9,6 @@ import Paper from "@mui/material/Paper";
 import { useRouter } from "next/router";
 import {
   AppRoutesValues,
-  AppRoutes,
   APP,
   GROUPS,
   FRIENDS,
@@ -48,10 +47,7 @@ const BottomAppBar = ({ routeValue = 0 }: { routeValue?: AppRoutesValues }) => {
   );
 
   return (
-    <Paper
-      sx={{ position: "fixed", bottom: 0, left: 0, right: 0 }}
-      elevation={3}
-    >
+    <Paper className="nav-bar" elevation={3}>
       <BottomNavigation
         showLabels
         value={value}

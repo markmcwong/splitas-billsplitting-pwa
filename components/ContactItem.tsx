@@ -19,26 +19,15 @@ const ContactItem = (
           : `/${hrefPrefix}/#`
       }
     >
-      <Grid
-        bgcolor="transparent"
-        display="flex"
-        flexDirection="row"
-        sx={{ my: 1 }}
-      >
-        <Grid display="flex" item container xs={1} sx={{ my: 1, mr: 3 }}>
+      <Grid className="contact-item__container">
+        <Grid item container xs={1} className="contact-item__avatar-container ">
           <Avatar
-            sx={{ maxHeight: 45, maxWidth: 45 }}
-            alt="name"
+            className="contact-item__avatar"
+            alt={`${friend.name}-avatar`}
             src="https://i.pravatar.cc/300"
           />
         </Grid>
-        <Grid
-          display="flex"
-          flexDirection={"column"}
-          item
-          xs
-          justifyContent="center"
-        >
+        <Grid className="contact-item__texts-container" item xs>
           <Typography
             variant="body2"
             sx={{ color: friend.id > 0 ? textColor : grey[400] }}
@@ -47,18 +36,15 @@ const ContactItem = (
           </Typography>
           <Typography
             variant={friend.email != null ? "caption" : "h6"}
-            sx={{ color: friend.email != null ? grey[500] : textColor }}
+            sx={{
+              color:
+                friend.email == null && friend.id > 0 ? textColor : grey[500],
+            }}
           >
             {friend.name}
           </Typography>
         </Grid>
-        <Grid
-          display="flex"
-          flexDirection={"column"}
-          item
-          xs={1}
-          justifyContent="center"
-        >
+        <Grid className="contact-item__content" item xs={1}>
           {rightContent}
         </Grid>
       </Grid>
