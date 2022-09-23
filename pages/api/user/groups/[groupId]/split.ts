@@ -1,6 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import * as models from "../../../../../utils/models";
 import * as api from "../../../../../utils/api";
+import * as webPushUtils from "../../../../../utils/web_push";
 import { prisma, Prisma, Split } from "@prisma/client";
 import webPush from "web-push";
 export default async function handler(
@@ -31,12 +32,16 @@ export default async function handler(
         if (subscription === null) {
           continue;
         }
+
         webPush.sendNotification(
           subscription,
-          JSON.stringify({
-            title: `Split in Group ${group.name}`,
-            message: `${payload.name} created a split worth ${split.amount}`,
-          })
+          JSON.stringify(
+            webPushUtils.generateNotificationFromUserCreateGroupExpense(
+              payload.name,
+              group.name,
+              split.amount
+            )
+          )
         );
       }
       res.status(200).json("success");

@@ -5,7 +5,7 @@ import { AppRoutesValues } from "../../utils/urls";
 import { useEffect, useState, useContext, useReducer } from "react";
 import * as url from "../../utils/urls";
 import * as models from "../../utils/models";
-import { PwaContext } from "../_app";
+import { LoggedInContext, InstallPromptContext } from "../_app";
 import {
   Avatar,
   Button,
@@ -17,17 +17,23 @@ import {
 import EditIcon from "@mui/icons-material/Edit";
 import EditNameDialog from "../../components/EditNameDialog";
 
-const defaultUser: models.User = {
+type UserWithProfileImage = Awaited<ReturnType<typeof models.getUserProfile>>;
+const defaultUser: UserWithProfileImage = {
   id: 0,
   hasAccount: false,
   name: "",
   email: "",
   tokenId: null,
+  webPushSubscriptionId: null,
+  ProfileImage: null,
 };
 
 export default function UserPage() {
   const [user, setUser] = useReducer(
-    (s: models.User, a: Partial<models.User>) => ({ ...s, ...a }),
+    (
+      s: UserWithProfileImage,
+      a: Partial<UserWithProfileImage>
+    ): UserWithProfileImage => ({ ...s, ...a }),
     defaultUser
   );
   const [editNameDialogOpen, setEditNameDialogOpen] = useState<boolean>(false);
@@ -42,7 +48,14 @@ export default function UserPage() {
       })
       .then((u) => setUser(u));
   }, []);
-
+  const installPromptContext = useContext(InstallPromptContext);
+  const loggedInContext = useContext(LoggedInContext);
+  useEffect(() => {
+    if (!loggedInContext) {
+      return;
+    }
+    loggedInContext.setIsLoggedIn(true);
+  }, []);
   const handleNameChange = (name: string) => {
     setUser({ name: name });
     fetch(`${url.api}/user`, {
@@ -50,8 +63,6 @@ export default function UserPage() {
       body: JSON.stringify(user),
     });
   };
-
-  const pwaContext = useContext(PwaContext);
 
   return (
     <Box bgcolor="background.paper">
@@ -73,7 +84,7 @@ export default function UserPage() {
               sx={{ width: "40vw", height: "40vw", align: "center" }}
             />
           </Box>
-          <Typography flexGrow={1} align="center" variant="h5">
+          <Typography flexGrow={1} align="center" variant="h5" color="#424242">
             {user?.name}
             <IconButton
               aria-label="menu"
@@ -82,6 +93,7 @@ export default function UserPage() {
               <EditIcon />
             </IconButton>
           </Typography>
+
           <Typography flexGrow={1} align="center" color="#424242">
             {user?.email}
           </Typography>
@@ -89,7 +101,7 @@ export default function UserPage() {
         </Stack>
         <Divider />
         <Stack spacing={2}>
-          {pwaContext?.pwaData?.deferredInstallPrompt && (
+          {installPromptContext?.deferredInstallPrompt && (
             <Typography flexGrow={1} align="center">
               <Button
                 variant="contained"
@@ -97,9 +109,9 @@ export default function UserPage() {
                 size="large"
                 sx={{ width: "66%", borderRadius: "12px" }}
                 onClick={(e) =>
-                  pwaContext.handleAppInstall(
-                    pwaContext.pwaData,
-                    pwaContext.setPwaData
+                  installPromptContext.handleAppInstall(
+                    installPromptContext.deferredInstallPrompt!,
+                    installPromptContext.setDeferredInstallPrompt
                   )
                 }
               >
@@ -119,7 +131,6 @@ export default function UserPage() {
           </Typography>
         </Stack>
       </Stack>
-
       <BottomAppBar routeValue={AppRoutesValues.Profile} />
     </Box>
   );

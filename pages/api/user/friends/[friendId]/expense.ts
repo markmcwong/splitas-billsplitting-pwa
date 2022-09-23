@@ -1,6 +1,8 @@
 import { NextApiRequest, NextApiResponse } from "next";
+import webPush from "web-push";
 import * as models from "../../../../../utils/models";
 import * as api from "../../../../../utils/api";
+import * as webPushUtils from "../../../../../utils/web_push";
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -19,6 +21,18 @@ export default async function handler(
         payload.userId,
         friendId
       );
+      const subscription = await models.getWebPushSubscriptionByUser(friendId);
+      if (subscription !== null) {
+        webPush.sendNotification(
+          subscription,
+          JSON.stringify(
+            webPushUtils.generateNotificationFromUserCreateFriendExpense(
+              payload.name,
+              parsedAmount
+            )
+          )
+        );
+      }
       res.status(200).json(response);
       break;
     default:

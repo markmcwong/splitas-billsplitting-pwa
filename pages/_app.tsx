@@ -10,6 +10,7 @@ import {
   SetStateAction,
 } from "react";
 import * as urls from "../utils/urls";
+import * as classExtension from "../utils/class_extension";
 
 const TRACKING_ID = "UA-242063911-1"; // Google Analytics Tracking ID
 
@@ -47,6 +48,7 @@ const webPushPublicKey = process.env.NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY;
 type PwaData = {
   deferredInstallPrompt?: BeforeInstallPromptEvent;
   shouldAskForPushNotifications: boolean;
+  isLoggedIn: boolean;
 };
 
 // let pwaData: PwaData = {
@@ -58,40 +60,31 @@ type PwaData = {
 // }
 
 function handleAppInstall(
-  pwaData: PwaData,
-  setPwaData: Dispatch<SetStateAction<PwaData>>
+  deferredInstallPrompt: BeforeInstallPromptEvent,
+  setDeferredInstallPrompt: Dispatch<
+    SetStateAction<BeforeInstallPromptEvent | undefined>
+  >
 ) {
-  const deferredPrompt = pwaData.deferredInstallPrompt;
-  if (!deferredPrompt) {
+  if (!deferredInstallPrompt) {
     console.error("Install prompt is not saved");
     return;
   }
-  deferredPrompt.prompt();
-  deferredPrompt.userChoice.then((choiceResult) => {
+  deferredInstallPrompt.prompt();
+  deferredInstallPrompt.userChoice.then((choiceResult) => {
     if (choiceResult.outcome === "accepted") {
       console.log("User accepted the prompt");
     }
 
-    setPwaData({
-      ...pwaData,
-      deferredInstallPrompt: undefined,
-    });
+    setDeferredInstallPrompt(undefined);
   });
 }
 
-async function askPermissionAndSubscribePushNotification(
-  pwaData: PwaData,
-  setPwaData: Dispatch<SetStateAction<PwaData>>
-) {
+async function askPermissionAndSubscribePushNotification() {
   if (typeof Notification === "undefined") {
     return;
   }
 
   const result = await Notification.requestPermission();
-  setPwaData({
-    ...pwaData,
-    shouldAskForPushNotifications: false,
-  });
 
   if (result !== "granted") {
     return;
@@ -126,16 +119,24 @@ async function askPermissionAndSubscribePushNotification(
   console.log(response.headers);
 }
 
-async function subscribeToWebPush() {}
-
-type PwaContextType = {
-  pwaData: PwaData;
-  setPwaData: Dispatch<SetStateAction<PwaData>>;
-  handleAppInstall: typeof handleAppInstall;
-  askPermissionAndSubscribePushNotification: typeof askPermissionAndSubscribePushNotification;
-};
-
-export const PwaContext = createContext<PwaContextType | null>(null);
+export const InstallPromptContext = createContext<
+  | {
+      deferredInstallPrompt: BeforeInstallPromptEvent | undefined;
+      setDeferredInstallPrompt: Dispatch<
+        SetStateAction<BeforeInstallPromptEvent | undefined>
+      >;
+      handleAppInstall: typeof handleAppInstall;
+    }
+  | undefined
+>(undefined);
+export const LoggedInContext = createContext<
+  | {
+      isLoggedIn: boolean;
+      setIsLoggedIn: Dispatch<SetStateAction<boolean>>;
+    }
+  | undefined
+>(undefined);
+export const NotificationContext = createContext<boolean>(false);
 
 // https://stackoverflow.com/questions/51503754/typescript-type-beforeinstallpromptevent
 /**
@@ -168,18 +169,17 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const [pwaData, setPwaData] = useState<PwaData>({
-    deferredInstallPrompt: undefined,
-    shouldAskForPushNotifications: false,
-  });
+  const [deferredInstallPrompt, setDeferredInstallPrompt] = useState<
+    BeforeInstallPromptEvent | undefined
+  >(undefined);
+  const [shouldAskForPushNotifications, setShouldAskForPushNotifications] =
+    useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
     window.addEventListener("beforeinstallprompt", (e) => {
       e.preventDefault();
-      setPwaData({
-        ...pwaData,
-        deferredInstallPrompt: e as BeforeInstallPromptEvent,
-      });
+      setDeferredInstallPrompt(e as BeforeInstallPromptEvent);
       console.log("Stored install prompt");
     });
   }, []);
@@ -190,18 +190,16 @@ function MyApp({ Component, pageProps }: AppProps) {
     }
 
     if (Notification.permission !== "granted") {
-      setPwaData({
-        ...pwaData,
-        shouldAskForPushNotifications: true,
-      });
+      setShouldAskForPushNotifications(true);
     }
   }, []);
 
   useEffect(() => {
-    if (pwaData.shouldAskForPushNotifications) {
-      askPermissionAndSubscribePushNotification(pwaData, setPwaData);
+    if (shouldAskForPushNotifications && isLoggedIn) {
+      setShouldAskForPushNotifications(false);
+      askPermissionAndSubscribePushNotification();
     }
-  }, [pwaData]);
+  }, [shouldAskForPushNotifications, isLoggedIn]);
 
   return (
     <>
@@ -219,16 +217,17 @@ function MyApp({ Component, pageProps }: AppProps) {
         `}
       </Script>
       <ThemeProvider theme={theme}>
-        <PwaContext.Provider
+        <InstallPromptContext.Provider
           value={{
-            pwaData,
-            setPwaData,
+            deferredInstallPrompt,
+            setDeferredInstallPrompt,
             handleAppInstall,
-            askPermissionAndSubscribePushNotification,
           }}
         >
-          <Component {...pageProps} />
-        </PwaContext.Provider>
+          <LoggedInContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
+            <Component {...pageProps} />
+          </LoggedInContext.Provider>
+        </InstallPromptContext.Provider>
       </ThemeProvider>
     </>
   );

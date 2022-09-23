@@ -22,7 +22,7 @@ export default async function handler(
   }
 
   const { redirectUrl } = JSON.parse(req.body) as RequestBody;
-
+  console.log(redirectUrl);
   if (redirectUrl === undefined) {
     // TODO
     res.status(400).send("TODO: Implement error flow");
@@ -69,6 +69,14 @@ export default async function handler(
       ...tokenSharedFields,
     };
 
+    const profileImage = await oauth.getUserProfileImage(email, {
+      access_token: tokenSharedFields.accessToken,
+      expiry_date: tokenSharedFields.expiresAt,
+      id_token: tokenSharedFields.idToken,
+      refresh_token: tokenSharedFields.refreshToken,
+      scope: tokenSharedFields.scope ?? undefined,
+    });
+
     const oauthToken = await models.createToken(oauthTokenInput);
     const userInput: Prisma.UserCreateInput = {
       email,
@@ -80,6 +88,15 @@ export default async function handler(
         },
       },
     };
+
+    if (profileImage) {
+      userInput.ProfileImage = {
+        create: {
+          imageString: profileImage,
+        },
+      };
+    }
+
     user = await models.createUser(userInput);
   } else {
     const oauthToken: models.OauthToken = {

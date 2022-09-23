@@ -4,6 +4,7 @@ import Grid from "@mui/material/Grid";
 import { Typography } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import Link from "next/link";
+import type { ContactInfo } from "../utils/oauth";
 
 const ContactItem = (
   friend: any,

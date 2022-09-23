@@ -14,7 +14,6 @@ export default function AuthPage() {
       const requestBody: RequestBody = {
         redirectUrl: currentUrl,
       };
-      console.log("POSTing to auth");
       setDoneSend(true);
       fetch(`${url.api}/auth`, {
         method: "POST",
