@@ -45,6 +45,7 @@ const CreateExpenseModal = ({
     ) || {}
   );
   const [userAmountsSum, setUserAmountsSum] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   useEffect(() => {
     setUserAmountsSum(
@@ -56,6 +57,7 @@ const CreateExpenseModal = ({
   /* Network functions start */
 
   const createExpense = (amount: number, description: string) => {
+    setIsLoading(true);
     const len = Object.keys(userAmounts).length;
     // We do not include Group and Payer here, as these info are obtained from the query params and session token.
     const postBody: Prisma.ExpenseCreateInput = {
@@ -81,11 +83,13 @@ const CreateExpenseModal = ({
     })
       .then((res) => {
         if (res.ok) return res.json();
+        setIsLoading(false);
         return Promise.reject(res);
       })
       .then((data) => {
         handleClose();
         resetFields();
+        setIsLoading(false);
       });
   };
   /* Network functions end */
@@ -236,7 +240,10 @@ const CreateExpenseModal = ({
           disabled={
             splitType == "exact"
               ? userAmountsSum != amount
-              : userAmountsSum > amount || description == "" || amount == 0
+              : userAmountsSum > amount ||
+                description == "" ||
+                amount == 0 ||
+                isLoading
           }
         >
           Submit
