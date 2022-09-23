@@ -18,19 +18,21 @@ Groups members
 
 ## Instructions for Local testing
 
-It is better to test a PWA on the production version than the development version as caching features are missing from the development version. The following environment variables are needed
+It is better to test a PWA on the production version than the development version as caching features are missing from the development version. The following environment variables are needed:
 
 - DATABASE_URL
 - PAYMELAH_CLIENT_ID
 - PAYMELAH_CLIENT_SECRET
-- NEXT_PUBLIC_SERVER=http://localhost:3000
+- NEXT_PUBLIC_SERVER
 - WEB_PUSH_PRIVATE_KEY
 - NEXT_PUBLIC_WEB_PUSH_PUBLIC_KEY
 - WEB_PUSH_EMAIL
-- JWT_PUBLIC_KEY=
+- JWT_PUBLIC_KEY
 - JWT_PRIVATE_KEY
 
 Note that PAYMELAH_CLIENT_ID, PAYMELAH_CLIENT_SECRET are secrets to the Google Cloud Project PayMeLah, which is inaccessible to external testers. However, it is still possible to setup your own Cloud project and set it. Also note that Splitas was previously called PayMeLah, and we changed the name quite late when we found out a project of the same name exists.
+
+There are generation commands you can find in package.json to generate some of the public/private key pairs needed.
 
 - `npx prisma generate` to generate Typescript types and code
 - `npx prisma migrate dev` to update the db
