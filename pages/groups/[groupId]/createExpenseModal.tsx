@@ -41,39 +41,27 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
     const postBody = {
       amount,
       description,
+      Splits: {
+        create: Object.keys(userAmounts).map((key) => {
+          return {
+            amount: userAmounts[parseInt(key)],
+            userId: parseInt(key),
+          };
+        }),
+      },
     };
+    console.log(userAmounts);
     fetch(`${url.api}/user/groups/${groupId}/expense`, {
-      method: "PUT",
+      method: "POST",
       body: JSON.stringify(postBody),
     })
       .then((res) => {
-        if (res.ok) {
-          return res.json();
-        }
+        if (res.ok) return res.json();
         return Promise.reject(res);
       })
       .then((data) => {
-        const len = Object.keys(users).length;
-        const putBodys: {
-          amount: number;
-          userId: number;
-          expenseId: number;
-        }[] = Object.keys(userAmounts).map((key) => {
-          return {
-            userId: parseInt(key),
-            amount:
-              splitType == "equal" ? amount / len : userAmounts[parseInt(key)],
-            expenseId: data.id,
-          };
-        });
-
-        fetch(`${url.api}/user/groups/${groupId}/split`, {
-          method: "PUT",
-          body: JSON.stringify(putBodys),
-        }).then((res) => {
-          handleClose();
-          resetFields();
-        });
+        handleClose();
+        resetFields();
       });
   };
 
