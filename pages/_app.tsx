@@ -11,6 +11,7 @@ import {
 } from "react";
 import * as urls from "../utils/urls";
 import * as classExtension from "../utils/class_extension";
+import ProtectedRoute from "../components/ProtectedRoute";
 
 const TRACKING_ID = "UA-242063911-1"; // Google Analytics Tracking ID
 
@@ -31,7 +32,7 @@ const theme = createTheme({
       main: "#6EBA97",
     },
     secondary: {
-      main: "#266B7E"
+      main: "#266B7E",
     },
     background: {
       default: "#082341",
@@ -225,7 +226,9 @@ function MyApp({ Component, pageProps }: AppProps) {
           }}
         >
           <LoggedInContext.Provider value={{ isLoggedIn, setIsLoggedIn }}>
-            <Component {...pageProps} />
+            <ProtectedRoute>
+              <Component {...pageProps} />
+            </ProtectedRoute>
           </LoggedInContext.Provider>
         </InstallPromptContext.Provider>
       </ThemeProvider>
