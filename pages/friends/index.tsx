@@ -10,7 +10,6 @@ import InputAdornment from "@mui/material/InputAdornment";
 import { Add, Search } from "@mui/icons-material";
 import Typography from "@mui/material/Typography";
 import Grid from "@mui/material/Grid";
-import grey from "@mui/material/colors/grey";
 import IconButton from "@mui/material/IconButton";
 import MoneyLabel from "../../components/MoneyLabel";
 import "../../utils/class_extension.ts";
@@ -39,6 +38,7 @@ const AddFriendItem = (props: { callback: () => void }) => {
 };
 
 export default function FriendsPage() {
+  /* lifecycle hooks starts */
   const [friends, setFriends] = useState<Array<friendWithExpense>>([]);
   const [balance, setBalance] = useState<number>(0);
   const [searchString, setSearchString] = useState<string>("");
@@ -47,6 +47,12 @@ export default function FriendsPage() {
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  useEffect(() => {
+    friendSummary();
+  }, []);
+  /* lifecycle ends starts */
+
+  /* network function starts */
   const friendSummary = () => {
     fetch(`${url.api}/user/friends/summary`)
       .then((res) => res.json())
@@ -65,10 +71,7 @@ export default function FriendsPage() {
         }
       });
   };
-
-  useEffect(() => {
-    friendSummary();
-  }, []);
+  /* network function ends */
 
   return (
     <Box bgcolor="background.paper" className="page">
@@ -85,7 +88,7 @@ export default function FriendsPage() {
       </Typography>
       <Typography
         variant="h4"
-        className="text--semibolded"
+        className="friend-page__figure"
         sx={{
           color: balance < 0 ? "error.main" : "primary.main",
         }}

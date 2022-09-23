@@ -26,15 +26,23 @@ export type GroupSummary = {
 };
 
 export default function GroupsPage() {
+  /* Lifecycle hooks start */
   const [userWithGroups, setUserWithGroups] = useState<GroupSummary[] | null>(
     null
   );
   const [searchString, setSearchString] = useState<string>("");
   const [open, setOpen] = useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
   const [balance, setBalance] = useState<number>(0);
 
+  const handleOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
+
+  useEffect(() => {
+    fetchGroup();
+  }, []);
+  /* Lifecycle hooks end */
+
+  /* Network functions start */
   const fetchGroup = () => {
     fetch(`${url.api}/user/groups/summary`)
       .then((res) => res.json())
@@ -56,7 +64,9 @@ export default function GroupsPage() {
         }
       });
   };
+  /* Network functions end */
 
+  /* Modal for creating new group */
   const ModalContent = () => {
     const [name, setName] = useState<string>("");
     function submitForm(e: React.MouseEvent<HTMLElement>) {
@@ -77,7 +87,7 @@ export default function GroupsPage() {
 
     return (
       <Modal keepMounted open={open} onClose={handleClose}>
-        <Box className="modal--centered">
+        <Box className="modal">
           <Typography variant="h6" color="primary.main">
             Create New Group
           </Typography>
@@ -105,16 +115,9 @@ export default function GroupsPage() {
     );
   };
 
-  useEffect(() => {
-    fetchGroup();
-  }, []);
-
   return (
     <>
-      <Box
-        bgcolor="background.paper"
-        className="padding__all-3 container--min-height-maximum container--min-width-maximum"
-      >
+      <Box bgcolor="background.paper" className="groups-page">
         <ModalContent />
         <BottomAppBar routeValue={AppRoutesValues.Groups} />
         <Typography variant="caption" className="text--light-grey">
@@ -122,13 +125,13 @@ export default function GroupsPage() {
         </Typography>
         <Typography
           variant="h4"
-          className="text--semibolded"
+          className="groups-page__figure"
           color={balance < 0 ? "error.main" : "primary.main"}
         >
           ${Math.abs(balance).toFixed(2)}
         </Typography>
         <TextField
-          className="container__item--full-flex container--rounded margin__top--2 text--black"
+          className="groups-page__input"
           sx={{
             input: { color: "background.default" },
           }}

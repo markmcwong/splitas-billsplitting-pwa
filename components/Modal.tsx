@@ -7,7 +7,7 @@ import Grid from "@mui/material/Grid";
 import Modal from "@mui/material/Modal";
 import Typography from "@mui/material/Typography";
 
-type Props = {
+type PropsType = {
   open: boolean;
   handleClose: () => void;
   title: string;
@@ -23,17 +23,17 @@ const ModalContent = ({
   subtitle,
   children,
   rightContent,
-}: Props) => {
+}: PropsType) => {
   return (
     <Modal open={open} onClose={handleClose}>
-      <Box className="modal--centered">
-        <Grid sx={{ mb: 1 }} flexDirection="row" display="flex">
+      <Box className="modal">
+        <Grid className="modal__content">
           <Grid item xs>
-            <Typography variant="h6" component="h2" color="background.default">
+            <Typography variant="h6" component="h2" className="modal__title">
               {title}
             </Typography>
             {subtitle && (
-              <Typography variant="body1" color={grey[400]} sx={{ pb: 1 }}>
+              <Typography variant="body1" className="modal__subtitle">
                 {subtitle}
               </Typography>
             )}
