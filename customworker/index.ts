@@ -183,6 +183,8 @@ async function POST_api_user_friends(
     email: newEmail,
     hasAccount: false,
     tokenId: null,
+    profileImageId: null,
+    webPushSubscriptionId: null,
   };
 
   const newFriendSummary: typeof friendSummaries[number] = {
