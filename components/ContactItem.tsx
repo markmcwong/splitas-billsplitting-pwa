@@ -5,13 +5,14 @@ import { Typography } from "@mui/material";
 import { grey } from "@mui/material/colors";
 import Link from "next/link";
 import * as models from "../utils/models";
+import { GroupSummary } from "../pages/groups";
 
 type FriendWithProfileImage = Awaited<
   ReturnType<typeof models.getFriendsList>
 >[number];
 
 const ContactItem = (
-  friend: FriendWithProfileImage,
+  friend: FriendWithProfileImage | GroupSummary,
   rightContent?: JSX.Element,
   hrefPrefix: string = "",
   textColor: string = "black"
@@ -28,7 +29,11 @@ const ContactItem = (
         <Grid item container xs={1} className="contact-item__avatar-container ">
           <Avatar
             alt={`${friend.name}-avatar`}
-            src={friend.ProfileImage?.imageString ?? ""}
+            src={
+              "ProfileImage" in friend
+                ? friend.ProfileImage?.imageString ?? ""
+                : ""
+            }
             className="contact-item__avatar"
           />
         </Grid>
@@ -37,13 +42,13 @@ const ContactItem = (
             variant="body2"
             sx={{ color: friend.id > 0 ? textColor : grey[400] }}
           >
-            {friend.email != null && friend.email}
+            {"email" in friend && (friend as FriendWithProfileImage).email!}
           </Typography>
           <Typography
-            variant={friend.email != null ? "caption" : "h6"}
+            variant={"email" in friend ? "caption" : "h6"}
             sx={{
               color:
-                friend.email == null && friend.id > 0 ? textColor : grey[500],
+                !("email" in friend) && friend.id > 0 ? textColor : grey[500],
             }}
           >
             {friend.name}
