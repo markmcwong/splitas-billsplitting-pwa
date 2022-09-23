@@ -19,12 +19,7 @@ const ContactItem = (
           : `/${hrefPrefix}/#`
       }
     >
-      <Grid
-        bgcolor="transparent"
-        display="flex"
-        flexDirection="row"
-        sx={{ my: 1 }}
-      >
+      <Grid className="contact-item__container">
         <Grid display="flex" item container xs={1} sx={{ my: 1, mr: 3 }}>
           <Avatar
             sx={{ maxHeight: 45, maxWidth: 45 }}
@@ -47,7 +42,10 @@ const ContactItem = (
           </Typography>
           <Typography
             variant={friend.email != null ? "caption" : "h6"}
-            sx={{ color: friend.email != null ? grey[500] : textColor }}
+            sx={{
+              color:
+                friend.email == null && friend.id > 0 ? textColor : grey[500],
+            }}
           >
             {friend.name}
           </Typography>

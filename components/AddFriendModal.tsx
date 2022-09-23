@@ -19,6 +19,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/router";
 import Stack from "@mui/system/Stack";
 
+/* type definition starts */
+
 type PropsType = {
   handleClose: () => void;
   open: boolean;
@@ -40,6 +42,8 @@ type friendSearchResultType = {
   isFriendAlready: boolean;
 };
 
+/* type definition ends */
+
 const FriendModal = ({
   handleClose,
   open,
@@ -47,6 +51,7 @@ const FriendModal = ({
   isUsedForGroup,
   currentUsers,
 }: PropsType) => {
+  /* Lifecycle hooks starts */
   const [friendEmail, setFriendEmail] = useState<string>("");
   const router = useRouter();
   const { groupId } = router.query;
@@ -61,12 +66,16 @@ const FriendModal = ({
   }, []);
 
   useEffect(() => {
+    /* timeout to prevent too many requests */
     const getData = setTimeout(() => {
       if (friendEmail.length > 0 && searchByEmail) {
         fetch(
           `${url.api}/user/friends/search?friendEmail=${friendEmail}&isForGroup=${isUsedForGroup}&groupId=${groupId}`
         )
-          .then((res) => res.json())
+          .then((res) => {
+            if (res.ok) return res.json();
+            return Promise.reject(res);
+          })
           .then((data) => {
             setFriendSearchResult(
               data.map((x: models.User) => {
@@ -91,12 +100,17 @@ const FriendModal = ({
     }
   }, [searchByEmail]);
 
+  /* Lifecycle hooks ends */
+
+  /* network functions starts */
+
   const addFriend = (friendId: number) => {
     fetch(`${url.api}/user/friends?friendId=${friendId}`, {
       method: "POST",
     })
       .then((res) => {
-        res.json();
+        if (res.ok) return res.json();
+        return Promise.reject(res);
       })
       .then((data) => {
         callback();
@@ -116,7 +130,10 @@ const FriendModal = ({
     fetch(`${url.api}/user/friends?friendEmail=${friendEmail}`, {
       method: "POST",
     })
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) return res.json();
+        return Promise.reject(res);
+      })
       .then((data) => {
         const res = friendSearchResult.map((x: friendSearchResultType) => {
           return {
@@ -133,7 +150,10 @@ const FriendModal = ({
 
   const getContacts = () => {
     fetch(`${url.api}/user/contacts`, {})
-      .then((res) => res.json())
+      .then((res) => {
+        if (res.ok) return res.json();
+        return Promise.reject(res);
+      })
       .then((data) => {
         console.log(stateRef.current);
         if (!stateRef.current) {
@@ -167,6 +187,8 @@ const FriendModal = ({
     });
   };
 
+  /* network functions ends */
+
   return (
     <ModalContent
       open={open}
@@ -178,7 +200,7 @@ const FriendModal = ({
       title="Add new friends"
     >
       <>
-        <Grid className="margin__top--2">
+        <Grid className="model-friend__form-controls">
           <Grid item xs={12}>
             <TextField
               className="form__input--no-margin"
@@ -213,7 +235,7 @@ const FriendModal = ({
                     setFriendSearchResult([]);
                     setSearchByEmail(!searchByEmail);
                   }}
-                  sx={{ ml: 0 }}
+                  className="form__switch"
                 />
                 <Typography color="primary.main" variant="body2">
                   Contacts
@@ -222,7 +244,7 @@ const FriendModal = ({
             </Grid>
           )}
         </Grid>
-        <Box overflow="scroll">
+        <Box className="model-friend__list">
           {friendSearchResult!
             .filter(
               (x) =>
@@ -231,17 +253,17 @@ const FriendModal = ({
                 x.email.toLowerCase().includes(friendEmail.toLowerCase())
             )
             .map((user, i) => (
-              <ListItem sx={{ ml: 0, pl: 0, display: "flex" }}>
+              <ListItem className="modal-friend__list-item">
                 <ListItemIcon
                   sx={{
-                    display: "flex",
                     flex: "0 0 95%",
-                    borderRadius: 2,
                   }}
                 >
-                  <Box display="flex" flexDirection="column">
+                  <Box className="container--column">
                     <Typography variant="h6" color="text.primary">
-                      {user.name.substring(0, 8)}
+                      {user.name.length > 16
+                        ? user.name.substring(0, 13) + "..."
+                        : user.name}
                     </Typography>
                     <Typography
                       color="text.primary"

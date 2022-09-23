@@ -3,21 +3,17 @@ import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
 
-const TopAppBar = (props: {headerText: string}) => {
+const TopAppBar = (props: { headerText: string }) => {
   return (
     <Box sx={{ flexGrow: 1 }}>
-      <AppBar position="static">
+      <AppBar className="app-bar">
         <Toolbar>
           <Typography
             variant="h5"
             gutterBottom
             component="div"
-            sx={{ p: 2, pb: 0, color: 'white'}}
-            
+            className="app-bar__text"
           >
             {props.headerText}
           </Typography>

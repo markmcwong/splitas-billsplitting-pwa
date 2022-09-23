@@ -20,8 +20,10 @@ const MoneyLabel = (
           variant="h6"
           sx={{
             color: isOffline
-                ? grey[400]
-                : dollar < 0 ? "error.main" : "primary.main",
+              ? grey[400]
+              : dollar < 0
+              ? "error.main"
+              : "primary.main",
             display: "inline-block",
           }}
         >

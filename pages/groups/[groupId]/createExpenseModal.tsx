@@ -40,6 +40,7 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
   const [userAmountsSum, setUserAmountsSum] = useState<number>(0);
 
   const createExpense = (amount: number, description: string) => {
+    const len = Object.keys(userAmounts).length;
     // We do not include Group and Payer here, as these info are obtained from the query params and session token.
     const postBody: Prisma.ExpenseCreateInput = {
       amount,
@@ -48,7 +49,10 @@ const CustomModal = ({ open, handleClose, users, groupId }: Props) => {
         createMany: {
           data: Object.keys(userAmounts).map((key) => {
             return {
-              amount: userAmounts[parseInt(key)],
+              amount:
+                splitType == "equal"
+                  ? amount / len
+                  : userAmounts[parseInt(key)],
               userId: parseInt(key),
             };
           }),
